@@ -33,7 +33,12 @@ typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
 typedef draw_f<tick, Pictick> draw_tick_f;
 typedef draw_f<grid, Picgrid> draw_grid_f;
 
-bool clipped(DisplayString *d) { return d->clip; }
+// A little helper function - tells if a DisplayString * points to a string
+// with the clipped attribute.  In an anonymous namespace so no one else has to
+// see it.
+namespace {
+    bool clipped(DisplayString *d) { return d->clip; }
+}
 
 extern bool compat_mode;
 
@@ -840,14 +845,22 @@ void Picplot::draw(frame *f) {
     if ( x < -EPSILON || x > f->wid + EPSILON ) in_frame = false;
     if ( y < -EPSILON || y > f->ht + EPSILON ) in_frame = false;
 
-    vector<DisplayString *> v;
+    // Make a copy of all the DisplayStrings that are really displayed - either
+    // all of them, if the plot is in the graph, or the unclipped ones if the
+    // plot is off the graph.
+    stringlist v;
+
     if ( in_frame ) 
 	copy(strs->begin(), strs->end(), back_inserter(v));
     else
 	remove_copy_if(strs->begin(), strs->end(), back_inserter(v), clipped);
 
+    // If there are strings to show, show them.
+    if ( v.size() ) {
+	for_each(v.begin(), v.end(), draw_string);
 
-    for_each(v.begin(), v.end(), draw_string);
-
-    cout << "at Frame.Origin + (" << x << ", " << y << ")" << endl;
+	cout << "at Frame.Origin + (" << x << ", " << y << ")" << endl;
+    }
+    // Now v will go out of scope and disappear, leaving the object itself
+    // alone.
 }

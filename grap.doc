@@ -15,6 +15,7 @@
 .Op Fl v
 .Op Fl u
 .Op Fl C
+.Op Fl c
 .Op Fl h
 .Op Ar filename ...
 .Sh DESCRIPTION
@@ -89,13 +90,28 @@ is a synonym for
 .Fl u
 makes labels unaligned by default.  This version of 
 .Nm
-uses new features of gnu 
+uses new features of GNU 
 .Xr pic
 to align the left and right labels with
 the axes, that is that the left and right labels run at right angles
 to the text of the paper.  This may be useful in porting old 
 .Nm 
 programs.
+.Fl c
+makes plot strings unclipped by default.  Some versions of 
+.Nm
+allow users to place a string anywhere in the coordinate space, rather than
+only in the frame.  By default this version of 
+.Nm
+does not plot any string centered outside the frame.  
+.Fl c
+allows strings to be placed anywhere.  See also the 
+.Ic clipped
+and 
+.Ic unclipped
+string modifiers described in the
+.Ic plot
+statement.
 .Pp
 .Fl M
 is followed by a colon-separated list of directories used to search
@@ -138,7 +154,8 @@ is given, any macro beginning with \&.G1 or \&.G2 is treated as a \&.G1 or
 also forces pure troff syntax on embedded font change commands when strings
 have the
 .Ic size
-attribute.
+attribute, and all strings to be 
+.Ic unclipped .
 .Pp
 The 
 .Fl h
@@ -425,6 +442,28 @@ and
 modifiers which are briefly noted in the description of the 
 .Ic label
 command.
+.Pp
+Strings placed by either format of the 
+.Ic plot
+command are restricted to being within the frame.  This can be overriden by
+using the 
+.Ic unclipped
+attribute, which allows a string to be plotted in or out of the frame.  The 
+.Fl c
+and 
+.Fl C
+flags set 
+.Ic unclipped
+on all strings, and to prevent a string from being plotted outside the frame
+when those flags are active, the 
+.Ic clipped 
+attribute can be used to retore clipping behavior.  Though 
+.Ic clipped
+or 
+.Ic unclipped
+can be applied to any string, it only has meaning for 
+.Ic plot
+statements.
 .Pp
 .Li size
 .Ar expr
