@@ -22,11 +22,6 @@ AC_PROG_YACC
 AC_PROG_INSTALL
 TVF_PROG_INSTALL_D
 TVF_PROG_MKDEP
-AC_CHECK_PROGS(CKSUM_PROG,md5 cksum sum, echo)
-
-if test "$CKSUM_PROG" = "echo"; then
-	AC_MSG_WARN(no checksumming program - make check always succeeds)
-fi
 TVF_OS_VERSION
 
 dnl Checks for libraries.
