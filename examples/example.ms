@@ -1945,3 +1945,279 @@ graph A
    mkgraphTiming(Random1500,Random-1500 ms,succ,succ,i,"SR (%)",result.SQ_MESH.Fail1.S3.R0,Square mesh)
 .G2
 .KE
+.KS
+.PP
+This is a graph donated by Bruce Lilly, after it demonstrated a couple 
+.CW grap
+bugs and incompatibilities with DWB
+.CW grap .
+But mostly I include it because it's a cool timing diagram, although I
+have no idea for what.  I shrunk it for this example, so this version
+is a little more cramped than his.  Remove the 4 that follows the .G1
+to see the diagram in its full glory.
+.DS
+.ft CW
+.ps 8
+.vs 10
+\&.G1 4
+\&.ps 14
+\&frame ht 5 wid 6 top invis right invis left invis bot invis
+\&ticks off
+\&coord x -21, 21 y 0, 70
+\&line dashed from (0,0) to (0,68)
+\&line dotted from (-11,0) to (-11,70)
+\&line dotted from (11,0) to (11,70)
+\&"clock" rjust at -21, 3.5
+\&"data" rjust at -21, 35
+\&"timing reference" below at 0, -1
+\&"recovery window" at 0, 70
+\&arrow from (-6,70) to (-10,70)
+\&arrow from (6,70) to (10,70)
+\&"``perfect'' data" at 0, 13.5
+\&"jitter" at 0, 23.5
+\&"timing offset" at 0, 38.3
+\&"timing offset + jitter" at 0, 58.3
+\&.\\"	clock
+\&draw solid
+\&[inline data elided]
+\&.\\"	perfect data
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	data with jitter +-3 ns
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	+3 ns
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.\\"	-3 ns
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.\\"	timing offset +3 ns
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	timing offset -3 ns
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	+3 ns timing offset +-3 ns jitter
+\&.\\"	+3 ns timing offset
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	-3 ns jitter around +3 ns timing offset
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.\\"	+3 ns jitter around +3 ns timing offset
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.\\"	-3 ns timing offset +-3 ns jitter
+\&.\\"	-3 ns timing offset
+\&new solid
+\&[inline data elided]
+\&new solid
+\&[inline data elided]
+\&.\\"	-3 ns jitter around -3 ns timing offset
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.\\"	+3 ns jitter around -3 ns timing offset
+\&new dashed
+\&[inline data elided]
+\&new dashed
+\&[inline data elided]
+\&.ps
+\&.G2
+.ft
+.DE
+.G1 4
+.ps 14
+frame ht 5 wid 6 top invis right invis left invis bot invis
+ticks off
+coord x -21, 21 y 0, 70
+line dashed from (0,0) to (0,68)
+line dotted from (-11,0) to (-11,70)
+line dotted from (11,0) to (11,70)
+"clock" rjust at -21, 3.5
+"data" rjust at -21, 35
+"timing reference" below at 0, -1
+"recovery window" at 0, 70
+arrow from (-6,70) to (-10,70)
+arrow from (6,70) to (10,70)
+"``perfect'' data" at 0, 13.5
+"jitter" at 0, 23.5
+"timing offset" at 0, 38.3
+"timing offset + jitter" at 0, 58.3
+.\"	clock
+draw solid
+-21, 7
+-16, 0
+-2.5, 0
+2.5, 7
+16, 7
+21, 0
+.\"	perfect data
+new solid
+-21, 17
+-16, 10
+16, 10
+21, 17
+new solid
+-21, 10
+-16, 17
+16, 17
+21, 10
+.\"	data with jitter +-3 ns
+new solid
+-21, 27
+-16, 20
+16, 20
+21, 27
+new solid
+-21, 20
+-16, 27
+16, 27
+21, 20
+.\"	+3 ns
+new dashed
+-21, 27
+-18, 27
+-13, 20
+19, 20
+21, 22.8
+new dashed
+-21, 20
+-18, 20
+-13, 27
+19, 27
+21, 24.2
+.\"	-3 ns
+new dashed
+-21, 22.8
+-19, 20
+13, 20
+18, 27
+21, 27
+new dashed
+-21, 24.2
+-19, 27
+13, 27
+18, 20
+21, 20
+.\"	timing offset +3 ns
+new solid
+-21, 37
+-18, 37
+-13, 30
+19, 30
+21, 32.8
+new solid
+-21, 30
+-18, 30
+-13, 37
+19, 37
+21, 34.2
+.\"	timing offset -3 ns
+new solid
+-21, 44.2
+-19, 47
+13, 47
+18, 40
+21, 40
+new solid
+-21, 42.8
+-19, 40
+13, 40
+18, 47
+21, 47
+.\"	+3 ns timing offset +-3 ns jitter
+.\"	+3 ns timing offset
+new solid
+-21, 57
+-18, 57
+-13, 50
+19, 50
+21, 52.8
+new solid
+-21, 50
+-18, 50
+-13, 57
+19, 57
+21, 54.2
+.\"	-3 ns jitter around +3 ns timing offset
+new dashed
+-21, 57
+-15, 57
+-10, 50
+21, 50
+new dashed
+-21, 50
+-15, 50
+-10, 57
+21, 57
+.\"	+3 ns jitter around +3 ns timing offset
+new dashed
+-21, 57
+-16, 50
+16, 50
+21, 57
+new dashed
+-21, 50
+-16, 57
+16, 57
+21, 50
+.\"	-3 ns timing offset +-3 ns jitter
+.\"	-3 ns timing offset
+new solid
+-21, 64.2
+-19, 67
+13, 67
+18, 60
+21, 60
+new solid
+-21, 62.8
+-19, 60
+13, 60
+18, 67
+21, 67
+.\"	-3 ns jitter around -3 ns timing offset
+new dashed
+-21, 67
+10, 67
+15, 60
+21, 60
+new dashed
+-21, 60
+10, 60
+15, 67
+21, 67
+.\"	+3 ns jitter around -3 ns timing offset
+new dashed
+-21, 60
+-16, 67
+16, 67
+21, 60
+new dashed
+-21, 67
+-16, 60
+16, 60
+21, 67
+.ps
+.G2
+.KE
