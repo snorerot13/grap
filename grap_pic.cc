@@ -424,9 +424,9 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 	else {
 	    x2 = px + t * vx;
 	    y2 = py + t * vy;
-	    vx = x2 - x1;
-	    vy = y2 - y1;
 	}
+	vx = x2 - x1;
+	vy = y2 - y1;
     }
     // repeat for 1
 

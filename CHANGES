@@ -1,5 +1,9 @@
 Change log
 
+1.27: A couple compilation bugs reported under later g++ versions by a couple
+people have been fixed.  Brian Mays caught a clipping bug, and Bruce Lilly also
+caught a couple compiler dependencies.
+
 1.26: .lf was appearing outside the PS/PE pairs, so I disabled generation of
 those lines.
 

@@ -937,8 +937,8 @@ int main(int argc, char** argv) {
     }
     if ( use_defines) include_file(&defines, true);
     yyparse();
-    for (stringSequence::iterator i = path.begin(); i != path.end(); i++)
-	delete (*i);
+    for (stringSequence::iterator ii = path.begin(); ii != path.end(); ii++)
+	delete (*ii);
     path.erase(path.begin(),path.end());
     
 }
