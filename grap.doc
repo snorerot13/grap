@@ -1075,11 +1075,4 @@ adherence to parameter order in the internal commands.
 Although much improved, the error reporting code can still be
 confused.  Notably, an error in a macro is not detected until the
 macro is used, and it produces unusual output in the error message.
-.Pp
-Under some operating systems (Solaris and SunOS), automatic tick
-generation can produce a tick label of -0.  This seems to be a result
-of the
-.Xr printf 3
-formatting of numbers close to zero.  To avoid this, give ticks
-explicitly.
 

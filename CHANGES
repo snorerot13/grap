@@ -5,7 +5,10 @@ Change log
 think it no longer does that.  In addition I took care of a error
 placement bug when the error was in a line containing a macro
 expansion, and changed the error handling from using char * to using
-String s, like the rest of grap.
+Strings, like the rest of grap.
+
+Got rid of an error on SunOS (and presumably other architectures) 
+where -0 labels were printed on auto-generated labels.
 
 1.01: Fixed a compilation bug under RedHat 6.1.  Cleaned up autoconf
 and tweaked the makefile.
