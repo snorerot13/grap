@@ -4,12 +4,11 @@ Version: 1.25
 Release: 1
 Copyright: BSD
 Group: Applications/Publishing
-Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-1.21.tar.gz
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-1.25.tar.gz
 
 %description
 This is grap, an implementation of Kernigan and Bentley\'s grap
-language for typesetting graphs.  I got sick of groff not having a
-version of grap, so I built one.
+language for typesetting graphs. 
 
 
 %prep
