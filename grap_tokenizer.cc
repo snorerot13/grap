@@ -1,4 +1,4 @@
-/* This code is (c) 1998 Ted Faber see COPYRIGHT
+/* This code is (c) 1998-2001 Ted Faber see COPYRIGHT
    for the full copyright and limitations of liabilities. */
 #ifdef HAVE_CONFIG_H
 #include "config.h"

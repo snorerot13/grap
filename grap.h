@@ -1,7 +1,7 @@
 // -*-c++-*-
 #ifndef GRAP_H
 #define GRAP_H
-// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 #ifndef DEFINES
 #define DEFINES "/usr/share/grap/grap.defines"

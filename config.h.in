@@ -1,6 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
 // The following are set by configure

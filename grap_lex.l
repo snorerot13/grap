@@ -1,6 +1,6 @@
 /* -*-c++-*- */
 %{
-/* This code is (c) 1998 Ted Faber see COPYRIGHT
+/* This code is (c) 1998-2001 Ted Faber see COPYRIGHT
    for the full copyright and limitations of liabilities. */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,7 +59,7 @@ int continuation =0;
 unsigned int tokenpos =0;
 bool print_lex_debug = false;
 
-int lex_expand_macro =1;
+bool lex_expand_macro = true;
 
 linelist *sl=0;
 string *copy_end, *copy_backstop;
@@ -687,6 +687,12 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
+
+// Most of these that begin with lex_ are an interface from the parser
+// (grap.y)
+
+// Store the line number info in the output text as a .lf.  This isn't
+// quite right yet.
 void linenum() {
     if (lexstack.empty()) return;
     struct grap_buffer_state *g = lexstack.front();
@@ -697,8 +703,10 @@ void linenum() {
     }
 }
 
-
-bool include_file(string *s, int rs, bool usepath) {
+// Put the given file into the input stream.  If rs is true, report
+// start tokens from that buffer.  If usepath is true the grap path is
+// used to search for the file.
+bool include_file(string *s, bool rs /* =false */ , bool usepath /* =true*/) {
     FILE *f=0;
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
@@ -739,20 +747,10 @@ bool include_file(string *s, int rs, bool usepath) {
     }
     else return 0;
 }
-	
-void lex_begin_macro_text() {
-	BEGIN(MACROTEXT);
-	debug("<MACROTEXT> lex_begin_macro_text()");
-	lex_expand_macro = 1;
-	slashcount = 0;
-	macro_end = 0;
-	return_macro=0;
-	macrotext = new string;
-	in_str = 0;
-	braces = 0;
-}
 
-
+// Include the given string into the input stream.  Additional
+// parameters are a for descriptor associated with the buffer (if its
+// part of a for loop) and an input type (taht's usualy GMACRO)
 int include_string(string *s, struct for_descriptor *f /* =0 */,
     grap_input it /*=GMACRO */) {
 	char *cbuf;
@@ -778,6 +776,25 @@ int include_string(string *s, struct for_descriptor *f /* =0 */,
 	return 1;
 }
 
+// Disable macro expansion of identifers (used in definingin new macros)
+void lex_no_macro_expansion() { lex_expand_macro = false; }
+
+// Begin parsing macro text.  Set the lexer into the appropriate start
+// condition and initialize the appropriate internals.
+void lex_begin_macro_text() {
+	BEGIN(MACROTEXT);
+	debug("<MACROTEXT> lex_begin_macro_text()");
+	lex_expand_macro = true;
+	slashcount = 0;
+	macro_end = 0;
+	return_macro=0;
+	macrotext = new string;
+	in_str = 0;
+	braces = 0;
+}
+
+// Parse the arguments to a macro invocation and call macro::add_arg
+// on them.
 void macro_args(macro *m) {
     string *arg;
     int c;
@@ -811,6 +828,8 @@ void macro_args(macro *m) {
     tokenpos++;
 }
 
+// prepare to copy text from the input for a copy statement.  Set the
+// start condition and the internal state.
 void lex_begin_copy(string *s /* =0 */) {
     debug("COPYSTATE (lex_begin_copy)");
     BEGIN(COPYSTATE);
@@ -823,15 +842,19 @@ void lex_begin_copy(string *s /* =0 */) {
     sl = new linelist;
 }
 
-void lex_hunt_macro() {
+// Change start condition
+void lex_hunt_macro() { BEGIN(HUNTMACRO); }
+// Change start condition
+void lex_begin_rest_of_line() { BEGIN(RESTOFLINE); }
 
-    BEGIN(HUNTMACRO);
-}
-void lex_begin_rest_of_line() {
+// Tell if coordinate names are allowed here
+void lex_no_coord() { no_coord = true; }
+// Tell if coordinate names are allowed here
+void lex_coord_ok() { no_coord = false; }
 
-    BEGIN(RESTOFLINE);
-}
-
+// This buffer is empty, go to the next one on the stack.  If there is
+// an associated for descriptor, do the for processing and replace the
+// buffer on the stack if the loop is continuing.
 int yywrap() {
     struct grap_buffer_state *g;
 
@@ -897,7 +920,7 @@ int yywrap() {
     return copystate ? 1 : 0;
 }
 
-
+// Newline processing.  Inrement the current line number
 void newline() {
     if ( !lexstack.empty() ) {
 	grap_buffer_state *g = lexstack.front();
@@ -905,6 +928,7 @@ void newline() {
     }
 }
 
+// Error message printing.
 string pre_context(void) {
     if (!tokenpos) return "";
     else return linebuf.substr(0,tokenpos-yyleng);

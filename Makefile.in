@@ -1,4 +1,4 @@
-# This file is (c) 2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
+# This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 # for the full copyright and limitations of liabilities.
 
 prefix = @prefix@
@@ -24,7 +24,7 @@ LIBOBJS=@LIBOBJS@
 MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
-DISTDIR=grap-1.20pre7
+DISTDIR=grap-1.20
 SOURCES=grap.cc grap_lex.cc *.cc
 OS_VERSION=@OS_VERSION@
 
@@ -44,7 +44,7 @@ SPOTLESSFILES=
 
 include Makefile.common
 
-grap:	.depend $(OBJS)
+grap:	$(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
 
 .l.cc:

@@ -1,6 +1,6 @@
 /* -*-c++-*- */
 %{
-/* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
+/* This code is (c) 1998-2001 Ted Faber (faber@lunabase.org) see the
    COPYRIGHT file for the full copyright and limitations of
    liabilities. */
 #ifdef HAVE_CONFIG_H
@@ -28,13 +28,13 @@ stringSequence path;
 bool first_line;
 bool unaligned_default = false;	// Should strings be unaligned by default 
 
-extern int lex_expand_macro;
-
 line* defline;
 coord *defcoord;
 string *graph_name;
 string *graph_pos;
 string *ps_param;
+// number of lines in a number list (used in grap_parse.cc) 
+int nlines;
 
 // bison wants these defined....
 int yyerror(char*);
@@ -42,11 +42,12 @@ int yylex();
 void init_dict(); 
 
 // defined in grap_lex.l
-extern bool include_file(string *, int =0, bool=true);
-extern void lex_begin_macro_text();
+extern bool include_file(string *, bool =false, bool=true);
+extern void lex_no_macro_expansion(); 
+extern void lex_begin_macro_text(); 
 extern void lex_begin_rest_of_line();
-extern void lex_begin_coord();
-extern void lex_end_coord();
+extern void lex_no_coord();
+extern void lex_coord_ok();
 extern void lex_begin_copy( string*s=0);
 extern void linenum(); 
 extern int include_string(string *,struct for_descriptor *f=0,
@@ -63,31 +64,27 @@ extern graph *initial_graph();
 extern linedesc* combine_linedesc(linedesc *, linedesc*);
 extern axis combine_logs(axis, axis);
 extern void draw_statement(string *, linedesc *, string *);
-void num_list(doublelist *);
-double assignment_statement(string *, double);
-stringlist *combine_strings(stringlist *, string *, strmod &);
-void plot_statement(double, string *, point *); 
-void next_statement(string *, point *, linedesc *);
-ticklist *ticklist_elem(double, string *, ticklist *);
-ticklist *tick_for(coord *, double, double, bydesc, string *);
-void ticks_statement(sides, double, shiftlist *, ticklist *);
-void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
-void line_statement(int, linedesc *, point *, point *, linedesc *);
-axisdesc axis_description(axis, double, double );
-void coord_statement(string *, axisdesc&, axisdesc&, axis);
-void coord_statement(coord *, axisdesc&, axisdesc&, axis);
-void for_statement(string *, double, double, bydesc, string *);
-void process_frame(linedesc *, frame *, frame *);
-void define_macro(string *, string*);
-void bar_statement(coord *, sides, double, double, double,
+extern void num_list(doublelist *);
+extern double assignment_statement(string *, double);
+extern stringlist *combine_strings(stringlist *, string *, strmod &);
+extern void plot_statement(double, string *, point *); 
+extern void next_statement(string *, point *, linedesc *);
+extern ticklist *ticklist_elem(double, string *, ticklist *);
+extern ticklist *tick_for(coord *, double, double, bydesc, string *);
+extern void ticks_statement(sides, double, shiftlist *, ticklist *);
+extern void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
+extern void line_statement(int, linedesc *, point *, point *, linedesc *);
+extern axisdesc axis_description(axis, double, double );
+extern void coord_statement(string *, axisdesc&, axisdesc&, axis);
+extern void coord_statement(coord *, axisdesc&, axisdesc&, axis);
+extern void for_statement(string *, double, double, bydesc, string *);
+extern void process_frame(linedesc *, frame *, frame *);
+extern void define_macro(string *, string*);
+extern void bar_statement(coord *, sides, double, double, double,
 		   double, linedesc *); 
 void init_dict(); 
 
-int nlines;
-int in_copy=0;
-extern bool no_coord; 
-
-// adapeters to return complex (complex-ish) functions
+// adapters to return complex (complex-ish) functions
 double grap_random() {  return double(random()) / (pow(2,32)-1); }
 double pow10(double x) { return pow(10,x); }
 double toint(double x) { return (double) int(x); }
@@ -865,7 +862,7 @@ copy_statement:
 	COPY string SEP
 	    {
 		unquote($2);
-		if (!include_file($2, 0)) return 0;
+		if (!include_file($2, false)) return 0;
 	    }
 |	COPY UNTIL string SEP
             {
@@ -908,7 +905,7 @@ copy_statement:
 		    }
 		    else {
 			lex_begin_copy(0);
-			include_file(c->s, 0);
+			include_file(c->s, false);
 		    }
 		    delete c;
 		}
@@ -965,7 +962,7 @@ copy_statement:
 ;
 
 define_statement:
-	DEFINE { no_coord = true; lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP { no_coord= false; define_macro($3, $5); }
+	DEFINE { lex_no_coord(); lex_no_macro_expansion();} IDENT { lex_begin_macro_text(); } TEXT SEP { lex_coord_ok(); define_macro($3, $5); }
 ;
 
 sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
@@ -1014,7 +1011,7 @@ for_statement:
 ;
 
 graph_statement:
-	GRAPH { no_coord = true; } IDENT { lex_begin_rest_of_line(); } REST SEP
+	GRAPH { lex_no_coord(); } IDENT { lex_begin_rest_of_line(); } REST SEP
 	    {
 		if ( !first_line ) {
 		    the_graph->draw(0);

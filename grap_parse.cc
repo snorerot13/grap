@@ -1,5 +1,5 @@
 /* -*-c++-*- */
-/* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
+/* This code is (c) 1998-2001 Ted Faber (faber@lunabase.org) see the
    COPYRIGHT file for the full copyright and limitations of
    liabilities. */
 #ifdef HAVE_CONFIG_H
@@ -45,7 +45,7 @@ extern int include_string(string *,struct for_descriptor *f=0,
 extern string pre_context(void);
 extern char *token_context(void);
 extern string post_context(void);
-extern bool include_file(string *, int =0, bool=true);
+extern bool include_file(string *, bool =false, bool=true);
 extern void init_keywords();
 extern int yyparse();
 extern int nlines;
@@ -884,15 +884,15 @@ int main(int argc, char** argv) {
 
     if ( argc == optind ) {
 	fname = "-";
-	include_file(&fname, 1, false);
+	include_file(&fname, true, false);
     }
     else {
 	for ( int i = argc-1; i >= optind; i-- ) {
 	    fname = argv[i];
-	    include_file(&fname, 1, false);
+	    include_file(&fname, true, false);
 	}
     }
-    if ( use_defines) include_file(&defines,1);
+    if ( use_defines) include_file(&defines, true);
     yyparse();
     for (stringSequence::iterator i = path.begin(); i != path.end(); i++)
 	delete (*i);

@@ -9,7 +9,7 @@
 #include "grap_draw.h"
 #include "grap_pic.h"
 
-// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
 // Convert the abstract types to Pictypes and draw them.  These are

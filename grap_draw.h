@@ -1,7 +1,7 @@
 // -*-c++-*-
 #ifndef GRAP_DRAW_H
 #define GRAP_DRAW_H
-// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
 // Names for the sides of graphs (_side because of globals left(), right())
