@@ -13,7 +13,8 @@
 .Op Fl D
 .Op Fl M Ar include path
 .Op Fl v
-.Op fl u
+.Op Fl u
+.Op Fl C
 .Op Ar filename ...
 .Sh DESCRIPTION
 .Nm
@@ -120,11 +121,23 @@ macros.  Any arguments to the
 macro in the input are arguments to the
 .Ic .PS
 macro in the output, so graphs can be scaled just like pic diagrams.
+If 
+.Fl C
+is given, any macro beginning with \&.G1 or \&.G2 is treated as a \&.G1 or
+\&.G2 macro, for compatibility with old versions of troff.
 .Pp
 The 
 .Nm
 commands are sketched below.  Refer to Kernighan and Bentley's paper
 for the details.
+.Pp
+New versions of
+.Xr groff 1
+will invoke 
+.Nm
+if 
+.Fl G
+is given.
 .Ss Commands
 .Pp
 Commands are separated from one another by newlines or semicolons (;).

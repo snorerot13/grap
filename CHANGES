@@ -1,5 +1,8 @@
 Change log
 
+1.06: Added an anonymous donor's TeX defines.  Also added the -C
+compatibility option for groff and fixed some manpage formatting bugs.
+
 1.05: kromJx@crosswinds.net noticed that numbers like 1. weren't
 accepted.  They are now.  While I was fixing that I noticed that copy
 until commands without a macor weren't supported.  They are now.  Made a minor change to the examples to test the fixes.
