@@ -24,6 +24,7 @@ MKDIR=mkdir
 LEX=@LEX@
 YACC=@YACC@
 CXX=@CXX@
+LIBOBJS=@LIBOBJS@
 
 DISTDIR=grap-0.97b
 
@@ -34,7 +35,7 @@ CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
 CCC=$(CXX)
 CCFLAGS=$(CXXFLAGS)
 
-OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o version.o
+OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o version.o $(LIBOBJS)
 
 all:	grap
 

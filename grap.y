@@ -20,22 +20,24 @@ extern "C" {
 }
 #endif
 
-#if !defined(HAVE_RANDOM) && defined(HAVE_RAND)
-#define random rand
-#endif
 
-#if (defined(HAVE_RANDOM) && !defined(RANDOM_DECLARED))
+#ifdef HAVE_RANDOM
+#ifdef RANDOM_DECLARED
 extern "C" {
     long random();
 }
 #endif
-
-#if (defined(HAVE_RAND) && !defined(RAND_DECLARED))
+#else 
+#ifdef HAVE_RAND
+#define random rand
+#ifndef RAND_DECLARED
 extern "C" {
     long rand();
 }
 #endif
- 
+#endif 
+#endif
+
 #include "grap.h"
 
 #ifndef DEFINES

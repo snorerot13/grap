@@ -1,7 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(grap.h)
-ac_random_declared="no"
-have_random="no"
 AC_LANG_CPLUSPLUS
 
 dnl Checks for programs.
@@ -16,69 +14,46 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h)
 
-echo "$ac_n" "checking if stl.h and string are compatible ... "
+AC_CACHE_CHECK(that stl.h and string are compatible,grap_cv_lang_stl_and_string,
 AC_TRY_COMPILE(
 #include <stl.h>
 #include <string>
 ,
 list<string> ls;
-,AC_DEFINE(USE_STD_STRING)
-echo "yes",echo "no")
+,grap_cv_lang_stl_and_string="yes",grap_cv_lang_stl_and_string="no"))
+
+if test $grap_cv_lang_stl_and_string = "yes" ; then
+AC_DEFINE(USE_STD_STRING)
+fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(strdup)
-AC_CHECK_FUNCS(snprintf)
-AC_CHECK_FUNC(random,
-AC_DEFINE(HAVE_RANDOM)
-have_random="yes",
-)
-if test $have_random = "no"; then
-AC_CHECK_FUNC(rand,
-AC_DEFINE(HAVE_RAND)
-, 
-echo "no random or rand functions?  Something is badly misconfigured!"
-exit 1;)
+AC_CHECK_FUNCS(snprintf random rand)
+AC_REPLACE_FUNCS(strdup)
+
+if test $ac_cv_func_random = "no" -a $ac_cv_func_rand = "no";  then
+AC_MSG_ERROR(grap requires either random or rand)
 fi
 
-# once we're sure we have the function...
-
-if test $have_random = "yes" ; then
-	#solaris does not declare random in stdlib.h
-
-	if test $ac_cv_header_stdc = yes; then
-		echo $ac_n "checking for declaration of random() in stdlib.h... "
-		AC_EGREP_HEADER(random,/usr/include/stdlib.h,echo "yes";
-	AC_DEFINE(RANDOM_DECLARED)
-	ac_random_declared="yes",echo "no")
-	fi
-
-	#If we have not found a declaration from random, check math.h
-
-	if test $ac_random_declared = no; then
-		echo $ac_n "checking for declaration of random() in math.h... "
-		AC_EGREP_HEADER(random,/usr/include/math.h,echo "yes";
-	AC_DEFINE(RANDOM_DECLARED)
-	ac_random_declared="yes",echo "no")
+if test $ac_cv_func_random = "yes" ; then
+	AC_CACHE_CHECK(for declaration of random,grap_cv_decl_random,
+		AC_EGREP_CPP(random,
+#include <stdlib.h>
+#include <math.h>
+,grap_cv_decl_random="yes",grap_cv_decl_random="no"))
+	if test $grap_cv_decl_random="yes"; then
+		AC_DEFINE(RANDOM_DECLARED)
 	fi
 else
-
-	if test $ac_cv_header_stdc = yes; then
-		echo $ac_n "checking for declaration of rand() in stdlib.h... "
-		AC_EGREP_HEADER(rand,/usr/include/stdlib.h,echo "yes";
-	AC_DEFINE(RAND_DECLARED)
-	ac_rand_declared="yes",echo "no")
-	fi
-
-	#If we have not found a declaration from random, check math.h
-
-	if test $ac_rand_declared = no; then
-		echo $ac_n "checking for declaration of rand() in math.h... "
-		AC_EGREP_HEADER(rand,/usr/include/math.h,echo "yes";
-	AC_DEFINE(RAND_DECLARED)
-	ac_rand_declared="yes",echo "no")
+	AC_CACHE_CHECK(for declaration of rand,grap_cv_decl_random,
+		AC_EGREP_CPP(rand,
+#include <stdlib.h>
+#include <math.h>
+,grap_cv_decl_rand="yes",grap_cv_decl_rand="no"))
+	if test $grap_cv_decl_rand="yes"; then
+		AC_DEFINE(RAND_DECLARED)
 	fi
 fi
 AC_OUTPUT(examples/Makefile Makefile)

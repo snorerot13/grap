@@ -2,7 +2,13 @@
 %{
 /* This code is (c) 1998 Ted Faber see COPYRIGHT
    for the full copyright and limitations of liabilities. */
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#else
+extern "C" {
+    void free(void*);
+};
+#endif
 #include <ostream.h>
 #include <sys/param.h>
 #include "grap.h"
@@ -36,6 +42,9 @@ int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
 void macro_args(macro*);
 void newline();
+#ifndef HAVE_STRDUP
+char *strdup(const char *);
+#endif 
 
 #define NF0 1
 
