@@ -32,6 +32,7 @@ extern doubleDictionary vars;
 extern stringSequence path; 
 extern graph *the_graph;
 extern bool unaligned_default;	// Should strings be unaligned by default
+extern bool clip_default;	// Should strings be clipped by default
 extern bool print_lex_debug;
 
 extern line* defline;
@@ -55,7 +56,7 @@ extern int yyparse();
 extern int nlines;
 
 extern macroDictionary macros;
-const char *opts = "d:lDvuM:CVhS";
+const char *opts = "d:lDvuM:CVhSc";
 
 // Classes for various for_each calls
 
@@ -67,11 +68,13 @@ public:
 	int just;
 	double size;
 	int rel;
+	bool clip;
 	modaccumulator() : just(0), size(0), rel(0) {};
 	int operator()(DisplayString* s) {
 	    just = s->j;
 	    size = s->size;
 	    rel = s->relsz;
+	    clip = s->clip;
 	    return 0;
 	}
 };
@@ -881,7 +884,11 @@ int main(int argc, char** argv) {
 	    case 'M':
 		pathstring = (pathstring + ":") + optarg;
 		break;
+	    case 'c':
+		clip_default = false;
+		break;
 	    case 'C':
+		clip_default = false;
 		compat_mode = true;
 		break;
 	    case 'S':

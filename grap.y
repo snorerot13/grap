@@ -36,6 +36,7 @@ macroDictionary macros;
 stringSequence path;
 bool first_line;
 bool unaligned_default = false;	// Should strings be unaligned by default 
+bool clip_default = true;	// Should strings be clipped by default 
 extern bool do_sprintf;		// true if it's acceptable to parse sprintf
 
 line* defline;
@@ -123,7 +124,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON LHS VFUNC1
+%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED
 %start graphs
 %union {
     int val;
@@ -546,6 +547,7 @@ strmod:
 		$$.size = 0;
 		$$.rel =0;
 		$$.just = (unaligned_default) ? unaligned : 0;
+		$$.clip = clip_default;
 	    }
 | 	strmod SIZE expr
 	    { $$.size = $3; $$.rel = ($3<0); }
@@ -563,6 +565,10 @@ strmod:
 	    { $$.just |= (int) aligned; }
 |	strmod UNALIGNED
 	    { $$.just |= (int) unaligned; }
+|	strmod CLIPPED
+	    { $$.clip = true; }
+|	strmod UNCLIPPED
+	    { $$.clip = false; }
 ;
 
 strlist:
@@ -570,7 +576,7 @@ strlist:
 	    {
 		DisplayString *s;
 
-		s = new DisplayString(*$1,$2.just,$2.size, $2.rel);
+		s = new DisplayString(*$1,$2.just,$2.size, $2.rel, $2.clip);
 		delete $1;
 		$$ = new stringlist;
 		$$->push_back(s);

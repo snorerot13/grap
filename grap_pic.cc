@@ -33,6 +33,8 @@ typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
 typedef draw_f<tick, Pictick> draw_tick_f;
 typedef draw_f<grid, Picgrid> draw_grid_f;
 
+bool clipped(DisplayString *d) { return d->clip; }
+
 extern bool compat_mode;
 
 void Picgraph::init(string *n /* =0 */, string* p /* =0 */ ) {
@@ -823,6 +825,7 @@ void Picplot::draw(frame *f) {
 // of strings instead of one.  A functor to convert the DisplayStrings
 // to PicDisplayStrings and plot them simplifies matters.
     double x, y;  // To transform the point into device coordinates
+    bool in_frame = true;
 
     // To print a set of strings
     draw_string_f draw_string(f);
@@ -832,12 +835,19 @@ void Picplot::draw(frame *f) {
     x = f->wid * loc->c->map(loc->x,x_axis);
     y = f->ht * loc->c->map(loc->y,y_axis);
 
-    // Clip strings to lie in the graph
-    
-    if ( x < -EPSILON || x > f->wid + EPSILON ) return;
-    if ( y < -EPSILON || y > f->ht + EPSILON ) return;
+    // Clip strings to lie in the graph (if requested)
 
-    for_each(strs->begin(), strs->end(), draw_string);
+    if ( x < -EPSILON || x > f->wid + EPSILON ) in_frame = false;
+    if ( y < -EPSILON || y > f->ht + EPSILON ) in_frame = false;
+
+    vector<DisplayString *> v;
+    if ( in_frame ) 
+	copy(strs->begin(), strs->end(), back_inserter(v));
+    else
+	remove_copy_if(strs->begin(), strs->end(), back_inserter(v), clipped);
+
+
+    for_each(v.begin(), v.end(), draw_string);
 
     cout << "at Frame.Origin + (" << x << ", " << y << ")" << endl;
 }

@@ -27,6 +27,7 @@ typedef struct {
     double size;
     int rel;
     int just;
+    bool clip;
 } strmod;
 
 class linedesc  {
@@ -160,16 +161,17 @@ public:
                         // but int supports | and &
     double size;	// Fontsize
     int relsz;		// True if the fontsize is relative
+    bool clip;		// True if the string can only appear in the frame
 
-    DisplayString() : string(), j(none), size(0), relsz(0) {}
-    DisplayString(char *s, int ju=0, double sz=0, int rsz=0 ) :
-	string(s), j(ju), size(sz), relsz(rsz) { }
-    DisplayString(string s, int ju=0, double sz=0, int rsz=0 ) :
-	string(s), j(ju), size(sz), relsz(rsz) { }
+    DisplayString() : string(), j(none), size(0), relsz(0), clip(true) {}
+    DisplayString(char *s, int ju=0, double sz=0, int rsz=0, bool c=true) :
+	string(s), j(ju), size(sz), relsz(rsz), clip(c) { }
+    DisplayString(string s, int ju=0, double sz=0, int rsz=0, bool c=true) :
+	string(s), j(ju), size(sz), relsz(rsz), clip(c) { }
     DisplayString(DisplayString& ds) :
-	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz) { }
+	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz), clip(ds.clip) { }
     DisplayString(double e, const DisplayString *fmt=0) :
-	j(0), size(0), relsz(0) {
+	j(0), size(0), relsz(0), clip(true) {
 	char *c = new char[64];
 	bool delf = false;
 
@@ -182,7 +184,9 @@ public:
 	*this = c;
 	delete[] c;
 	if ( delf ) delete fmt;
-	else { j = fmt->j; size = fmt->size; relsz = fmt->relsz; }
+	else { 
+	    j = fmt->j; size = fmt->size; relsz = fmt->relsz; clip = fmt->clip;
+	}
     }
 };
 
@@ -527,7 +531,7 @@ public:
     stringlist *strs;	// the strings to draw
     point* loc;		// The location to put them at
     
-    plot(stringlist *s = 0, point *p =0) : strs(s), loc(p) { }
+    plot(stringlist *s = 0, point *p =0, bool clip=true) : strs(s), loc(p) { }
     // copy constructors have to copy ...
     plot( const plot& p ) : strs(0), loc(0) {
 	if (p.loc) loc = new point(p.loc);

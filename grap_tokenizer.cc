@@ -25,7 +25,8 @@ string gk[] = {
     "copy", "next", "draw", "new", "line", "define", "arrow", "circle",
     "plot", "at", "frame", "graph", "coord", "for", "if", "print", "sprintf",
     "ticks", "tick", "label", "grid", "pic", "sh", "bar", "ljust", "rjust",
-    "above", "below", "aligned", "unaligned", "size", "undefine"
+    "above", "below", "aligned", "unaligned", "size", "undefine", "clipped",
+    "unclipped"
 };
 
 // These are the keywords recognized by any keyword that takes a line
@@ -36,7 +37,8 @@ string lk[] = {
 
 // Keywords recognized for sting modifiers 
 string sk[] = {
-    "ljust", "rjust", "above", "below", "aligned", "unaligned", "size"
+    "ljust", "rjust", "above", "below", "aligned", "unaligned", "size", 
+    "clipped", "unclipped"
 };
 
 // Keywords recognized by ticks and graph
@@ -60,7 +62,7 @@ keywordDictionary keywords;
 // and should just be statically initialized, but is complex enough
 // that building it is easier to maintain.  It's split into
 // subfunctions primarily because the gcc optimizer has a terrible
-// time with th eone big function, and partially to make it easier to
+// time with the one big function, and partially to make it easier to
 // maintain.
 
 // All these can appear multiple times in a command
@@ -80,6 +82,8 @@ void init_multiples() {
     keywords["below"] = keyword(empty, empty, false, BELOW);
     keywords["aligned"] = keyword(empty, empty, false, ALIGNED);
     keywords["unaligned"] = keyword(empty, empty, false, UNALIGNED);
+    keywords["clipped"] = keyword(empty, empty, false, CLIPPED);
+    keywords["unclipped"] = keyword(empty, empty, false, UNCLIPPED);
     keywords["size"] = keyword(empty, empty, false, SIZE);
     keywords["in"] = keyword(empty, empty, false, IN);
     keywords["out"] = keyword(empty, empty, false, OUT);
