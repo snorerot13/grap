@@ -21,4 +21,6 @@
 
 #undef DEFINES 
 
+#define OS_VERSION "@OS_VERSION@"
+
 #endif

@@ -36,7 +36,7 @@ extern bool print_lex_debug;
 
 extern line* defline;
 extern coord *defcoord;
-extern string version; 
+//string version = ; 
 bool compat_mode=false;			//  Compatibility mode
 
 // defined in grap_lex.l
@@ -839,7 +839,8 @@ int main(int argc, char** argv) {
 		use_defines = 0;
 		break;
 	    case 'v':
-		cout << version << endl;
+		cout << "grap " << VERSION << " compiled under ";
+		cout << OS_VERSION << endl;
 		exit(0);
 	    case 'V':
 		print_lex_debug = true;

@@ -2613,3 +2613,29 @@ contest.  The following is a more readable version:
 .ft
 .DE
 .KE
+.KS
+One of the few things that one couldn't do under recent versions of 
+.CW grap
+was redefining keywords.  Now you can.  Here's an example that
+redefines the bar keyword.  This also demonstrates the new undefine
+keyword that restores the original bar semantics.
+.DS
+.ft CW
+\&.G1
+\&define bar { "_" } 
+\&for i = 1 to 10 do {
+\&	bar at i,i
+\&}
+\&undefine bar
+\&bar up 5 ht 3
+\&.G2
+.G1
+define bar { "_" } 
+for i = 1 to 10 do {
+	bar at i,i
+}
+undefine bar
+bar up 5 ht 3
+.G2
+.DE
+.KE

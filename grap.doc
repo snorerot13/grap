@@ -1121,6 +1121,8 @@ the
 command :
 .Pp
 .Ic define Ar name block
+.br
+.Ic undefine Ar name 
 .Bd -filled -offset indent
 Every occurrence of 
 .Ar name
@@ -1146,7 +1148,7 @@ be replaced in the macro with the elements of the list.  A $ not
 followed by a digit is left unchanged.  This parsing
 is very rudimentary, no nesting or parentheses or escaping of commas
 is allowed.  Also, there is no way to say argument 1 followed by a
-digit (${1}0 in sh(1)).  A macro can have at most 32 arguments.
+digit (${1}0 in sh(1)).
 .Pp
 The following will draw a line with slope 1.
 .Bd -literal -offset indent-two
@@ -1155,7 +1157,9 @@ for i from 1 to 5 { foo(i,i) }
 .Ed
 Macros persist across graphs.  The file 
 .Pa DEFINES_FILE
-contains simple macros for plotting common characters.
+contains simple macros for plotting common characters.  The 
+.Ic undefine
+command deletes a macro.
 .Pp
 See the file
 .Pa EXAMPLES

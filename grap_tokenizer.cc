@@ -23,7 +23,7 @@ string gk[] = {
     "copy", "next", "draw", "new", "line", "define", "arrow", "circle",
     "plot", "at", "frame", "graph", "coord", "for", "if", "print", "sprintf",
     "ticks", "tick", "label", "grid", "pic", "sh", "bar", "ljust", "rjust",
-    "above", "below", "aligned", "unaligned", "size"
+    "above", "below", "aligned", "unaligned", "size", "undefine"
 };
 
 // These are the keywords recognized by any keyword that takes a line
@@ -252,11 +252,30 @@ void init_line_starters() {
 void init_wipers() {
     vector<string> empty;
     keywords["define"] = keyword(empty, empty, true, DEFINE);
+    keywords["undefine"] = keyword(empty, empty, true, UNDEFINE);
     keywords["graph"] = keyword(empty, empty, true, GRAPH);
     keywords["else"] = keyword(empty, empty, true, ELSE);
     keywords["print"] = keyword(empty, empty, true, PRINT);
     keywords["pic"] = keyword(empty, empty, true, PIC);
     keywords["sh"] = keyword(empty, empty, true, SH);
+}
+
+// This are used in parsing multi-element matches for macros.
+
+bool id_letter[256];
+
+// set up the table to scan for embedded macros
+void init_id() {
+    int i;	// Scratch
+    for (i = 0; i < 256; i++ ) id_letter[i] = false;
+
+    // assumes letters are contiugous.  Is there still any character set
+    // for this which doesn't hold?
+    
+    for ( i = 'a'; i <= 'z' ; i++ ) id_letter[i] = true;
+    for ( i = 'A'; i <= 'Z' ; i++ ) id_letter[i] = true;
+    for ( i = '0'; i <= '9' ; i++ ) id_letter[i] = true;
+    id_letter['_'] = true;
 }
 
 // Initialize the table of keywords.
@@ -271,4 +290,7 @@ void init_keywords() {
     // Sprintf is unusual in that it doesn't alter the parse state at
     // all.
     keywords["sprintf"] = keyword(empty, empty, false, SPRINTF);
+
+    // init the table
+    init_id();
 }

@@ -99,7 +99,7 @@ function0 jtf0[NF0] = { grap_random };
 function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
-%token NUMBER START END IDENT COPY SEP STRING COORD_NAME
+%token NUMBER START END IDENT COPY SEP STRING COORD_NAME UNDEFINE
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
 %token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN HT WID
 %token IN OUT NONE TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
@@ -224,6 +224,8 @@ statement:
 |	copy_statement
 	    { first_line = false;}
 |	define_statement
+	    { first_line = false;}
+|	undefine_statement
 	    { first_line = false;}
 |	if_statement
 	    { first_line = false;}
@@ -963,6 +965,14 @@ copy_statement:
 
 define_statement:
 	DEFINE { lex_no_coord(); lex_no_macro_expansion();} IDENT { lex_begin_macro_text(); } TEXT SEP { lex_coord_ok(); define_macro($3, $5); }
+;
+
+undefine_statement:
+	UNDEFINE { lex_no_coord(); lex_no_macro_expansion(); } IDENT SEP {
+	    lex_coord_ok();
+	    macros.erase(*$3);
+	    delete $3;
+	}
 ;
 
 sh_statement: SH { lex_begin_macro_text(); } TEXT SEP

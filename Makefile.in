@@ -24,11 +24,11 @@ LIBOBJS=@LIBOBJS@
 MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
-DISTDIR=grap-1.20
 SOURCES=grap.cc grap_lex.cc *.cc
-OS_VERSION=@OS_VERSION@
+VERSION=1.21
+DISTDIR=grap-${VERSION}
 
-CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
+CXXFLAGS +=@GXXFLAGS@ @DEFS@
 
 # To suppress optimization of certain files under g++ where
 # optimization is costly at compilation time and of minimial use at
@@ -37,30 +37,24 @@ SUPPRESS_OPT=@SUPPRESS_OPT@
 NO_UNDEF=@NO_UNDEF@
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
-	version.o $(LIBOBJS)
+	${LIBOBJS}
 CLEANFILES=y.output
 VERYCLEANFILES=grap.cc grap_lex.cc
 SPOTLESSFILES=
 
 include Makefile.common
 
-grap:	$(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
+grap:	${OBJS}
+	${CXX} ${CXXFLAGS} ${LDFLAGS} ${OBJS} ${LDLIBS} -o grap
 
 .l.cc:
-	$(LEX) -o$@ $<
+	${LEX} -o$@ $<
 
 y.tab.h grap.cc:	grap.y
-	$(YACC) -d grap.y
+	${YACC} -d grap.y
 	mv y.tab.c grap.cc
 
 grap_lex.cc:	grap_lex.l y.tab.h
-
-version.cc:	Makefile
-	echo "#include <string>" > version.cc
-	echo "using namespace std;" >> version.cc
-	echo "string version=\"$(DISTDIR) compiled under $(OS_VERSION)\";" \
-		>> version.cc
 
 # Under g++ the memory overhead for optimization of grap_tokenizer is
 # high.  Compilation time becomes prohibitive and the function is only
@@ -68,15 +62,19 @@ version.cc:	Makefile
 # that file under g++ by default.  If --optimize-grap_tokenizer is
 # given to configure, no attempt to suppress optimization is made.
 grap_tokenizer.o:	grap_tokenizer.cc
-	$(CXX) ${CXXFLAGS} ${SUPPRESS_OPT} -c grap_tokenizer.cc
+	${CXX} ${CXXFLAGS} ${SUPPRESS_OPT} -c grap_tokenizer.cc
 
 # flex defines an unused static function.  This rule supresses that
 # warning under g++.
 grap_lex.o:	grap_lex.cc
-	$(CXX) ${CXXFLAGS} ${NO_UNDEF} -c grap_lex.cc
+	${CXX} ${CXXFLAGS} ${NO_UNDEF} -c grap_lex.cc
+
+# Only grap_parse.cc needs to have the version defined.
+grap_parse.o:	grap_parse.cc
+	${CXX} ${CXXFLAGS} -DVERSION="\"${VERSION}\"" -c grap_parse.cc
 
 y.output:	grap.y
-	$(YACC) -v grap.y
+	${YACC} -v grap.y
 
 grap.man:	grap.1
 	groff -mdoc -Tascii grap.1 > grap.man
@@ -85,31 +83,27 @@ grap.ps:	grap.1
 	groff -mdoc grap.1 > grap.ps
 
 grap.1:	grap.doc
-	sed "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;
+	sed "s#DEFINES_FILE#${DEFINESDIR}/grap.defines#g; s#EXAMPLES#${DEFINESDIR}/examples#g;" < grap.doc > grap.1 ;
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
 install:	grap grap.defines grap.1
 	strip grap
-	$(INSTALL) -d $(BINDIR) || true
-	$(INSTALL) -d $(MANDIR) || true
-	$(INSTALL) -d $(DEFINESDIR)/examples || true
-	$(INSTALL_PROGRAM) grap $(BINDIR)
-	$(INSTALL_DATA) grap.1 $(MANDIR)
-	$(INSTALL_DATA) grap*.defines $(DEFINESDIR)
-	$(INSTALL_DATA) README $(DEFINESDIR)
-	$(INSTALL_DATA) CHANGES $(DEFINESDIR)
-	$(INSTALL_DATA) COPYRIGHT $(DEFINESDIR)
-	$(INSTALL_DATA) grap.man $(DEFINESDIR)
-	$(INSTALL_DATA) examples/*.d examples/example.ms examples/*.result examples/Makefile $(DEFINESDIR)/examples
+	${INSTALL} -d ${BINDIR} || true
+	${INSTALL} -d ${MANDIR} || true
+	${INSTALL} -d ${DEFINESDIR}/examples || true
+	${INSTALL_PROGRAM} grap ${BINDIR}
+	${INSTALL_DATA} grap.1 ${MANDIR}
+	${INSTALL_DATA} grap*.defines README CHANGES COPYRIGHT grap.man ${DEFINESDIR}
+	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${DEFINESDIR}/examples
 
 deinstall:
-	$(RM) $(BINDIR)/grap
-	$(RM) $(MANDIR)/grap.1
-	$(RM) $(DEFINESDIR)/grap*.defines $(DEFINESDIR)/README $(DEFINESDIR)/CHANGES $(DEFINESDIR)/COPYRIGHT $(DEFINESDIR)/grap.man
-	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile $(DEFINESDIR)/examples/*result
-	$(RMDIR) $(DEFINESDIR)/examples
-	$(RMDIR) $(DEFINESDIR)
+	${RM} ${BINDIR}/grap
+	${RM} ${MANDIR}/grap.1
+	${RM} ${DEFINESDIR}/grap*.defines ${DEFINESDIR}/README ${DEFINESDIR}/CHANGES ${DEFINESDIR}/COPYRIGHT ${DEFINESDIR}/grap.man
+	${RM} ${DEFINESDIR}/examples/*.d ${DEFINESDIR}/examples/*.ms ${DEFINESDIR}/examples/Makefile ${DEFINESDIR}/examples/*result
+	${RMDIR} ${DEFINESDIR}/examples
+	${RMDIR} ${DEFINESDIR}
 
 check:	grap grap.defines examples/example.ms
 	cd examples && \

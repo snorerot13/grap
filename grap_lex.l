@@ -70,12 +70,15 @@ extern macroDictionary macros;
 extern doubleDictionary vars;
 extern graph *the_graph;
 extern stringSequence path;
-extern bool compat_mode; 
+extern bool compat_mode;
+extern bool id_letter[]; 
 
 int include_string(string *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
 void lex_end_expr(); 
 void macro_args(macro*);
+void expand_macro(macro*);
+bool is_macro(const string&);
 void newline();
 #ifndef HAVE_STRDUP
 char *strdup(const char *);
@@ -97,6 +100,7 @@ extern keywordDictionary keywords;
 // There are a couple times when the possiblity of a COORD_NAME can be
 // ruled out.  If this is set, this is one of those times.
 bool no_coord=false;
+ 
 %}
 %x GRAP
 %x REJECTED_COORD
@@ -107,7 +111,7 @@ bool no_coord=false;
 
 identifier	[A-Za-z][A-Za-z0-9_]*
 
-keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y
+keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y|undefine
 %%
 <INITIAL>{
 ^.*$ 	{
@@ -177,6 +181,9 @@ keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coor
 			}
 
  {identifier}[ \t]*=/[^=] {
+                           if ( is_macro(yytext) ) 
+			       REJECT;
+
                            // in a for statement, identifier = is a
                            // synonym for identifier FROM, so don't
                            // identify it as a LHS.
@@ -257,6 +264,12 @@ log[ \t]+(x|y|log)	{
 			   // The yyless/YY_BREAK allows us to redo the
                            // match under the new start condition.
 
+                           if ( is_macro(yytext) ) {
+			       BEGIN(REJECTED_COORD);
+			       yyless(0);
+			       YY_BREAK;
+			   }
+			   
                            // Early rejection if a COORD_NAME is
                            // illegal here.
                            if ( no_coord ) {
@@ -319,10 +332,13 @@ log[ \t]+(x|y|log)	{
 {identifier}/[ \t][ \t]*[0123456789\.] {
 			   coordinateDictionary::iterator ci;
 			   coord *c;
-
-			   if ( active.count(yytext) ) {
+			   
+                           if ( is_macro(yytext) ) 
 			       REJECT;
-			   }
+
+			   if ( active.count(yytext) ) 
+			       REJECT;
+
 			   ci = the_graph->coords.find(yytext);
 			   if ( ci != the_graph->coords.end()) {
 			       c = (*ci).second;
@@ -337,32 +353,42 @@ log[ \t]+(x|y|log)	{
 			   return COORD_NAME;
                         }
 {keyword}               {
-                           if (active.count(yytext) ) {
-			       keywordDictionary::iterator ki;
-			       unsigned int i;
-
-			       if ( (ki = keywords.find(yytext))
-				    == keywords.end()) {
-				   cerr << "keyword not in map!?" << endl;
-				   return(0);
-			       }
-			       // The alias runs faster
-			       const keyword& k = (*ki).second;
-			       
-			       if ( k.clear ) active.clear();
-			       for ( i = 0; i < k.add.size(); i++ )
-				   active.insert(k.add[i]);
-			       for ( i = 0; i < k.remove.size(); i++)
-				   active.erase(k.remove[i]);
-
-			       debug(yytext);
+                           macroDictionary::iterator mi;
+			   
+			   if ( lex_expand_macro &&
+				( mi = macros.find(yytext)) != macros.end() ) {
+			       expand_macro((*mi).second);
 			       tokenpos += yyleng;
 			       BEGIN(GRAP);
-			       return(k.token);
 			   }
 			   else {
-			       debug(yytext, " not active");
-			       REJECT;
+			       if (active.count(yytext) ) {
+				   keywordDictionary::iterator ki;
+				   unsigned int i;
+
+				   if ( (ki = keywords.find(yytext))
+					== keywords.end()) {
+				       cerr << "keyword not in map!?" << endl;
+				       return(0);
+				   }
+				   // The alias runs faster
+				   const keyword& k = (*ki).second;
+			       
+				   if ( k.clear ) active.clear();
+				   for ( i = 0; i < k.add.size(); i++ )
+				       active.insert(k.add[i]);
+				   for ( i = 0; i < k.remove.size(); i++)
+				       active.erase(k.remove[i]);
+
+				   debug(yytext);
+				   tokenpos += yyleng;
+				   BEGIN(GRAP);
+				   return(k.token);
+			       }
+			       else {
+				   debug(yytext, " not active");
+				   REJECT;
+			       }
 			   }
                         }
 at			{
@@ -470,23 +496,14 @@ atan2|min|max		{
 
 			debug("ident: ", yytext);
 			id = new string(yytext);
-			tokenpos += yyleng;
 			if ( lex_expand_macro &&
 			     ( mi = macros.find(*id)) != macros.end() ) {
-			        m = (*mi).second;
-				delete id;
-				ch = yyinput();
-				if ( ch == '(') {
-                                    macro_args(m);
-                                    tokenpos++;
-                                }
-				else unput(ch);
-				id = m->invoke();
-				include_string(id);
-				delete id;
-			        tokenpos += yyleng;
+			    delete id;
+			    expand_macro((*mi).second);
+			    tokenpos += yyleng;
 			}
 			else {
+			    tokenpos += yyleng;
 			    yylval.String = id;
 			    BEGIN(GRAP);
 			    return IDENT;
@@ -942,3 +959,29 @@ string post_context(void) {
     return linebuf.substr(tokenpos);
 }
 
+
+void expand_macro(macro *m) {
+    char ch = yyinput();
+    string *exp;
+    
+    if ( ch == '(') {
+	macro_args(m);
+	tokenpos++;
+    }
+    else unput(ch);
+    exp = m->invoke();
+    include_string(exp);
+    delete exp;
+}
+
+bool is_macro(const string& s) {
+    int i = (int) s.length()-1;
+    string mname;
+
+    while ( i >=0 && !id_letter[s[i]])
+	i--;
+    if ( i < 0 ) return false;
+
+    mname = s.substr(0, i+1);
+    return (macros.find(mname) != macros.end());
+}
