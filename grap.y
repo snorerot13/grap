@@ -16,10 +16,6 @@
 #include <unistd.h>
 #endif
 
-#ifndef RANDOM_DECLARED
-long random();
-#endif 
-
 #include "grap.h"
 #include "grap_data.h"
 #include "grap_draw.h"
