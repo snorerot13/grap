@@ -329,7 +329,7 @@ log[ \t]+(x|y|log)	{
 			   return COORD_NAME;
                         }
 <GRAP,REJECTED_COORD>{
-{identifier}/[ \t][ \t]*[0123456789\.] {
+{identifier}/[ \t][ \t]*[0123456789\.(] {
 			   coordinateDictionary::iterator ci;
 			   coord *c;
 			   
