@@ -9,4 +9,4 @@ local.example.ps:	example.ms
 	../grap -d ../grap.defines example.ms | groff -pe $(MACROS) > local.example.ps
 
 clean:
-	rm -f *.ps 
+	rm -f *.ps *.pdf *.ps.gz
