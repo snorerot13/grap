@@ -1646,9 +1646,6 @@ real graph are missing from this one.
 .ps 8
 .vs 10
 \&.ds ** \\v'+.2m'\\fB*\\fP\\v'-.2m'
-\&.PE
-\&scale = 1.3
-\&.PE
 \&.vs 10
 \&.G1
 \&define myplot % # (symbol)
@@ -1682,11 +1679,8 @@ real graph are missing from this one.
 .vs 12
 .DE
 .ds ** \v'+.2m'\fB*\fP\v'-.2m'
-.PS
-scale = 1.3
-.PE
 .vs 10
-.G1
+.G1 2i
 define myplot % # (symbol)
 next linename at $1,$2
 symb at $1,$2
@@ -1774,9 +1768,6 @@ of
 .ft CW
 .ps 8
 .vs 10
-\&.PS
-\&scale = 1.9
-\&.PE
 \&.G1
 \&define write_name % #(code,X,Y)
 \&  if ($1 == 1) then {
@@ -1867,10 +1858,7 @@ of
 .ps 10
 .vs 12
 .DE
-.PS
-scale = 1.9
-.PE
-.G1
+.G1 2.5i
 define write_name % #(code,X,Y)
   if ($1 == 1) then {
     "\s-2G\s+2" above at $2,$3 

@@ -5,7 +5,10 @@ Generated from groff.  Written by
 (<a href="mailto:faber@lunabase.org">faber@lunabase.org</a>).<br>
 Please <a href="mailto:faber@lunabase.org">mail</a> me any problems with, or
 comments about this page.<br>
-Here's my <a href="http://www.lunabase.org/~faber/pubkey.asc">PGP public key</a>
+PGP Public Keys:
+<a href="http://www.lunabase.org/~faber/pubkey.asc">RSA</a>,
+<a href="http://www.lunabase.org/~faber/pubkey5.asc">DSS</a>,
+<a href="http://www.lunabase.org/~faber/pubkeys.asc">Both</a>
 </address>
 </body>
 </html>
