@@ -1,7 +1,7 @@
 Summary: grap, a grapher for groff
 Name: grap
-Version: 0.95b
-Release: 0
+Version: 1.01
+Release: 1
 Copyright: BSD
 Group: Applications/Publishing
 Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.95b.tar.gz
@@ -16,36 +16,42 @@ version of grap, so I built one.
 %setup
 
 %build
-./configure --prefix=/usr
+MYCFLAGS="$RPM_OPT_FLAGS"
+
+CFLAGS="$MYCFLAGS" ./configure --prefix=%prefix
 
 %install
-make install
+rm -rf $RPM_BUILD_ROOT
+make prefix=$RPM_BUILD_ROOT%{prefix} install
 
 
 %files
+%defattr(-, root, root)
+
 %doc README
 %doc COPYRIGHT
 %doc CHANGES
-/usr/bin/grap
-/usr/man/man1/grap.1
-/usr/share/grap/examples
-/usr/share/grap/examples/400mpairs.d
-/usr/share/grap/examples/400mtimes.d
-/usr/share/grap/examples/400wpairs.d
-/usr/share/grap/examples/Makefile
-/usr/share/grap/examples/army.d
-/usr/share/grap/examples/boyhts.d
-/usr/share/grap/examples/example.ms
-/usr/share/grap/examples/internet.d
-/usr/share/grap/examples/prof2.d
-/usr/share/grap/examples/states.d
-/usr/share/grap/examples/states2.d
-/usr/share/grap/examples/states3.d
-/usr/share/grap/examples/usapop.d
-/usr/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Global.Random1500.succ.result
-/usr/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Local.Random1500.succ.result
-/usr/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Hybrid.Random1500.succ.result
-/usr/share/grap/grap.defines
-/usr/share/grap/README
-/usr/share/grap/COPYRIGHT
-/usr/share/grap/CHANGES
+
+%{prefix}/bin/grap
+%{prefix}/man/man1/grap.1
+%{prefix}/share/grap/examples
+%{prefix}/share/grap/examples/400mpairs.d
+%{prefix}/share/grap/examples/400mtimes.d
+%{prefix}/share/grap/examples/400wpairs.d
+%{prefix}/share/grap/examples/Makefile
+%{prefix}/share/grap/examples/army.d
+%{prefix}/share/grap/examples/boyhts.d
+%{prefix}/share/grap/examples/example.ms
+%{prefix}/share/grap/examples/internet.d
+%{prefix}/share/grap/examples/prof2.d
+%{prefix}/share/grap/examples/states.d
+%{prefix}/share/grap/examples/states2.d
+%{prefix}/share/grap/examples/states3.d
+%{prefix}/share/grap/examples/usapop.d
+%{prefix}/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Global.Random1500.succ.result
+%{prefix}/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Local.Random1500.succ.result
+%{prefix}/share/grap/examples/result.SQ_MESH.Fail1.S3.R0.Hybrid.Random1500.succ.result
+%{prefix}/share/grap/grap.defines
+%{prefix}/share/grap/README
+%{prefix}/share/grap/COPYRIGHT
+%{prefix}/share/grap/CHANGES
