@@ -48,7 +48,7 @@ public:
 	    if ( fc ) fillcolor = new string(*fc);
     }
 
-    linedesc(linedesc *l) {
+    linedesc(const linedesc *l) {
 	if ( l) {
 	    ld = l->ld;
 	    param = l->param;
@@ -112,7 +112,7 @@ public:
 
     shiftdesc(sides s=top_side, double p=0) : dir(s), param(p) { }
     
-    shiftdesc(shiftdesc *sh ) {
+    shiftdesc(const shiftdesc *sh ) {
 	if ( sh ) {
 	    dir = sh->dir;
 	    param = sh->param;
@@ -336,7 +336,7 @@ public:
     }
 
     // To allow ticks and grids to share parse rules
-    grid(tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
+    grid(const tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
 	    prt(0), shift(), c(t->c) {
 	shiftcpy sc(&shift);
 
@@ -392,7 +392,7 @@ public:
     point(double xx, double yy, coord* cc) : x(xx), y(yy), c(cc) {
 	if ( c ) c->newpt(x, y);
     }
-    point(point *p) : x(p->x), y(p->y), c(p->c) {
+    point(const point *p) : x(p->x), y(p->y), c(p->c) {
 	if ( c ) c->newpt(x, y);
     }
     point(const point& p) : x(p.x), y(p.x), c(p.c) { }
@@ -548,7 +548,7 @@ public:
     
     plot(stringlist *s = 0, point *p =0, bool clip=true) : strs(s), loc(p) { }
     // copy constructors have to copy ...
-    plot( const plot& p ) : strs(0), loc(0) {
+    plot(const plot& p ) : strs(0), loc(0) {
 	if (p.loc) loc = new point(p.loc);
 
 	if ( p.strs ) {
