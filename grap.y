@@ -20,9 +20,14 @@ extern "C" {
     extern char *optarg;
     extern int optind, opterr, optopt;
     int getopt(int, char * const [], const char *);
-    long random();
 }
 #endif 
+
+#ifndef RANDOM_DECLARED
+extern "C" {
+    long random();
+}
+#endif
 
 #include "grap.h"
 

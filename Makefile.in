@@ -1,14 +1,14 @@
 # This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 # for the full copyright and limitations of liabilities.
 
-PREFIX?=@prefix@
+PREFIX = @prefix@
 
 # By default these are relative to PREFIX.  You can override them on the 
 # command line
 
-BINDIR?=${PREFIX}/bin
-DEFINESDIR?=${PREFIX}/share/grap
-MANDIR?=${PREFIX}/man/man1
+BINDIR = $(PREFIX)/bin
+DEFINESDIR = $(PREFIX)/share/grap
+MANDIR = $(PREFIX)/man/man1
 
 INSTALL=@INSTALL@
 RM=rm
@@ -16,6 +16,7 @@ RMDIR=rmdir
 MKDIR=mkdir
 LEX=@LEX@
 YACC=@YACC@
+CXX=@CXX@
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
@@ -33,7 +34,7 @@ all:	grap
 grap:	$(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
 
-y.tab.h:	grap.cc
+y.tab.h:	grap.y
 grap.cc:	grap.y
 grap_lex.cc:	grap_lex.l y.tab.h
 
