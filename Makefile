@@ -17,7 +17,7 @@ LEX=flex
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
 
-CXXFLAGS =-g -pipe
+#CXXFLAGS =-g -pipe
 CXXFLAGS += -Wall
 #CXXFLAGS += -DLEX_DEBUG
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 

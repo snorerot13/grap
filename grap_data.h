@@ -182,7 +182,7 @@ public:
 	char *c = str;
 	char *fmt = new char[strlen() + strchunk];
 	char *f;
-	unsigned first = 1;
+	int first = 1;
 
 	f = fmt;
 	for(f=fmt; (*f = *c); c++,f++ ) {

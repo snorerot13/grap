@@ -86,7 +86,7 @@ public:
 	pframe(0) {}
     
     
-    ~Picgraph() {
+    virtual ~Picgraph() {
 	sfree_f sfree;
 
 	if ( ps_param ) delete ps_param;

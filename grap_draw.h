@@ -89,7 +89,7 @@ public:
     linedescclass& operator=(const linedescval &l) {
 	ld = l.ld;
 	param= l.param;
-	fill = l.param;
+	fill = l.fill;
 	if ( color ) { delete color; color = 0;}
 	if ( l.color ) color = new String(l.color);
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
@@ -123,7 +123,7 @@ public:
 	    param = 0;
 	}
     }
-    shiftclass & operator=( const shiftdesc sh ) {
+    shiftclass & operator=( const shiftdesc &sh ) {
 	dir = sh.dir;
 	param = sh.param;
 	return *this;
