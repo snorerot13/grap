@@ -7,6 +7,8 @@ bullet color "blue" at 1, 3
 
 work.
 
+Minor code tweaks to make grap compile under g++ 3.4.2
+
 1.31: In compatibility mode grap will no longer add whitespace around graphs.
 I like it, but Yuval Tamir rightly complained.
 

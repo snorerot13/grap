@@ -286,7 +286,7 @@ void init_id() {
     for ( i = 'a'; i <= 'z' ; i++ ) id_letter[i] = true;
     for ( i = 'A'; i <= 'Z' ; i++ ) id_letter[i] = true;
     for ( i = '0'; i <= '9' ; i++ ) id_letter[i] = true;
-    id_letter['_'] = true;
+    id_letter[static_cast<unsigned int>('_')] = true;
 }
 
 // Initialize the table of keywords.

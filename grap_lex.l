@@ -41,19 +41,6 @@ extern char *strerror(int errnum);
 #include <errno.h>
 #endif
 
-// Templates for debugging.  Print the parameters to cerr.  
-
-//#define LEX_DEBUG
-template <class T>
-inline void debug(T p) {
-    if ( print_lex_debug) cerr << p << endl;
-}
-
-template <class T, class U>
-inline void debug(T p1, U p2) {
-    if ( print_lex_debug) cerr << p1 << p2 << endl;
-}
-
 int return_macro = 0;
 int slashcount = 0;
 int macro_end = 0;
@@ -79,6 +66,19 @@ extern graph *the_graph;
 extern stringSequence path;
 extern bool compat_mode;
 extern bool id_letter[]; 
+
+// Templates for debugging.  Print the parameters to cerr.  
+
+//#define LEX_DEBUG
+template <class T>
+inline void debug(T p) {
+    if ( print_lex_debug) cerr << p << endl;
+}
+
+template <class T, class U>
+inline void debug(T p1, U p2) {
+    if ( print_lex_debug) cerr << p1 << p2 << endl;
+}
 
 int include_string(string *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
@@ -985,7 +985,7 @@ bool is_macro(const string& s) {
     int i = (int) s.length()-1;
     string mname;
 
-    while ( i >=0 && !id_letter[s[i]])
+    while ( i >=0 && !id_letter[static_cast<unsigned int>(s[i])])
 	i--;
     if ( i < 0 ) return false;
 
