@@ -25,6 +25,8 @@ LEX=@LEX@
 YACC=@YACC@
 CXX=@CXX@
 
+DISTDIR=grap-0.91a
+
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
@@ -66,15 +68,16 @@ dist:
 	make clean
 	make grap.an
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
-	rm /tmp/grap/configure.in /tmp/grap/Makefile /tmp/grap/examples/Makefile
-	rm /tmp/grap/examples/Makefile.local /tmp/grap/examples/color_example.ms
-	rm /tmp/grap/examples/.html* /tmp/grap/examples/.cvsignore
-	rm -rf /tmp/grap/CVS /tmp/grap/examples/CVS
-	cd /tmp && tar czf grap.tgz grap
-	mv /tmp/grap.tgz . && rm -rf /tmp/grap
+	cd /tmp && mv grap ${DISTDIR}
+	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
+	rm /tmp/${DISTDIR}/examples/Makefile.local /tmp/${DISTDIR}/examples/color_example.ms
+	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
+	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
+	cd /tmp && tar czf ${DISTDIR}.tar.gz ${DISTDIR}
+	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* grap.tgz
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* grap.tar.gz
 
 install:	grap grap.defines grap.1
 	strip grap
