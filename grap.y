@@ -3,6 +3,15 @@
 #include <iostream.h>
 #include <math.h>
 #include <stdlib.h>
+
+#ifdef NO_RANDOM
+extern "C" { long random(); }
+#endif
+
+#ifdef NO_GETOPT
+extern "C" { int getopt(int, char * const *, const char *); }
+#endif
+
 #include "grap.h"
 
 #ifndef DEFINES
@@ -113,9 +122,9 @@ public:
 %token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
 %token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN FRAMESIZE
-%token UP DOWN IN OUT TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
+%token IN OUT TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
 %token PLUS MINUS TIMES DIV CARAT EQUALS SIZE UNALIGNED LABEL RADIUS CIRCLE
-%token LINE ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
+%token ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH
 %start graphs
@@ -572,9 +581,9 @@ strmod:
 	    { $$.just |= (int) above; }
 |	strmod BELOW
 	    { $$.just |= (int) below; }
-|	strmod ALIGNED;
+|	strmod ALIGNED
 	    { $$.just |= (int) aligned; }
-|	strmod UNALIGNED;
+|	strmod UNALIGNED
 	    { $$.just |= (int) unaligned; }
 ;
 

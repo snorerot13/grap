@@ -13,10 +13,10 @@ const static int strchunk = 256;
 class String {
 protected:
     
-#ifdef HAVE_SNPRINTF
-    inline snprintf(char *s, int l, char *f, double d) { ::snprintf(s,l,f,d); }
-#else 
+#ifdef NO_SNPRINTF
     inline snprintf(char *s, int l, char *f, double d) { ::sprintf(s,f,d); }
+#else 
+    inline snprintf(char *s, int l, char *f, double d) { ::snprintf(s,l,f,d); }
 #endif
     
 public:

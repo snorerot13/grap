@@ -8,9 +8,16 @@ RM=rm
 RMDIR=rmdir
 MKDIR=mkdir
 
+# Solaris : NO_RANDOM, NO_SNPRINTF
+# SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
+
 CXXFLAGS=-g
 #CXXFLAGS += -DLEX_DEBUG
-CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" -DHAVE_SNPRINTF
+CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+#CXXFLAGS += -DNO_SNPRINTF
+#CXXFLAGS += -DNO_RANDOM
+#CXXFLAGS =+ -DNO_GETOPT
+
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
 
 .o.out:
