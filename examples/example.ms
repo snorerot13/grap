@@ -684,7 +684,7 @@ line from 1790, fit(1790) to 1920,fit(1920)
 .PP
 Another re-expression of the U.S. population data.  Uses plenty of
 .I grap 
-arithmatic and an 
+arithmetic and an 
 .I eqn
 axis label (which is 
 .CW unaligned ).
@@ -1263,13 +1263,24 @@ frame invis ht bars/3 wid 3
 .KS
 .PP
 The creative graph of state heights and volcano heights from their
-grap paper.  The data was included in the graph description, and I
-have no idea where they got it.
+grap paper.  The data was included in the graph description, which
+(accroding to Bruce Lilly) is from John W. Tukey's classic 1977 text 
+.I
+Exploratory
+Data Analysis,
+.R
+Chapter 10.  Tukey cites \*QThe World Almanac, 1966, page 269.  Their
+source: National Geographic Society.\*U  The format of the graph is
+also similar to a graph on pg. 40 (exhibit 5, chapter 2).  All those
+attributions are from Bruce Lilly.  I don't have the relevant material
+to verify it, but have no reason to doubt the accuracy of the information.
 .EQ
 delim off
 .EN
 .DS
 .ft CW
+.ps 8
+.vs 10
 \&.G1
 \&frame invis ht 4 wid 3 bot solid
 \&ticks off
@@ -2219,5 +2230,68 @@ new dashed
 16, 60
 21, 67
 .ps
+.G2
+.\" "
+.KE
+.KS
+Bruce Lilly also suggests this example.  He says:
+.QP
+I've attached a small data file and simple grap specification which shows
+one way to handle missing data (and perhaps also how to ignore a column
+header row in a data file). The data is annual US bicyclist fatalities as
+published by the National Highway Transportation Safety Administration
+.CW http://www.nhtsa.dot.gov/people/ncsa/factshet.html ; (
+the \*Qfact sheets\*U for
+\*Qpedalcyclists\*U for 1998 and for 1993) and by the National Center for
+Injury Prevention and Control
+.CW http://www.cdc.gov/ncipc/osp/us9693/mvpctr.htm ; (
+change the numbers for
+different years). CDC data hasn't yet been published for 1997 or 1998.
+Don't ask me why two groups of bureaucrats in the US Federal Government
+can't agree on the numbers.  The data is, of course, public information,
+and there's no reason why you can't use the trivial grap
+specification (though you might wish to embellish it).
+.LP
+I did embellish it by adding labels and a key.
+.DS
+.CW
+\&.G1
+\&label top "Bicycling Deaths by Year"
+\&label left "Deaths" left 0.25
+\&label bottom "Year"
+\&copy "cy_fatal.d" through {
+\&	# ignore missing data (zero or negative values used as placeholders)
+\&	# also happens to ignore column header row in data
+\&	if $2 > 0 then {square at $1,$2 }
+\&	if $3 > 0 then {bullet at $1,$3 }
+\&}
+\&square at 1993, 925
+\&"NHTSA data" ljust at 1993.5, 925
+\&bullet at 1993, 900
+\&"CDC data" ljust at 1993.5, 900
+\&line from 1992.5,940 to 1998,940
+\&line from 1998,940 to 1998,890
+\&line from 1998,890 to 1992.5, 890
+\&line from 1992.5, 890 to 1992.5,940
+\&.G2
+.DE
+.G1
+label top "Bicycling Deaths by Year"
+label left "Deaths" left 0.25
+label bottom "Year"
+copy "cy_fatal.d" through {
+	# ignore missing data (zero or negative values used as placeholders)
+	# also happens to ignore column header row in data
+	if $2 > 0 then {square at $1,$2 }
+	if $3 > 0 then {bullet at $1,$3 }
+}
+square at 1993, 925
+"NHTSA data" ljust at 1993.5, 925
+bullet at 1993, 900
+"CDC data" ljust at 1993.5, 900
+line from 1992.5,940 to 1998,940
+line from 1998,940 to 1998,890
+line from 1998,890 to 1992.5, 890
+line from 1992.5, 890 to 1992.5,940
 .G2
 .KE
