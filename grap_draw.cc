@@ -156,7 +156,7 @@ double coord::map(double v, axis ax ) {
 // straightforward.  Connect this segment to the previous point in the
 // line.
 linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
-			 string *s /* =0 */, linedesc *l /* =0 */,
+			 DisplayString *s /* =0 */, linedesc *l /* =0 */,
 			 bool a /* =false */)
     : to(xx,yy,cc), from(0) {
     point *p;	// The last point on line ll.
@@ -166,9 +166,9 @@ linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
 
     desc = *l;
 
-    if ( s ) plotstr = new string(*s);
+    if ( s ) plotstr = new DisplayString(*s);
     else {
-	if ( ll->plotstr ) plotstr = new string(*ll->plotstr);
+	if ( ll->plotstr ) plotstr = new DisplayString(*ll->plotstr);
 	else plotstr = 0;
     }
     arrow = a;

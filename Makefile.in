@@ -6,6 +6,7 @@ exec_prefix = @exec_prefix@
 
 BINDIR = @bindir@
 DEFINESDIR = @datadir@/grap
+DOCDIR = @datadir@/doc/grap
 MANDIR = @mandir@/man1
 
 PROGS=grap
@@ -85,7 +86,7 @@ grap.ps:	grap.1
 	groff -mdoc grap.1 > grap.ps
 
 grap.1:	grap.doc
-	sed "s#DEFINES_FILE#${DEFINESDIR}/grap.defines#g; s#EXAMPLES#${DEFINESDIR}/examples#g;" < grap.doc > grap.1 ;
+	sed "s#DEFINES_FILE#${DEFINESDIR}/grap.defines#g; s#EXAMPLES#${DOCDIR}/examples#g;" < grap.doc > grap.1 ;
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
@@ -96,15 +97,17 @@ install:	grap grap.defines grap.1
 	${INSTALL} -d ${DEFINESDIR}/examples || true
 	${INSTALL_PROGRAM} grap ${BINDIR}
 	${INSTALL_DATA} grap.1 ${MANDIR}
-	${INSTALL_DATA} grap*.defines README CHANGES COPYRIGHT grap.man ${DEFINESDIR}
-	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${DEFINESDIR}/examples
+	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
+	${INSTALL_DATA} grap*.defines README CHANGES COPYRIGHT grap.man ${DOCDIR}
+	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${DOCDIR}/examples
 
 deinstall:
 	${RM} ${BINDIR}/grap
 	${RM} ${MANDIR}/grap.1
-	${RM} ${DEFINESDIR}/grap*.defines ${DEFINESDIR}/README ${DEFINESDIR}/CHANGES ${DEFINESDIR}/COPYRIGHT ${DEFINESDIR}/grap.man
-	${RM} ${DEFINESDIR}/examples/*.d ${DEFINESDIR}/examples/*.ms ${DEFINESDIR}/examples/Makefile ${DEFINESDIR}/examples/*result
-	${RMDIR} ${DEFINESDIR}/examples
+	${RM} ${DEFINESDIR}/grap*.defines ${DOCDIR}/README ${DOCDIR}/CHANGES ${DOCDIR}/COPYRIGHT ${DOCDIR}/grap.man
+	${RM} ${DOCDIR}/examples/*.d ${DOCDIR}/examples/*.ms ${DOCDIR}/examples/Makefile ${DOCDIR}/examples/*result
+	${RMDIR} ${DOCDIR}/examples
+	${RMDIR} ${DOCDIR}
 	${RMDIR} ${DEFINESDIR}
 
 check:	grap grap.defines examples/example.ms

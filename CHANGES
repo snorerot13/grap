@@ -1,5 +1,27 @@
 Change log
 
+1.22: John Heidemann caught a bug with respect to large sizes and size
+changes in titles.  Those large szie changes are now supported.  Generally
+the groff [] syntax is now used for the embedded \s commans that size
+generates.  This can be turned off by using -C.
+
+John also wanted to be able to specify string modifiers like size, etc.
+on ticks.  Now ticks, grids, and plot strings (e.g. in a new or draw
+statement) all take string modifiers.  grap.defines has been changed to
+support and encourage this usage.
+
+A bug where a null graph was output when only a draw statement was given
+has been corrected.
+
+sprintf processing has been revamped to more directly follow sprintf
+syntax.  As a result, a limitation on the number of parameters (10) has
+been introduced.
+
+As a result of using string attributes on plotting strings, the name of
+the default line has become user-visible.  Changing
+grap_internal_default via new will change the default lines for the rest
+of the graph.  It's not encouraged.
+
 1.21: Allow redefinition of keywords as macros.  In the process, I
 added an undefine keyword to do the obvious: remove a macro.
 

@@ -100,6 +100,7 @@ typedef hash_map<string, macro *, Strhash> macroDictionary;
 typedef hash_map<string, keyword, Strhash> keywordDictionary;
 #endif
 typedef list<plot *> plotSequence;
+typedef vector<double> doublevec;
 typedef list<double> doublelist;
 typedef list<tick *> ticklist;
 typedef list<grid *> gridlist;

@@ -159,27 +159,30 @@ public:
     int j;               // justification modifiers (should be just,
                         // but int supports | and &
     double size;	// Fontsize
-    int relsz;		// True if the fintsize is relative
+    int relsz;		// True if the fontsize is relative
 
     DisplayString() : string(), j(none), size(0), relsz(0) {}
+    DisplayString(char *s, int ju=0, double sz=0, int rsz=0 ) :
+	string(s), j(ju), size(sz), relsz(rsz) { }
     DisplayString(string s, int ju=0, double sz=0, int rsz=0 ) :
 	string(s), j(ju), size(sz), relsz(rsz) { }
     DisplayString(DisplayString& ds) :
 	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz) { }
-    DisplayString(double e, const string *fmt=0) :
+    DisplayString(double e, const DisplayString *fmt=0) :
 	j(0), size(0), relsz(0) {
 	char *c = new char[64];
-	int delf =0;
+	bool delf = false;
 
 	if ( !fmt) {
-	    fmt = new string("%g");
-	    delf = 1;
+	    fmt = new DisplayString("%g");
+	    delf = true;
 	}
 
 	snprintf(c,64,fmt->c_str(),e);
-	*(string*)this = c;
+	*this = c;
 	delete[] c;
 	if ( delf ) delete fmt;
+	else { j = fmt->j; size = fmt->size; relsz = fmt->relsz; }
     }
 };
 
@@ -237,7 +240,7 @@ public:
     double where;	// x or y value of the tick
     double size;	// how large a tick mark to make
     sides side;		// Which side of the graph the mark is on
-    string *prt;	// The string to print next to the mark
+    DisplayString *prt;	// The string to print next to the mark
     shiftlist shift;	// Shift information, to fine tune position of prt
     coord *c;		// The coordinate scale that the tick is in
     
@@ -246,15 +249,15 @@ public:
 	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
 	shiftcpy sc(&shift);
 	
-	if ( t.prt ) prt = new string(*t.prt);
+	if ( t.prt ) prt = new DisplayString(*t.prt);
 	else prt =0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
     }
-    tick(double w, double s, sides sd, string *p, shiftlist *sh,
+    tick(double w, double s, sides sd, DisplayString *p, shiftlist *sh,
 	 coord *co) : where(w), size(s), side(sd), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new string(*p);
+	if ( p ) prt = new DisplayString(*p);
 	else prt =0;
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
@@ -283,7 +286,7 @@ public:
 	shift = t.shift;
 	c = t.c;
 	if ( prt ) { delete prt; }
-	if ( t.prt ) prt = new string(*t.prt);
+	if ( t.prt ) prt = new DisplayString(*t.prt);
 	else prt = 0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
 	return *this;
@@ -296,40 +299,37 @@ public:
     double where;	// x or y value of the grid line
     linedesc desc;	// style of the grid line
     sides side;		// Side of the graph where line labels are printed
-    string *prt;	// The label for this line
+    DisplayString *prt;	// The label for this line
     shiftlist shift;	// Shift info for the label
     coord *c;		// Coordinate system for this line
     
     grid() : where(0), desc(dotted,0,0), side(top_side), prt(0), shift(),
 	c(0) { }
 
-    grid(double w, linedesc *l, sides sd, string *p, shiftlist *sh,
+    grid(double w, linedesc *l, sides sd, DisplayString *p, shiftlist *sh,
 	 coord *co) :
-	where(w), desc(l), side(sd), shift(), c(co) {
+	where(w), desc(l), side(sd), prt(0), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new string(*p);
-	else prt =0;
+	if ( p ) prt = new DisplayString(*p);
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
     }
 
     // To allow ticks and grids to share parse rules
     grid(tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
-	    shift(), c(t->c) {
+	    prt(0), shift(), c(t->c) {
 	shiftcpy sc(&shift);
 
-	if ( t->prt ) prt = new string(*t->prt);
-	else prt =0;
+	if ( t->prt ) prt = new DisplayString(*t->prt);
 	for_each(t->shift.begin(), t->shift.end(), sc);
     }
 
-    grid(grid& g) : where(g.where), desc(g.desc), side(g.side),
+    grid(grid& g) : where(g.where), desc(g.desc), side(g.side), prt(0),
 		shift(), c(g.c) {
 	shiftcpy sc(&shift);
 
-	if ( g.prt ) prt = new string(*g.prt);
-	else prt =0;
+	if ( g.prt ) prt = new DisplayString(*g.prt);
 	for_each(g.shift.begin(), g.shift.end(), sc);
     }
 
@@ -357,7 +357,7 @@ public:
 	shift = g.shift;
 	c = g.c;
 	if ( prt ) delete prt;
-	if ( g.prt ) prt = new string(*g.prt);
+	if ( g.prt ) prt = new DisplayString(*g.prt);
 	else prt = 0;
 	for_each(g.shift.begin(), g.shift.end(), sc);
 	return *this;
@@ -402,7 +402,7 @@ public:
     gridlist gds;		// gridlines to draw
 
     frame() : ht(2), wid(3), tks(), gds() {
-	string g = "%g";
+	DisplayString g = "%g";
 	
 	for ( int i = 0 ; i < 4 ; i ++ ) {
 	    desc[i] = linedesc(def,0,0);
@@ -459,20 +459,20 @@ public:
 // different plotting symbol or drawing style.
 class linesegment {
 public:
-    point to;		// The end point of this segment
-    point *from;	// the point this segment started from (if any)
-    linedesc desc;	// style for the connection to this point
-    string *plotstr;	// string to plot
-    bool arrow;		// true if the connection ends with an arrow
+    point to;			// The end point of this segment
+    point *from;		// the point this segment started from (if any)
+    linedesc desc;		// style for the connection to this point
+    DisplayString *plotstr;	// string to plot
+    bool arrow;			// true if the connection ends with an arrow
 	
     linesegment() : to(),  from(0), desc(invis, 0.0, 0),  plotstr(0),
 		    arrow(false) { } ;
-    linesegment(double xx, double yy, coord* cc, line *ll, string *s=0,
+    linesegment(double xx, double yy, coord* cc, line *ll, DisplayString *s=0,
 	      linedesc *l=0, bool a=0);
     linesegment(linesegment& ls) :
 	to(ls.to), desc(ls.desc), plotstr(0) , arrow(ls.arrow) {
 	if ( ls.from ) from = new point(ls.from);
-	if ( ls.plotstr ) plotstr = new string(*ls.plotstr);
+	if ( ls.plotstr ) plotstr = new DisplayString(*ls.plotstr);
     }
 
     ~linesegment() {
@@ -485,19 +485,19 @@ public:
 
 class line {
 public:
-    string *plotstr;		// default plotting string
+    DisplayString *plotstr;	// default plotting string
     linedesc desc;		// Default connection style
     point *lastpoint;		// The last point plotted on the line
 
     line() : plotstr(0), desc(), lastpoint(0) {}
 
-    line(linedesc *l, string *s=0 ) : plotstr(0), desc(l), lastpoint(0) {
-	if (s) plotstr = new string(*s);
+    line(linedesc *l, DisplayString *s=0 ) : plotstr(0), desc(l), lastpoint(0) {
+	if (s) plotstr = new DisplayString(*s);
     }
     
     line(line& l) : plotstr(0), desc(l.desc),  lastpoint(0) {
 	if ( l.plotstr ) {
-	    plotstr = new string(*l.plotstr);
+	    plotstr = new DisplayString(*l.plotstr);
 	}
     }
 
@@ -707,7 +707,7 @@ public:
     // object on the list.  Don't delete it, although you can modify
     // it.
     virtual linesegment *new_linesegment(double x, double y, coord* c, line *l,
-					 string *s=0, linedesc *ld=0,
+					 DisplayString *s=0, linedesc *ld=0,
 					 bool a=false) =0;
     virtual plot *new_plot(stringlist *s =0, point *p=0)  =0;
     virtual circle *new_circle(point *p, double r, linedesc *l=0) =0;

@@ -137,7 +137,7 @@ linedesc* combine_linedesc(linedesc *desc, linedesc* elem) {
 // Process a draw statement.  Create a new line description if this is
 // a new name, assign the line description to it, and a plot string if
 // necessary.
-void draw_statement(string *ident, linedesc *ld, string *plot) {
+void draw_statement(string *ident, linedesc *ld, DisplayString *plot) {
     line *l;
     lineDictionary::iterator li;
     linedesc defld(invis,0,0);
@@ -146,22 +146,25 @@ void draw_statement(string *ident, linedesc *ld, string *plot) {
     if ( ident ) {
 	li = the_graph->lines.find(*ident);
 	if ( li == the_graph->lines.end() ) {
-	    macroDictionary::iterator md;
+	    /*macroDictionary::iterator md;
 	    macro *m;
-	    string *s;
-	
+	    DisplayString *s;
+
 	    // We need to create a new line with default parameters.
 	    // Initialize the line to be invisible with a bullet
 	    // plotting string.
 	    if ( ( md = macros.find("bullet")) != macros.end()) {
 		m = (*md).second;
-		s = m->invoke();
+		string *ss = m->invoke();
+		s = new DisplayString(*ss);
+		delete ss;
 	    }
-	    else s = new string("\"\\(bu\"");
+	    else s = new  DisplayString("\"\\(bu\""); */
 
-	    l = new line(&defld, s);
+	    if ( *ident == "grap_internal_default") defline = l = new line();
+	    else l = new line(*defline);
 	    the_graph->lines[*ident] = l;
-	    delete s;
+	    // delete s;
 	}
 	else {
 	    l = (*li).second;
@@ -180,7 +183,7 @@ void draw_statement(string *ident, linedesc *ld, string *plot) {
     if ( plot ) {
 	if ( *plot != "" ) {
 	    if ( l->plotstr ) *l->plotstr = *plot;
-	    else l->plotstr = new string(*plot);
+	    else l->plotstr = new DisplayString(*plot);
 	}
 	else {
 	    // If the string is "", don't issue the pic commands to
@@ -284,7 +287,7 @@ stringlist *combine_strings(stringlist *sl, string *st, strmod &sm)  {
 
 // Create a new plot, that is a string created from a double, and add
 // it to the current graph.
-void plot_statement(double val, string *fmt, point *pt) {
+void plot_statement(double val, DisplayString *fmt, point *pt) {
     stringlist *seq = new stringlist;
     DisplayString *s;
 
@@ -314,16 +317,18 @@ void next_statement(string *ident, point *p, linedesc* ld) {
 	if ( li == the_graph->lines.end() ) {
 	    macroDictionary::iterator md;
 	    macro *m;
-	    string *s;
+	    DisplayString *s;
 	
 	    // We need to create a new line with default perameters.
 	    // Initialize the line to be invisible with a bullet
 	    // plotting string.
 	    if ( ( md = macros.find("bullet")) != macros.end()) {
 		m = (*md).second;
-		s = m->invoke();
+		string *ss = m->invoke();
+		s = new DisplayString(*ss);
+		delete ss;
 	    }
-	    else s = new string("\"\\(bu\"");
+	    else s = new DisplayString("\"\\(bu\"");
 	    l = new line((linedesc *)0, s );
 	    the_graph->lines[*ident] = l;
 	    delete s;
@@ -344,16 +349,16 @@ void next_statement(string *ident, point *p, linedesc* ld) {
 // Create a new tick with the given format (if any) and add it to the
 // current ticklist (which we're creating as we go).  If no such list
 // exists, create it.
-ticklist *ticklist_elem(double d, string *fmt, ticklist *tl) {
+ticklist *ticklist_elem(double d, DisplayString *fmt, ticklist *tl) {
     tick *t = new tick(d,0,top_side,0, (shiftlist *) 0, 0);
-    string *s;
+    DisplayString *s;
 
     if ( fmt ) {
 	unquote(fmt);
-	s = dblString(d, fmt);
+	s = new DisplayString(d, fmt);
 	delete fmt;
     }
-    else s = dblString(d);
+    else s = new DisplayString(d);
     t->prt = s;
 
     if ( !tl ) tl = new ticklist;
@@ -365,10 +370,10 @@ ticklist *ticklist_elem(double d, string *fmt, ticklist *tl) {
 // including the coordinate system to put the ticks in, the beginning
 // and ending ticks, a general increment descriptor (by) and a string
 // to format each tick value.  Return the list.
-ticklist *tick_for(coord *c, double from, double to, bydesc by, string *rfmt) {
+ticklist *tick_for(coord *c, double from, double to, bydesc by, DisplayString *rfmt) {
     tick *t;
-    string *s;
-    string *fmt;
+    DisplayString *s;
+    DisplayString *fmt;
     double idx;
     int dir;
     ticklist *tl;
@@ -376,10 +381,10 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, string *rfmt) {
     tl = new ticklist;
     if ( rfmt ) {
 	unquote(rfmt);
-	fmt = new string(*rfmt);
+	fmt = new DisplayString(*rfmt);
 	delete rfmt;
     } else
-	fmt = new string("%g");
+	fmt = new DisplayString("%g");
 		
     if ( to - from >= 0 ) dir = 1;
     else dir = -1;
@@ -389,7 +394,7 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, string *rfmt) {
 	t = new tick(idx, 0, top_side, 0, (shiftlist *) 0, 0);
 	t->c = c;
 
-	s = dblString(idx,fmt);
+	s = new DisplayString(idx,fmt);
 	t->prt = s;
 	tl->push_back(t);
 
@@ -758,16 +763,14 @@ void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
 // invisible and have a plotting string defined by the bullet macro,
 // if it is defined or a bullet character if not.
 void init_dict() {
-    linedesc defld(invis,0,0);		// The default line descriptor
-    macroDictionary::iterator md;	// An iterator to search for bullet
-    macro *m;				// The bullet macro
-    string *s;				// The plot string for the default line
+    // The plot string for the default line
+    string s = (macros.find("bullet") != macros.end()) ? 
+	"bullet;" : "\"\\(bu\";\n"; 
 
-    if ( ( md = macros.find("bullet")) != macros.end()) {
-	m = (*md).second;
-	s = m->invoke();
-    }
-    else s = new string("\"\\(bu\"");
+    s.insert(0,"new grap_internal_default invis ");
+    include_string(&s, 0, GINTERNAL);
+    defline = new line();
+    the_graph->lines["grap_internal_default"] = defline;
     
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
@@ -775,10 +778,7 @@ void init_dict() {
 	the_graph->base->tickdef[i].c = defcoord;
 	the_graph->base->griddef[i].c = defcoord;
     }
-    defline = new line(&defld,s);
-    the_graph->lines["grap.internal.default"] = defline;
     nlines = 0;
-    delete s;
 }
 
 

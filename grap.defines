@@ -1,14 +1,15 @@
 .G1
 .\" This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 .\" for the full copyright and limitations of liabilities.
-define delta {"\s8\(*D\s0"}
-define bullet {"\s9\v'0.1m'\(bu\v'-0.1m'\s0"}
-define vtick {"\s8|\s0"}
-define square {"\s8\(sq\s0"}
-define box {"\f(ZD\s8\N'110'\s0\fP"}
-define times {"\s8\(mu\s0"}
-define htick {"\s8\(em\s0"}
-define plus {"\s8\(pl\s0"}
-define star {"\s8\(**\s0"}
-define dot {"\s8\v'-0.2m'.\v'0.2m'\s0"}
+define delta {"\(*D" size 8}
+define bullet {"\v'0.1m'\(bu\v'-0.1m'" size 9}
+define vtick {"|" size 8}
+define square {"\(sq" size 8}
+.\"define box {"\f(ZD\s8\N'110'\s0\fP"}
+define box {"\f(ZD\N'110'\fP" size 8}
+define times {"\(mu" size 8}
+define htick {"\(em" size 8}
+define plus {"\(pl" size 8}
+define star {"\(**" size 8}
+define dot {"\v'-0.2m'.\v'0.2m'" size 8}
 .G2

@@ -133,7 +133,12 @@ diagrams.
 If 
 .Fl C
 is given, any macro beginning with \&.G1 or \&.G2 is treated as a \&.G1 or
-\&.G2 macro, for compatibility with old versions of troff.
+\&.G2 macro, for compatibility with old versions of troff.  Using 
+.Fl C
+also forces pure troff syntax on embedded font change commands when strings
+have the
+.Ic size
+attribute.
 .Pp
 The 
 .Fl h
@@ -310,6 +315,11 @@ statement, the plot string can be removed by specifying "" in the
 .Ic draw
 statement.
 .Pp
+The plot string can have its format changed through several string
+modifiers.  String modifiers are described in the description of the 
+.Ic plot 
+command.
+.Pp
 .Ic new
 is a synonym for 
 .Ic draw .
@@ -368,13 +378,28 @@ The coordinates may optionally be enclosed in parentheses:
 .Ar expr , expr
 .Bd -filled -offset indent
 These commands both plot a string at the given point.  In the first
-case the literal strings are stacked above each other.  The string
-modifiers include the
+case the literal strings are stacked above each other.  The string_modifiers
+include the
 .Xr pic 
-justification modifiers, and absolute and
-relative
+justification modifiers 
+.Ns No ( Ic ljust , 
+.Ic rjust ,
+.Ic above ,
+and
+.Ic below Ns No ),
+and absolute and relative
 .Li size
-modifiers.
+modifiers.  See the
+.Xr pic
+documentation for the description of the justification modifiers.
+.Nm
+also supports the 
+.Ic aligned
+and
+.Ic unaligned 
+modifiers which are briefly noted in the description of the 
+.Ic label
+command.
 .Pp
 .Li size
 .Ar expr
@@ -413,8 +438,7 @@ expression (See
 .Xc
 .Oo
 .Sm on
-.Xo ( Cm in Ns No \(or 
-.Ns Cm out )
+.Xo ( Cm in Ns No \(or Ns Cm out )
 .Xc
 .Op Ar expr
 .Oc
@@ -427,12 +451,10 @@ expression (See
 .Pp
 .Ic ticks 
 .Sm off
-.Xo ( Cm left No \(or Cm right 
-.No \(or Cm top No \(or Cm bottom )
+.Xo ( Cm left No \(or Cm right No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
-.Xo ( Cm in Ns No \(or 
-.Ns Cm out )
+.Xo ( Cm in Ns No \(or Ns Cm out )
 .Xc
 .Op Ar expr
 .Oo
@@ -461,8 +483,7 @@ expression (See
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
-.Xo ( Cm in Ns No \(or 
-.Ns Cm out )
+.Xo ( Cm in Ns No \(or Ns Cm out )
 .Xc
 .Op Ar expr
 .Oo
@@ -533,7 +554,10 @@ parameter must be given.  For each tick a
 style format string can be given.  The
 .Ar format_string
 defaults to
-.Qq %g .  
+.Qq %g .
+The format string can also take string modifiers as described in the 
+.Ic plot
+command.
 To place ticks with no labels, specify 
 .Ar format_string 
 as
@@ -895,7 +919,7 @@ statement, if any.  If the user specifies
 .Xr pic
 or 
 .Xr troff
-commands and neither any plottable object nor a 
+commands and neither any plotable object nor a 
 .Ic frame 
 command, the commands will not be output.
 .Ed
@@ -982,7 +1006,7 @@ draws a 2 unit high bar sitting on the x axis, centered on x=3.  By
 default bars are 1 unit wide, but this can be changed with the 
 .Ic wid
 keyword.  By default bars sit on the base axis, i.e., bars directed up
-will extend from y=0.  That may be overriden by the 
+will extend from y=0.  That may be overridden by the 
 .Ic base
 keyword.  (The bar described above has corners (2.5, 0) and (3.5, 2).)
 .Pp
@@ -1110,7 +1134,7 @@ distributed on [0,1).  The following two argument functions are supported:
 .Ic atan2 
 works just like
 .Xr atan2 3 .
-The random number generater can be seeded by calling 
+The random number generator can be seeded by calling 
 .Ic srand
 with a single parameter (converted internally to an integer).  Because
 its return value is of no use, you must use 
@@ -1231,7 +1255,7 @@ The macros are emitted immediately before the frame is drawn.
 .Pp
 DWB
 .Nm
-may use these as part of its implemenation.  This
+may use these as part of its implementation.  This
 .Nm
 provides them only for compatibility.  Note that these are very simple
 macros, and may not do what you expect under complex conditions.

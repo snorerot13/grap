@@ -33,6 +33,8 @@ typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
 typedef draw_f<tick, Pictick> draw_tick_f;
 typedef draw_f<grid, Picgrid> draw_grid_f;
 
+extern bool compat_mode;
+
 void Picgraph::init(string *n /* =0 */, string* p /* =0 */ ) {
     // Start a new graph, but maybe not a new block.
     
@@ -94,17 +96,27 @@ void Picgraph::draw(frame *) {
 void PicDisplayString::draw(frame *) {
 // Draw a display string.  Basically just a straight translation into
 // pic/troff idioms.
-    
+
     if ( size ) {
 	if ( relsz ) {
-	    if (size > 0.0 )  {
-		cout << "\"\\s+" << size;
+	    char relchar = ( size > 0 ) ? '+' : '-';
+	    size = fabs(size);
+	    if ( compat_mode ) {
+		cout << "\"\\s" << relchar;
+		cout << ((size > 9) ? "(" : "") << size;
 	    }
 	    else {
-		cout << "\"\\s" << size;
+		cout << "\"\\s[" << relchar << size << "]";
 	    }
 	}
-	else cout << "\"\\s" << size;
+	else {
+	    // double digit size changes need the ( using classic troff.  Groff
+	    // allows a general [] syntax, that we use if available ).
+	    if ( compat_mode ) 
+		cout << "\"\\s" << ((size > 9) ? "(" : "") << size;
+	    else
+		cout << "\"\\s[" << size << "]";
+	}
     }
     else cout << '"';
 
@@ -302,7 +314,8 @@ void Picframe::addautoticks(sides sd) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
 		     tickdef[sd].c);
 	if ( tickdef[sd].prt)
-	    t->prt = dblString(idx,tickdef[sd].prt);
+	    t->prt = new DisplayString(idx,tickdef[sd].prt);
+	    //t->prt = dblString(idx,tickdef[sd].prt);
 	tks.push_back(t);
 	if ( ls ) idx *= 10;
 	else idx += ts;
@@ -325,7 +338,8 @@ void Picframe::addautogrids(sides sd) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,
 		     &griddef[sd].shift, griddef[sd].c);
 	if ( griddef[sd].prt)
-	    g->prt = dblString(idx,griddef[sd].prt);
+	    // g->prt = dblString(idx,griddef[sd].prt);
+	    g->prt = new DisplayString(idx,griddef[sd].prt);
 	gds.push_back(g);
 	if ( ls ) idx *= 10;
 	else idx += ts;
@@ -504,7 +518,8 @@ void Piclinesegment::draw(frame *f) {
 	// if a plot string has been specified and the point has
 	// not been clipped, put the plotstring out.
 	if ( plotstr && inbox(x) && inbox(y) ) {
-	    cout <<  *plotstr ;
+	    PicDisplayString pstr(*plotstr);
+	    pstr.draw(f);
 	    if ( !from ) 
 		cout << " at Frame.Origin + (" << x * f->wid << ", "
 		     << y * f->ht << ")" << endl;
@@ -571,7 +586,9 @@ void Pictick::draw(frame *f) {
 	for_each(shift.begin(), shift.end(), sd);
 
 	quote(prt);
-	cout << *prt << " " << just << " at Here" << endl;
+	PicDisplayString pprt(*prt);
+	pprt.draw(f);
+	cout << " " << just << " at Here" << endl;
     }
 }
     
@@ -648,7 +665,9 @@ void Picgrid::draw(frame *f) {
 	for_each(shift.begin(), shift.end(), sd);
 
 	quote(prt);
-	cout << *prt << " at Here" << endl;
+	PicDisplayString pprt(*prt);
+	pprt.draw(f);
+	cout << " at Here" << endl;
     }
 }
     

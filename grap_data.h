@@ -10,19 +10,6 @@
 #include <string>
 #include <vector>
 
-inline string *dblString(double d, string *f=0) {
-    const int sz = 64;
-    char c[sz];
-    string *s;
-
-    if ( !f ) 
-	snprintf(c,sz,"%g",d);
-    else 
-	snprintf(c,sz,f->c_str(),d);
-    s = new string(c);
-    return s;
-}
-
 inline void unquote(string *s) {
     int i;
     if ( (*s)[0] == '"' ) s->erase(0,1);
@@ -34,62 +21,6 @@ inline void quote(string *s) {
     s->insert((string::size_type) 0,1,'"');
     s->append(1,'"');
 }
-
-class grap_sprintf_String : public string {
-public:
-    grap_sprintf_String(const char *f=0) : string(f) {}
-    grap_sprintf_String(const string& f) : string(f) {}
-    grap_sprintf_String(const string *f) : string() {
-	if (f) *this = *f;
-    }
-    void next_number(double d) {
-	const int len=length()+64;
-	char *c = new char [len];
-	char *fmt = new char[len];
-	char *f;
-	char *cc;	// Save the start of the new string for deletion 
-	int first = 1;
-
-	copy(c, npos);
-	c[length()] = '\0';
-	cc = c;
-	
-	f = fmt;
-	for(f=fmt; (*f = *c); c++,f++ ) {
-	    if (*c == '%' ) {
-		if ( first ) {
-		    if ( c[1] == '%' ) {
-			*++f = '%';
-			*++f = '%';
-			*++f = '%';
-			c++;
-		    }
-		    else { first = 0; }
-		} else { *++f = '%'; }
-	    }
-	}
-	snprintf(c,len,fmt,d);
-	*this = c;
-	delete[] fmt;
-	delete[] cc;
-    }
-    
-    void finish_fmt() {
-        // next_number has to double %% throughout the string.  This
-        // method removes those doubled % s
-	
-	char *n = new char[length()+1];
-	const char *a;
-	char *b;
-
-	for ( a = c_str(), b = n; (*b = *a); a++, b++) {
-	    if ( *a == '%' && a[1] == '%' ) a++;
-	}
-	*this = n;
-    }
-};
-
-/*  #endif */
 
 class macro {
 public:

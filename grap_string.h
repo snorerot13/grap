@@ -216,10 +216,6 @@ inline ostream& operator<<(ostream& f, const String& s) { return s.print(f); }
 // and support that.  Because this code was already written, I chose
 // this.
 
-inline String *dblString(double d, String *f=0) {
-    return new String(d,f);
-}
-
 inline void unquote(String *s) {
     s->unquote();
 }
@@ -227,50 +223,4 @@ inline void unquote(String *s) {
 inline void quote(String *s) {
     s->quote();
 }
-
-
-class grap_sprintf_String : public String {
-public:
-    grap_sprintf_String(const char *f=0) : String(f) {}
-    grap_sprintf_String(const String& f) : String(f) {}
-    grap_sprintf_String(const String *f) : String(f) {}
-    void next_number(double d) {
-	char *c = str;
-	char *fmt = new char[strlen() + strchunk];
-	char *f;
-	int first = 1;
-
-	f = fmt;
-	for(f=fmt; (*f = *c); c++,f++ ) {
-	    if (*c == '%' ) {
-		if ( first ) {
-		    if ( c[1] == '%' ) {
-			*++f = '%';
-			*++f = '%';
-			*++f = '%';
-			c++;
-		    }
-		    else { first = 0; }
-		} else { *++f = '%'; }
-	    }
-	}
-	if ( len < (int) (2 * ::strlen(fmt)) ) resize(2*::strlen(fmt));
-	snprintf(str,len,fmt,d);
-	delete fmt;
-    }
-    
-    void finish_fmt() {
-        // next_number has to double %% throughout the string.  This
-        // method removes those doubled % s
-	
-	char *n = new char[len];
-	char *a, *b;
-
-	for ( a = str, b = n; (*b = *a); a++, b++) {
-	    if ( *a == '%' && a[1] == '%' ) a++;
-	}
-	delete str;
-	str = n;
-    }
-};
 #endif

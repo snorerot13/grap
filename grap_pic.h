@@ -4,6 +4,7 @@
 // This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
+extern void linenum();
 
 // This is used by Pictick and Picgrid to iterate across their shifts
 class Picshiftdraw : unary_function<shiftdesc*, int> {
@@ -78,7 +79,7 @@ protected:
     bool clip( double &, double &, double &, double &);
 public:
     Piclinesegment(linesegment &ls) : linesegment(ls) { }
-    Piclinesegment(double x, double y, coord* c, line *l, string *s=0,
+    Piclinesegment(double x, double y, coord* c, line *l, DisplayString *s=0,
 		   linedesc *ld=0, bool a=false) :
 	linesegment(x, y, c, l, s, ld, a) { }
     ~Piclinesegment() { }
@@ -152,14 +153,14 @@ public:
     
     void init(string * =0, string* =0);
     void begin_block(string *param) { graphs = 0; ps_param = param; }
-    void end_block() { if ( graphs ) cout << ".PE" << endl; }
+    void end_block() { if ( graphs ) { cout << ".PE" << endl; linenum(); } }
     void passthru_string(const string& s) {
 	Picthrustring *t = new Picthrustring(s);
 	if ( t ) objs.push_back(t);
     }
 
     virtual linesegment *new_linesegment(double x, double y, coord* c, line *l,
-					 string *s=0, linedesc *ld=0,
+					 DisplayString *s=0, linedesc *ld=0,
 					 bool a=false) {
 	Piclinesegment *pls = new Piclinesegment(x, y, c, l, s, ld, a);
 	queue_frame();

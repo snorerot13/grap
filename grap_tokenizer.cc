@@ -224,6 +224,7 @@ void init_line_starters() {
     keywords["then"] = keyword(temp, empty, true, THEN);
 
     temp = tick_keys;
+    temp.insert(temp.end(), strmod_keys.begin(), strmod_keys.end());
     keywords["tick"] = keywords["ticks"] = keyword(temp, empty, true, TICKS);
 
     temp = strmod_keys;
@@ -239,6 +240,7 @@ void init_line_starters() {
 
     temp = linedesc_keys;
     temp.insert(temp.end(), tick_keys.begin(), tick_keys.end());
+    temp.insert(temp.end(), strmod_keys.begin(), strmod_keys.end());
     temp.push_back("ticks");
     temp.push_back("tick");
     keywords["grid"] = keyword(temp, empty, true, GRID);

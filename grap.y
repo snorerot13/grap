@@ -53,12 +53,12 @@ void init_dict();
 // defined in grap_lex.l
 extern bool include_file(string *, bool =false, bool=true);
 extern void lex_no_macro_expansion(); 
+extern void lex_macro_expansion_ok(); 
 extern void lex_begin_macro_text(); 
 extern void lex_begin_rest_of_line();
 extern void lex_no_coord();
 extern void lex_coord_ok();
 extern void lex_begin_copy( string*s=0);
-extern void linenum(); 
 extern int include_string(string *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern void lex_hunt_macro();
@@ -72,14 +72,14 @@ void init_graph();
 extern graph *initial_graph(); 
 extern linedesc* combine_linedesc(linedesc *, linedesc*);
 extern axis combine_logs(axis, axis);
-extern void draw_statement(string *, linedesc *, string *);
+extern void draw_statement(string *, linedesc *, DisplayString *);
 extern void num_list(doublelist *);
 extern double assignment_statement(string *, double);
 extern stringlist *combine_strings(stringlist *, string *, strmod &);
-extern void plot_statement(double, string *, point *); 
+extern void plot_statement(double, DisplayString *, point *); 
 extern void next_statement(string *, point *, linedesc *);
-extern ticklist *ticklist_elem(double, string *, ticklist *);
-extern ticklist *tick_for(coord *, double, double, bydesc, string *);
+extern ticklist *ticklist_elem(double, DisplayString *, ticklist *);
+extern ticklist *tick_for(coord *, double, double, bydesc, DisplayString *);
 extern void ticks_statement(sides, double, shiftlist *, ticklist *);
 extern void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
 extern void line_statement(int, linedesc *, point *, point *, linedesc *);
@@ -128,6 +128,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     int val;
     double num;
     string *String;
+    DisplayString *ds;
     frame *frameptr;
     shiftdesc *shift;
     shiftlist *shift_list;
@@ -137,6 +138,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     linelist *line_list;
     ticklist *tick_list;
     doublelist *double_list;
+    doublevec *double_vec;
     macro *macro_val;
     coord *coordptr;
     line *lineptr;
@@ -150,15 +152,17 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
 %type <num> opt_wid assignment_statement lexpr pure_lexpr right_hand_side
 %type <stringmod> strmod
-%type <String> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
+%type <String> IDENT STRING opt_ident TEXT else_clause REST TROFF
 %type <String> START string LHS
+%type <ds> opt_display_string
 %type <val>  VFUNC1 FUNC0 FUNC1 FUNC2 tickdir opt_tick_off line_token
 %type <coordptr> opt_coordname COORD_NAME autotick
 %type <side>  side  bar_dir
 %type <frameptr> sides size size_elem final_size
 %type <lined> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
-%type <double_list> num_line expr_list
+%type <double_list> num_line
+%type <double_vec> expr_list
 %type <tick_list> ticklist tickat tickfor tickdesc
 %type <pt> point coord_pair
 %type <shift_list> opt_shift
@@ -188,13 +192,11 @@ graph :
 		the_graph->init();
 		init_dict();
 		first_line = true;
-		linenum();
 		the_graph->begin_block($1);
 	    } prog END
             {
 		the_graph->draw(0);
 		the_graph->end_block();
-		linenum();
 	    }
 ;
 prog :
@@ -214,7 +216,7 @@ statement:
 		the_graph->is_visible(true);
 	    }
 |	draw_statement
-	    { first_line = false; the_graph->is_visible(true);}
+	    { first_line = false; }
 |	next_statement
 	    { first_line = false; the_graph->is_visible(true);}
 |	plot_statement
@@ -274,10 +276,10 @@ opt_ident:
 	    { $$ = $1; }
 ;
 
-opt_string:
+opt_display_string:
 	    { $$ = 0; } 
-|	string
-	    { $$ = $1; }
+|	string strmod
+	    { $$ = new DisplayString(*$1, $2.just, $2.size, $2.rel); }
 ;
 
 string:
@@ -285,23 +287,71 @@ string:
              { $$ = $1; }
 |       SPRINTF LPAREN STRING COMMA expr_list RPAREN
              {
-		 grap_sprintf_String *s = new grap_sprintf_String($3);
-		 doublelist::iterator d;
+		 const int len = $3->length() < 128 ? 256 : 2*$3->length();
+		 char *buf = new char[len];
 
-		 for ( d = $5->begin(); d != $5->end(); d++)
-		     s->next_number(*d);
-		 s->finish_fmt();
-		 delete $5;
-		 delete $3;
+		 // I really dislike this, but I dislike trying to do it
+		 // incrementally more.
+		 switch ($5->size()) {
+		    case 0:
+			snprintf(buf, len, $3->c_str());
+			break;
+		    case 1:
+			snprintf(buf, len, $3->c_str(), (*$5)[0]);
+			break;
+		    case 2:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1]);
+			break;
+		    case 3:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2]);
+			break;
+		    case 4:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3]);
+			break;
+		    case 5:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4]);
+			break;
+		    case 6:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5]);
+			break;
+		    case 7:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6]);
+			break;
+		    case 8:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
+			    (*$5)[7]);
+			break;
+		    case 9:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
+			    (*$5)[7], (*$5)[8]);
+			break;
+		    default:
+			cerr << "more that 10 arguments to sprintf.  " << 
+			    "Ignoring more than 10." << endl;
+		    case 10:
+			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
+			    (*$5)[7], (*$5)[8], (*$5)[9]);
+			break;
+		 }
+		 delete $5; delete $3;
 
-		 $$ = (string *) s;
+		 $$ = new string(buf);
+		 delete[] buf;
 	     }
 ;
 
 expr_list:
 	expr
             {
-		$$ = new doublelist;
+		$$ = new doublevec;
 		$$->push_back($1);
 	    }
 |       expr_list COMMA expr
@@ -358,7 +408,7 @@ linedesc:
 ;
 
 draw_statement:
-	DRAW opt_ident opt_linedesc opt_string SEP
+	DRAW opt_ident opt_linedesc opt_display_string SEP
 	    { draw_statement($2, $3, $4); }
 ;
 
@@ -529,7 +579,7 @@ plot_statement:
 	    {
   		the_graph->new_plot($1,$3);
 	    }
-|	PLOT expr opt_string AT point SEP
+|	PLOT expr opt_display_string AT point SEP
 	    { plot_statement($2, $3, $5); }
 ;
 
@@ -661,9 +711,9 @@ direction:
 ;
 
 ticklist:
-	expr opt_string
+	expr opt_display_string
 	    { $$ = ticklist_elem($1, $2, 0); }
-|	ticklist COMMA expr opt_string
+|	ticklist COMMA expr opt_display_string
 	    { $$ = ticklist_elem($3, $4, $1); }
 ;
 
@@ -693,7 +743,7 @@ tickat:
 ;
 
 tickfor:
-	from opt_coordname expr TO expr by_clause opt_string
+	from opt_coordname expr TO expr by_clause opt_display_string
 	    { $$ = tick_for($2, $3, $5, $6, $7); }
 ;
 tickdesc :
@@ -974,12 +1024,15 @@ copy_statement:
 ;
 
 define_statement:
-	DEFINE { lex_no_coord(); lex_no_macro_expansion();} IDENT { lex_begin_macro_text(); } TEXT SEP { lex_coord_ok(); define_macro($3, $5); }
+	DEFINE { lex_no_coord(); lex_no_macro_expansion();} 
+	IDENT { lex_begin_macro_text(); } TEXT 
+	SEP { lex_macro_expansion_ok(); lex_coord_ok(); define_macro($3, $5); }
 ;
 
 undefine_statement:
 	UNDEFINE { lex_no_coord(); lex_no_macro_expansion(); } IDENT SEP {
 	    lex_coord_ok();
+	    lex_macro_expansion_ok();
 	    macros.erase(*$3);
 	    delete $3;
 	}

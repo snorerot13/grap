@@ -800,6 +800,8 @@ int include_string(string *s, struct for_descriptor *f /* =0 */,
 
 // Disable macro expansion of identifers (used in definingin new macros)
 void lex_no_macro_expansion() { lex_expand_macro = false; }
+// Disable macro expansion of identifers (used in definingin new macros)
+void lex_macro_expansion_ok() { lex_expand_macro = true; }
 
 // Begin parsing macro text.  Set the lexer into the appropriate start
 // condition and initialize the appropriate internals.
