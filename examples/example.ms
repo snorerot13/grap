@@ -464,7 +464,7 @@ P; P; P; P; P
 .KE
 .KS
 .PP
-The number of Representitives to the U.S. Congress versus population
+The number of Representatives to the U.S. Congress versus population
 of the states.  My data is more recent than that of Bentley/Kernigan,
 so the graph is different from theirs.  Data is from the U.S. Census
 Bureau at 
@@ -1184,7 +1184,7 @@ copy "states2.d" thru {
 .KE
 .KS
 .PP
-A histogram of satet abbreviations.  The data has been massaged by the
+A histogram of state abbreviations.  The data has been massaged by the
 .I awk
 program described by Bentley and Kernigan.
 .EQ

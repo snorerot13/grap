@@ -1027,7 +1027,11 @@ A whitespace-separated list of numbers is treated specially.  The list
 is taken to be points to be plotted using the default line style on
 the default coordinate system.  If more than two numbers are given,
 the extra numbers are taken to be additional y values to plot at the
-first x value.
+first x value.  Number lists in DWB 
+.Nm
+can be comma-separated, and this 
+.Nm
+supports that as well.
 .Bd -literal -offset indent-two
 1 2 3
 4 5 6

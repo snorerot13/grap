@@ -19,7 +19,7 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 
-DISTDIR=grap-0.97b
+DISTDIR=grap-0.98b
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
@@ -80,7 +80,7 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* ${DISTDIR}.tar.gz
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* ${DISTDIR}.tar.gz *core*
 
 install:	grap grap.defines grap.1
 	strip grap

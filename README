@@ -55,15 +55,14 @@ So far I've compiled the code on Sunos 4.1.3, Solaris 5.5.1, FreeBSD
 other systems, and your c++ compiler and yacc/lex versions are
 probably more important than the type of Unix you run.  Flex 2.5.4 and
 the yacc on FreeBSD 2.2.7 are known to work as well as later versions
-of bison.  g++ 2.7.2.1 and 2.8.1 have both worked.  grap used the
-standard template library, so that may also be a factor.  The STL
+of bison.  g++ 2.7.2.1, 2.8.1 and 2.95.1 have all worked.  grap uses
+the standard template library, so that may also be a factor.  The STL
 included with g++ works.
 
-Edit GNUMakefile to suit your system and run gnu make.  Makefile is a
-BSD makefile, and is probably less portable than GNUMakefile.  If
-you're running on a BSD system you may prefer the Makefile.  If you're
-running FreeBSD I suggest using the port which will hopefully be
-available from the ports collection soon or from the web page below.
+The distribution uses GNU configure.  ./configure should create a
+viable set of makefiles.  After running configure, you should be able
+to use make directly.  The resulting makefile should run under most
+versions of make, including GNU make and FreeBSD's pmake.
 
 If you try to compile grap on a new system and have problems, let me
 know and I'll try to help.  If you succeed, let me know.
