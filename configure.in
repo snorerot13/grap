@@ -3,18 +3,34 @@ AC_INIT(grap.y)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
-dnl Checks for programs.
-AC_PROG_CXX
-AC_PROG_LEX
-AC_PROG_YACC
-AC_PROG_INSTALL
-AC_CHECK_PROGS(MKDEP,mkdep g++, cp)
-AC_CHECK_PROGS(CKSUM_PROG,md5 cksum sum, echo)
-
 # Note to self: it's possible to get separate tables out of byacc.  It
 # is confusing because g++ optimizes away the const static tables that
 # byacc generates, and compiling those tables aren't the problem
 # anyway.  So don't try it again.
+
+dnl Checks for programs.
+dnl need to check for C to use the right compiler for exe determination
+AC_PROG_CC
+AC_PROG_CXX
+
+# Set g++ specific compiler options 
+if test "$GXX" = "yes" ; then
+	GXXFLAGS="-Wall"
+	NO_UNDEF="-Wno-unused"
+	SUPPRESS_OPT="-O0"
+else
+	GXXFLAGS=""
+	NO_UNDEF=""
+	SUPPRESS_OPT=""
+fi
+AC_SUBST(GXXFLAGS)
+AC_SUBST(MAKEDEP)
+AC_SUBST(NO_UNDEF)
+AC_SUBST(SUPPRESS_OPT)
+
+AC_PROG_LEX
+AC_PROG_YACC
+AC_PROG_INSTALL
 
 AC_CACHE_CHECK(whether $INSTALL supports -d, grap_cv_prog_install_d, 
 	if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$ ; then 
@@ -29,48 +45,17 @@ if test "$grap_cv_prog_install_d" = "no" ; then
 	INSTALL=$ac_install_sh
 fi
 
-
-AC_MSG_CHECKING(whether make is GNU make)
-AC_ARG_ENABLE(force-gnu-make, 
---enable-force-gnu-make            create a GNU make file,
-grap_cv_prog_gmake="yes",
-AC_CACHE_VAL(grap_cv_prog_gmake, 
-	if  make -n -v 2>/dev/null | grep GNU > /dev/null; then
-		grap_cv_prog_gmake="yes"
-	else
-		grap_cv_prog_gmake="no"
-	fi
-))
-AC_MSG_RESULT($grap_cv_prog_gmake)
-
-
-# If we're using GNU make, include a line in the makefile including
-# the dependencies
-if test "$grap_cv_prog_gmake" = "yes" ; then
-	GMAKE_INCLUDE_DEPS='include .depend'
-else
-	GMAKE_INCLUDE_DEPS=''
-fi
-AC_SUBST(GMAKE_INCLUDE_DEPS)
-
-# Only use -Wall if we are using g++ (which understands it) 
-# Also use g++ for generating dependencies if available
-if test "$GXX" = "yes" ; then
-	GXXFLAGS="-Wall"
-	NO_UNDEF="-Wno-unused"
-else
-	GXXFLAGS=""
-	NO_UNDEF=""
-fi
-AC_SUBST(GXXFLAGS)
-AC_SUBST(MAKEDEP)
-AC_SUBST(NO_UNDEF)
-
+AC_CHECK_PROGS(MKDEP,mkdep g++, cp)
 # depending on which mkdep method has been found, the args are
-# slightly different
-case $MKDEP in 
+# slightly different.  -f is redundant of FreeBSD, but needed other places.  
+# The test for that is completely superfluous.
+case "$MKDEP" in 
 	mkdep)
-		MKDEPFLAGS='-MM ${CXXFLAGS} ${SOURCES}'
+		if test `uname` = 'FreeBSD'; then 
+			MKDEPFLAGS='-MM ${CXXFLAGS} ${SOURCES}'
+		else
+			MKDEPFLAGS='-f .depend -MM ${CXXFLAGS} ${SOURCES}'
+		fi
 	;;
 	g++)
 		MKDEPFLAGS='-MM ${CXXFLAGS} ${SOURCES} >> .depend'
@@ -80,6 +65,8 @@ case $MKDEP in
 	;;
 esac
 AC_SUBST(MKDEPFLAGS)
+
+AC_CHECK_PROGS(CKSUM_PROG,md5 cksum sum, echo)
 
 dnl Checks for libraries.
 
@@ -94,39 +81,39 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(snprintf random rand)
 AC_REPLACE_FUNCS(strdup strerror)
 
-if test $ac_cv_func_snprintf = "yes" ; then
+if test "$ac_cv_func_snprintf" = "yes" ; then
 	AC_CACHE_CHECK(for declaration of snprintf,grap_cv_decl_snprintf,
 		AC_EGREP_CPP(snprintf,
 #include <stdio.h>
 ,grap_cv_decl_snprintf="yes",grap_cv_decl_snprintf="no"))
-	if test $grap_cv_decl_snprintf = "yes"; then
+	if test "$grap_cv_decl_snprintf" = "yes"; then
 		AC_DEFINE(SNPRINTF_DECLARED)
 	fi
 fi
 
-if test $ac_cv_func_strerror = "yes" ; then
+if test "$ac_cv_func_strerror" = "yes" ; then
 	AC_CACHE_CHECK(for declaration of strerror,grap_cv_decl_strerror,
 		AC_EGREP_CPP(strerror,
 #include <stdio.h>
 #include <string.h>
 ,grap_cv_decl_strerror="yes",grap_cv_decl_strerror="no"))
-	if test $grap_cv_decl_strerror = "yes"; then
+	if test "$grap_cv_decl_strerror" = "yes"; then
 		AC_DEFINE(STRERROR_DECLARED)
 	fi
 fi
 
 
-if test $ac_cv_func_random = "no" -a $ac_cv_func_rand = "no";  then
+if test "$ac_cv_func_random" = "no" -a $ac_cv_func_rand = "no";  then
 AC_MSG_ERROR(grap requires either random or rand)
 fi
 
-if test $ac_cv_func_random = "yes" ; then
+if test "$ac_cv_func_random" = "yes" ; then
 	AC_CACHE_CHECK(for declaration of random,grap_cv_decl_random,
 		AC_EGREP_CPP(random,
 #include <stdlib.h>
 #include <math.h>
 ,grap_cv_decl_random="yes",grap_cv_decl_random="no"))
-	if test $grap_cv_decl_random = "yes"; then
+	if test "$grap_cv_decl_random" = "yes"; then
 		AC_DEFINE(RANDOM_DECLARED)
 	fi
 else
@@ -135,21 +122,21 @@ else
 #include <stdlib.h>
 #include <math.h>
 ,grap_cv_decl_rand="yes",grap_cv_decl_rand="no"))
-	if test $grap_cv_decl_rand = "yes"; then
+	if test "$grap_cv_decl_rand" = "yes"; then
 		AC_DEFINE(RAND_DECLARED)
 	fi
 fi
 
-if test $ac_cv_header_unistd_h = "yes" ; then
+if test "$ac_cv_header_unistd_h" = "yes" ; then
 AC_CACHE_CHECK(for optarg in unistd.h,grap_cv_header_optarg,
 AC_EGREP_HEADER(optarg,unistd.h,grap_cv_header_optarg="yes";
 ,grap_cv_header_optarg="no"))
-if test $grap_cv_header_optarg = "yes"; then
+if test "$grap_cv_header_optarg" = "yes"; then
 AC_DEFINE(OPTARG_DEFINED)
 fi
 fi
 
-if test $ac_cv_func_snprintf = "no"; then
+if test "$ac_cv_func_snprintf" = "no"; then
 AC_CACHE_CHECK(if sprintf returns an int, grap_cv_sprintf_int,
 AC_TRY_RUN([
 changequote(<<, >>)dnl
@@ -162,7 +149,7 @@ main(int argc, char* argv) {
 changequote([, ])dnl
 ],grap_cv_sprintf_int="yes",grap_cv_sprintf_int="no",echo ""))
 
-if test $grap_cv_sprintf_int = "no" ; then 
+if test "$grap_cv_sprintf_int" = "no" ; then 
 AC_DEFINE(SPRINTF_NOT_INT)
 fi
 fi
@@ -170,7 +157,7 @@ fi
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
 
 # expand the data directory parameter.  Repeatedly eval the contents
-# of ddir until it has not $ in it.
+# of ddir until it has no $ in it.
 
 ddir=$datadir
 while echo $ddir | grep '\$' > /dev/null ; do 
@@ -187,23 +174,15 @@ ac_cv_grap_opt_tok="yes",
 AC_CACHE_VAL(ac_cv_grap_opt_tok, ac_cv_grap_opt_tok="no"))
 AC_MSG_RESULT($ac_cv_grap_opt_tok)
 
-if test $GXX = "yes" ; then 
-	SUPPRESS_OPT="-O0"
-else
+if test "$ac_cv_grap_opt_tok" = "yes" ; then 
 	SUPPRESS_OPT=""
 fi
-
-if test $ac_cv_grap_opt_tok = "yes" ; then 
-	SUPPRESS_OPT=""
-fi
-
-AC_SUBST(SUPPRESS_OPT)
 
 # AC_EXEEXT isn't working for C++
 AC_LANG_C
 AC_EXEEXT
 AC_LANG_CPLUSPLUS
-if [ test $ac_cv_exeext != "no" ] ; then 
+if [ test "$ac_cv_exeext" != "no" ] ; then 
 	EXE_CORRECT="mv -f grap.$ac_cv_exeext grap"
 else
 	EXE_CORRECT=""
@@ -212,7 +191,18 @@ AC_SUBST(EXE_CORRECT)
 
 
 if test "$CKSUM_PROG" = "echo"; then
-	AC_MSG_RESULT(no checksumming program - make check always succeeds)
+	AC_MSG_WARN(no checksumming program - make check always succeeds)
+fi
+
+if test "$MKDEP" = "cp" ; then 
+	cp default_depend .depend
+else
+	# Create an empty .depend that is older than Makefile
+	# if touch will take a time, set the time explicitly, 
+	# if not wait a bit so that the created Makefile is newer
+
+	cat < /dev/null > .depend
+	touch -t 9912311000 .depend > /dev/null 2>&1 || sleep 1
 fi
 
 AC_OUTPUT(examples/Makefile Makefile)

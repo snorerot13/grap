@@ -25,7 +25,7 @@ MKDEPFLAGS=@MKDEPFLAGS@
 DISTDIR=grap-1.20pre4
 SOURCES=grap.cc grap_lex.cc *.cc
 
-CXXFLAGS += @GXXFLAGS@ @DEFS@ 
+CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
 # CXXFLAGS = -pipe @GXXFLAGS@ @DEFS@ 
 
 # To suppress optimization of certain files under g++ where
@@ -95,7 +95,7 @@ grap.1:	grap.doc
 manifest:	manifest.in
 	sed 's/^/${DISTDIR}\//;' < manifest.in > manifest
 
-dist:	cksum.md5 cksum.sum cksum.cksum cksum.echo manifest grap.man grap.ps
+dist:	manifest grap.man grap.ps .makesum
 	${RM} examples/test.grap
 	cd .. && tar cf - grap | (cd /tmp && tar xf - && mv grap ${DISTDIR} )
 	cd /tmp && tar --create --gzip --file ${DISTDIR}.tar.gz \
@@ -104,15 +104,15 @@ dist:	cksum.md5 cksum.sum cksum.cksum cksum.echo manifest grap.man grap.ps
 	${RM} -r /tmp/${DISTDIR}
 
 clean:
-	${RM} grap $(OBJS) *.o grap.1 grap.man grap.ps \
-		${DISTDIR}.tar.gz *core* y.output
+	${RM} grap $(OBJS) *.o ${DISTDIR}.tar.gz *core* y.output
 
 cleanconfig:
 	${RM} config.log config.status config.cache 
 
 veryclean:
 	${MAKE} clean
-	${RM} grap_lex.cc grap.cc y.tab.h version.cc *.tgz 
+	${RM} grap_lex.cc grap.cc y.tab.h version.cc *.tgz  grap.1 \
+		grap.man grap.ps 
 
 spotless:
 	${MAKE} veryclean
@@ -145,40 +145,29 @@ deinstall:
 	$(RMDIR) $(DEFINESDIR)
 
 cleandepend:
-	${RM} .depend
+	cat < /dev/null > .depend
+	touch -t 9912311000 .depend > /dev/null 2>&1 || ( sleep 1; touch Makefile)
 
 depend:	.depend
 
-.depend:
+.depend:	Makefile
 	grep "^#" grap.y > grap.cc
 	grep "^#" grap_lex.l > grap_lex.cc
 	touch y.tab.h
 	${MKDEP} ${MKDEPFLAGS}
 	${RM} grap.cc grap_lex.cc y.tab.h
 
-examples/test.grap:	grap
-	cd examples && ${RM} test.grap  && \
-		../grap -d ../grap.defines example.ms > test.grap
+makesum:	.makesum
 
-makesum:	cksum.md5 cksum.sum cksum.echo cksum.cksum
-	${RM} examples/test.grap
+.makesum:	grap grap.defines examples/example.ms
+	cd examples && for f in md5 cksum sum echo ; do \
+		sed 's/rand()/1/' < example.ms | \
+			../grap -d ../grap.defines | $$f > cksum.$$f; \
+	done
 
-cksum.md5:	examples/test.grap
-	md5 examples/test.grap > cksum.md5 
-
-cksum.sum:	examples/test.grap
-	sum examples/test.grap > cksum.sum 
-
-cksum.cksum:	examples/test.grap
-	cksum examples/test.grap > cksum.cksum 
-
-cksum.echo:	examples/test.grap
-	echo examples/test.grap > cksum.echo
-
-
-check:	grap examples/test.grap 
-	${CKSUM_PROG} examples/test.grap > /tmp/grap_check
-	${RM} examples/test.grap
+check:	grap grap.defines examples/example.ms
+	cd examples && sed 's/rand()/1/' < example.ms | \
+		../grap -d ../grap.defines | ${CKSUM_PROG} > /tmp/grap_check
 	if diff /tmp/grap_check ./cksum.${CKSUM_PROG} ; then \
 		${RM} /tmp/grap_check; \
 		echo "pass";\
@@ -196,6 +185,4 @@ distclean:	veryclean
 	rm Makefile
 maintainer-clean:	veryclean
 
-@GMAKE_INCLUDE_DEPS@
-
-
+include .depend
