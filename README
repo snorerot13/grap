@@ -2,16 +2,40 @@ This is grap, an implementation of Kernigan and Bentley's grap
 language for typesetting graphs.  I got sick of groff not having a
 version of grap, so I built one.
 
-You're welcome to use grap and give it to anyone you like, as long as
-I get what little credit there is to be had from writing it.  You may
-*not* sell it for a profit without my permission, even if you add code
-to it.  You may, however, distribute it in collections of free
-software or shareware, even if a small fee is charged for such a
-collection.  Specifically, you may distribute it with free operating
-system distributions like FreeBSD or Linux.
+The code is distributed under the FreeBSD-style copyright:
 
-I'm not a lawyer.  I want this software to be available to people who
-want to use it.  I don't want people selling it for profit.
+Copyright 1998-1999
+Ted Faber
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+
+	Redistributions of source code must retain the above
+	copyright notice, this list of conditions and the
+	following disclaimer.
+
+	Redistributions in binary form must reproduce the
+	above copyright notice, this list of conditions and the
+	following disclaimer in the documentation and/or other
+	materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE FREEBSD PROJECT ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+That text is reproduced in the COPYRIGHT file, too.  Changes are in
+CHANGES.
 
 The code was all written by me, based on K&B's _Grap-A Language for
 Typesetting Graphs, Tutorial and User Manual_ by Jon L. Bentley and

@@ -1,6 +1,8 @@
 /* -*-c++-*- */
 %{
-/* This code is (c) 1998 Ted Faber (faber@lunabase.org) */
+/* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
+   COPYRIGHT file for the full copyright and limitations of
+   liabilities. */
 #include <stdio.h>
 #include <iostream.h>
 #include <math.h>

@@ -1,7 +1,8 @@
 // -*-c++-*-
 #ifndef GRAP_DRAW_H
 #define GRAP_DRAW_H
-// This file is (c) 1998 Ted Faber (faber@lunabase.org)
+// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// for the full copyright and limitations of liabilities.
 #include <iostream.h>
 #include <stl.h>
 

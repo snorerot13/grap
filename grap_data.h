@@ -1,6 +1,7 @@
 #ifndef GRAP_DATA_H
 #define GRAP_DATA_H
-// This file is (c) 1998 Ted Faber (faber@lunabase.org)
+// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// for the full copyright and limitations of liabilities.
 #include <string.h>
 
 #include <stl.h>

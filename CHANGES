@@ -1,0 +1,14 @@
+Change log
+
+0.9a: Added commands for making bars.  
+
+Error reporting is much closer to the correct line now.
+
+Generalized line descriptions for fillable objects.  
+
+Circles now take a line description.  Added new examples of fillable
+objects.
+
+Now using the BSD copyright notice instead of my own half-baked one.
+
+0.8a: alpha release

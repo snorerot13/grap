@@ -2,7 +2,9 @@
 #ifndef GRAP_PIC_H
 #define GRAP_PIC_H
 #include <iostream.h>
-// This file is (c) 1998 Ted Faber (faber@lunabase.org)
+// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// for the full copyright and limitations of liabilities.
+
 
 class PicDisplayString : public DisplayString, public drawable {
 public:

@@ -1,6 +1,7 @@
 /* -*-c++-*- */
 %{
-/* This code is (c) 1998 Ted Faber */
+/* This code is (c) 1998 Ted Faber see COPYRIGHT
+   for the full copyright and limitations of liabilities. */
 #include <stdlib.h>
 #include <ostream.h>
 #include <sys/param.h>
