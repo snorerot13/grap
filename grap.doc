@@ -315,8 +315,8 @@ statement, the plot string can be removed by specifying "" in the
 .Ic draw
 statement.
 .Pp
-The plot string can have its format changed through several string
-modifiers.  String modifiers are described in the description of the 
+The plot string can have its format changed through several string_modifiers.
+String_modifiers are described in the description of the 
 .Ic plot 
 command.
 .Pp
