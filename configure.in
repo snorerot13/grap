@@ -9,7 +9,7 @@ AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_INSTALL
 AC_CHECK_PROGS(MKDEP,mkdep g++, cp)
-AC_CHECK_PROGS(CKSUM_PROG,md5 sum, echo)
+AC_CHECK_PROGS(CKSUM_PROG,md5 cksum sum, echo)
 
 # Note to self: it's possible to get separate tables out of byacc.  It
 # is confusing because g++ optimizes away the const static tables that

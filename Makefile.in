@@ -95,7 +95,7 @@ grap.1:	grap.doc
 manifest:	manifest.in
 	sed 's/^/${DISTDIR}\//;' < manifest.in > manifest
 
-dist:	cksum.md5 cksum.sum cksum.echo manifest grap.man grap.ps
+dist:	cksum.md5 cksum.sum cksum.cksum cksum.echo manifest grap.man grap.ps
 	${RM} examples/test.grap
 	cd .. && tar cf - grap | (cd /tmp && tar xf - && mv grap ${DISTDIR} )
 	cd /tmp && tar --create --gzip --file ${DISTDIR}.tar.gz \
@@ -160,7 +160,7 @@ examples/test.grap:	grap
 	cd examples && ${RM} test.grap  && \
 		../grap -d ../grap.defines example.ms > test.grap
 
-makesum:	cksum.md5 cksum.sum cksum.echo
+makesum:	cksum.md5 cksum.sum cksum.echo cksum.cksum
 	${RM} examples/test.grap
 
 cksum.md5:	examples/test.grap
@@ -168,6 +168,9 @@ cksum.md5:	examples/test.grap
 
 cksum.sum:	examples/test.grap
 	sum examples/test.grap > cksum.sum 
+
+cksum.cksum:	examples/test.grap
+	cksum examples/test.grap > cksum.cksum 
 
 cksum.echo:	examples/test.grap
 	echo examples/test.grap > cksum.echo
