@@ -39,14 +39,14 @@ and
 macros, and rewrites them into pic commands to display the graph.
 Other lines are copied.  Output is always to the standard output,
 which is usually reidrected.  Input is from the given
-.Ar filename s,
+.Ar filename Ns No s ,
 which are read in the order given.  A 
 .Ar filename 
 of 
 .Fl 
 is the standard input.
 If no 
-.Ar filename s
+.Ar filename Ns No s
 are given, input is read from the standard input.
 .Pp
 Because
@@ -90,6 +90,9 @@ The
 commands are sketched below.  Refer to Kernighan and Bentley's paper
 for the details.
 .Ss Commands
+.Pp
+Commands are separated from one another by newlines or semicolons (;).
+.Pp
 .Ic frame 
 .Op Ar line_description 
 .Oo
@@ -124,6 +127,34 @@ The default line style can be over-ridden for sides of the frame by
 specifying additional parameters to
 .Ic frame .
 .Ed 
+.Pp
+.Ic coord
+.Op Ar name
+.Op Cm x Ar expr , expr
+.Op Cm y Ar expr , expr
+.Oo
+.Cm log x No \(or
+.Cm log y No \(or
+.Cm log log 
+.Oc
+.Bd -filled -offset indent
+The
+.Ic coord
+command specifies a new coordinate system or sets limits on the
+default system.  It defines the largest and smallest values that can
+be plotted, and therefore the scale of the data in the frame.  The
+limits for the x and y coordinate systems can be given separately.  If
+a 
+.Ar name
+is given, that coordinate system is defined, if not the default system
+is modified.
+.Pp
+This command also determines if a scale is plotted logarithmically.
+Unlike K&B 
+.Nm grap ,
+this program accepts exactly one of the three logarithm
+specifications.
+.Ed
 .Pp
 .Ic draw
 .Op Ar line_name
@@ -606,34 +637,6 @@ have
 given.
 .Ed
 .Pp
-.Ic coord
-.Op Ar name
-.Op Cm x Ar expr , expr
-.Op Cm y Ar expr , expr
-.Oo
-.Cm log x No \(or
-.Cm log y No \(or
-.Cm log log 
-.Oc
-.Bd -filled -offset indent
-The
-.Ic coord
-command specifies a new coordinate system or sets limits on the
-default system.  It defines the largest and smallest values that can
-be plotted, and therefore the scale of the data in the frame.  The
-limits for the x and y coordinate systems can be given separately.  If
-a 
-.Ar name
-is given, that coordinate system is defined, if not the default system
-is modified.
-.Pp
-This command also determines if a scale is plotted logarithmically.
-Unlike K&B 
-.Nm grap ,
-this program accepts exactly one of the three logarithm
-specifications.
-.Ed
-.Pp
 .Ic copy 
 .Qo 
 .Ar filename 
@@ -675,7 +678,231 @@ Check out the paper and
 .Pa EXAMPLES
 for more details.
 .Ed
+.Ic print 
+.Sm off 
+.Ar ( expr \(or string )
+.Sm on
+.Bd -filled -offset indent
+Prints its argument to the standard error.
+.Ed
+.Pp
+.Ic pic Ar pic_statement
+.Bd -filled -offset indent
+This issues the given 
+.Xr pic
+statements  in the enclosing
+.Ic .PS
+and 
+.Ic .PE
+macros before the 
+.Xr pic
+commands to draw the graph.
+.Pp
+Statements that begin with a period are considered to be 
+.Xr troff statements
+and are output in the enclosing
+.Ic .PS
+and 
+.Ic .PE
+macros before the 
+.Xr pic
+commands to draw the graph.
+.Ed
+.Pp
+.Ic graph Ar Name pic_commands
+.Bd -filled -offset indent
+This command is used to position graphs with respect to each other.
+The current graph is given the
+.Xr pic
+name
+.Ar Name
+(
+.Xr pic
+names begin with capital letters).  Any 
+.Xr pic
+commands following the graph are used to position the next graph.  The
+frame of the graph is available for use with
+.Xr pic
+name
+.Li Frame.  
+The following places a second graph below the first:
+.Bd -literal -offset indent-two
+graph Linear
+[ graph description ]
+graph Exponential with .Frame.n at \\
+	Linear.Frame.s - (0, .05)
+[ graph description ]
+.Ed
+.Ed
+.Pp
+.Ar name = expr
+.Bd -filled -offset indent
+This assigns 
+.Ar expr 
+to the variable
+.Ar name .
+.Nm 
+has only numeric (double) variables.  Unlike K&B 
+.Nm grap ,
+assignment is not part of an expression, so 
+.Bd -literal -offset indent-two
+a = b = c = 3
+.Ed
+.Pp
+is illegal.
+.Pp
+Assignment creates a variable if it does not exist.  Variables presist
+across graphs.
+.Ed
+.Ss Control Flow
+.Pp
+.Ic if Ar expr Ic then Ar block
+.Op Ic else Ar block
+.Bd -filled -offset indent
+The
+.Ic if
+statement provides simple conditional execution.  If
+.Ar expr 
+is non-zero, the 
+.Ar block 
+after the 
+.Ic then
+statement is executed.  If not the 
+.Ar block 
+after the
+.Ic else
+is executed, if present.  See
+.Sx Macros
+for the definition of blocks.
+.Ed
+.Pp
+.Ic for Ar name Ic from Ar from_expr Ic to Ar to_expr
+.Oo
+.Ic by 
+.Op No +\(or-\(or*\(or/
+.Ar by_expr
+.Oc
+.Ar block
+.Bd -filled -offset indent
+This command executes 
+.Ar block
+iteratively.  The variable
+.Ar name
+is set to 
+.Ar from_expr
+and incremented by
+.Ar by_expr 
+until it exceeds 
+.Ar to_expr .
+The iteration has the semantics defined in the 
+.Ic ticks 
+command.  The definition of
+.Ar block
+is discussed in 
+.Sx Marcos .
+.Pp
+An 
+.Ic =
+can be used in place of 
+.Ic from .
+.Ed
+.Ss Expressions
+.Pp
+.Nm
+supports a most standard arithmatic operators: + - / * ^.  The carat
+(^) is exponentiation.  It also supports the C logical operators ==, !=,
+&&, || and unary !.  == and != are overloaded for the comparison of
+quoted strings.  Parentheses are used for grouping.  
+.Pp
+Assignment is not allowed in an expression.
+.Pp
+.Nm
+supports the following functions that take one argument:
+.Ic log , exp , int , sin , cos , sqrt , rand .
+The logarithms are base 10 and the trigonometric functions are in
+radians.  If 
+.Ic rand
+is given an argument, it seeds the random number generator with that
+value.  Called with no arguments, it returns a random number uniformly
+distributed on [0,1).  The following two argument functions are supported:
+.Ic atan2 , min , max .
+.Ic atan2 
+works just like
+.Xr atan2 3 .
+.Pp
+Other than string comparison, no expressions can use strings.  One
+string valued function exists: 
+.Ic sprintf ( Ar format ,
+.Oo
+.Ar expr 
+.Op Ar \&, expr
+.Oc
+).  It operates like
+.Xr sprintf 3 ,
+except returning the value.  It can be used anywhere a quoted string
+is used.
+.Ss Macros
+.Nm
+has a simple but powerful macro facility.  Macros are defined using
+the 
+.Ic define
+command :
+.Pp
+.Ic define Ar name block
+.Bd -filled -offset indent
+Every occurrance of 
+.Ar name
+in the program text is replaced by the contents of 
+.Ar block .
+.Ar block
+is defined by a series of statements in nested { }'s, or a series of
+statements surrounded by the same letter.  An example of the latter is
+.Bd -literal -offset indent-two
+define foo  X coord x 1,3 X
+.Ed
+Each time 
+.Li foo
+appears in the text, it will be replaced by 
+.Li coord x 1,3 .
+Macros are literal, and can contain newlines.  If a macro does not
+span multiple lines, it should end in a semicolon to avoid parsing
+errors.
+.Pp
+Macros can take parameters, too.  If a macro call is followed by a
+parenthesized, comma-separated list the values $1-$9 will be replaced
+in the macro with the elements of the list.  This parsing is very
+rudimentary, no nesting or parentheses or escaping of commas is
+allowed.
+.Pp
+The following will draw a line with slope 1.
+.Bd -literal -offset indent-two
+define foo { next at $1, $2 }
+for i from 1 to 5 { foo(i,i) }
+.Ed
+Macros persist across graphs.  The file 
+.Pa DEFINES
+contains simple macros for plotting common characters.
+.Pp
+See the file
+.Pa EXAMPLES
+for more examples of macros.
+.Ed
 .Sh FILES
+.Pa DEFINES
 .Sh SEE ALSO
-.Sh DIAGNOSTICS
+.Xr atan2 3 ,
+.Xr groff 1 ,
+.Xr pic 1 ,
+.Xr printf 3 ,
+.Xr sprintf 3 ,
+.Xr troff 1
+.Sh AUTHOR
+This implementation was done by
+.An Ted Faber Ao faber@lunabase.org Ac .
+.Nm 
+was designed and specified by 
+.An Brian Kernighan
+and 
+.An Jon Bentley .
 .Sh BUGS
+

@@ -41,11 +41,14 @@ pic.h:	pic.macros
 y.output:	grap.y
 	$(YACC) -v $(.ALLSRC)
 
+grap.1:	grap.doc
+	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1
 
-install:	grap grap.defines
+install:	grap grap.defines grap.1
 	$(INSTALL) -c -g bin -o root -m 755 grap $(BINDIR)
+	$(INSTALL) -c -g bin -o root -m 644 grap.1 $(MANDIR)
 	$(INSTALL) -d -g bin -o root -m 755 $(DEFINESDIR)
 	$(INSTALL) -d -g bin -o root -m 755 $(DEFINESDIR)/examples
 	$(INSTALL) -c -g bin -o root -m 644 grap.defines $(DEFINESDIR)
@@ -53,6 +56,7 @@ install:	grap grap.defines
 
 uninstall:
 	$(RM) $(BINDIR)/grap
+	$(RM) $(MANDIR)/grap.1
 	$(RM) $(DEFINESDIR)/grap.defines
 	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile
 	$(RMDIR) $(DEFINESDIR)/examples
