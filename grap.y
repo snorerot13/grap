@@ -1482,7 +1482,7 @@ copy_statement:
 		    end = (*expand)[expand->length()-1];
 
 		    if ( !$5->name && end != ';' && end != '\n' ) 
-			expand->append(1,';');
+			*expand += ';';
 		    delete t;
 		    delete s;
 		}
