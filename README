@@ -57,7 +57,9 @@ probably more important than the type of Unix you run.  Flex 2.5.4 and
 the yacc on FreeBSD 2.2.7 are known to work as well as later versions
 of bison.  g++ 2.7.2.1, 2.8.1 and 2.95.1 have all worked.  grap uses
 the standard template library, so that may also be a factor.  The STL
-included with g++ works.
+included with g++ works.  grap has successfully compiled under UWIN
+(http://www.research.att.com/sw/tools/uwin/) under Windows NT with g++
+2.95.1. (Yeah, it surprised me, too.)
 
 The distribution uses GNU configure.  ./configure should create a
 viable set of makefiles.  After running configure, you should be able
