@@ -139,6 +139,7 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
     line *l;
     lineDictionary::iterator li;
     linedesc defld(invis,0,0);
+    bool extant = false;	// True if this line was already defined.
 
     if ( ident ) {
 	li = the_graph->lines.find(*ident);
@@ -162,24 +163,44 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
 	}
 	else {
 	    l = (*li).second;
+	    extant = true;
 	}
-	delete ident;
-    } else l = defline;
+    } else {
+	l = defline;
+    }
 
-    l->desc = *ld;
+    // If a linedesc is specified, set the current line's description.
+    if ( ld ) l->desc = *ld;
 
     if ( plot ) {
-	if ( l->plotstr ) *l->plotstr = *plot;
-	else l->plotstr = new String(*plot);
-	delete plot;
+	if ( *plot != "" ) {
+	    if ( l->plotstr ) *l->plotstr = *plot;
+	    else l->plotstr = new String(*plot);
+	}
+	else {
+	    // If the string is "", don't issue the pic commands to
+	    // print it.
+	    if (l->plotstr) {
+		delete l->plotstr;
+		l->plotstr = 0;
+	    }
+	}
     }
     else {
-	if (l->plotstr) {
-	    delete l->plotstr;
-	    l->plotstr = 0;
+	// Only delete the plot string if this is the line definition.
+	// (This makes draw solid do what's expected.)  To remove a
+	// plot string, the user will have to explicitly specify an
+	// empty plot string.
+	if ( !extant ) {
+	    if (l->plotstr) {
+		delete l->plotstr;
+		l->plotstr = 0;
+	    }
 	}
     }
     l->initial = 1;
+    delete ident;
+    delete plot;
     delete ld;
 }
 
@@ -285,13 +306,12 @@ void plot_statement(double val, String *fmt, point *pt) {
     p = new plot(seq,pt);
     the_graph->add_plot(*p);
     delete p;
-    // XXX: delete pt?
     delete pt;
 }
 
 // Add a point to the current line (or the named line if ident is
-// non-0).  It may also include a linedescription, wich should be
-// passed on if not a default.
+// non-0).  It may also include a pointer to a linedesc, wich should be
+// passed on if non-0.
 void next_statement(String *ident, point *p, linedesc* ld) {
     line *l;
     lineDictionary::iterator li;
@@ -317,10 +337,9 @@ void next_statement(String *ident, point *p, linedesc* ld) {
 	}
 	else { l = (*li).second; }
     } else l = defline;
-    // XXX: delete ident??
     delete ident;
 		
-    if ( ld->ld != def )
+    if ( ld )
 	l->addpoint(p->x,p->y,p->c,0,ld);
     else 
 	l->addpoint(p->x,p->y,p->c);
@@ -443,18 +462,12 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 		
     the_graph->base->tickdef[side].size = 0;
 		
-    if ( ld->ld != def ) 
+    if ( ld ) {
+	// The default for grids is dotted
+	if ( ld->ld == def ) ld->ld = dotted;
 	the_graph->base->griddef[side].desc = *ld;
-    else {
-		    
-	// This is some dirty sleight of hand.  ld->color
-	// is only assigned to defgrid.color long enough
-	// to make these copies. XXX
-		    
-	defgrid.color = ld->color;
-	the_graph->base->griddef[side].desc = defgrid;
-	defgrid.color = 0;
     }
+
 
     sc = new shiftcpy(&the_graph->base->griddef[side].shift);
     for_each(sl->begin(), sl->end(), *sc);
@@ -473,18 +486,11 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 			
 	    g = new grid(t);
 	    g->side = side;
-	    if ( ld->ld != def )
-		g->desc = *ld;
-	    else {
 
-		// This is some dirty sleight of hand.
-		// ld->color is only assigned to
-		// defgrid.color long enough to make these
-		// copies. XXX
-		    
-		defgrid.color = ld->color;
-		g->desc = defgrid;
-		defgrid.color = 0;
+	    if ( ld ) {
+		// The default for grids is dotted
+		if ( ld->ld == def ) ld->ld = dotted;
+  		g->desc = *ld;
 	    }
 		    
 	    sc = new shiftcpy(&g->shift);
@@ -531,13 +537,15 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
     }
     else { l = (*li).second; } 
 
-    des = *ld1;
-    if ( ld2->ld != def ) {
+    // des will be acombination of the information in ld1 and ld2 if
+    // any.
+    
+    if ( ld1 ) des = *ld1;
+    if ( ld2 && ld2->ld != def ) {
 	des.ld = ld2->ld;
 	des.param = ld2->param;
     }
-
-    if ( ld2->color ) des.color = new String(*ld2->color);
+    if ( ld2 && ld2->color ) des.color = new String(*ld2->color);
 		    
     l->initial = 1;
 
@@ -553,7 +561,6 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 	else l->addarrow(p2->x,p2->y,p2->c);
     }
     delete ld1; delete ld2;
-    // XXX: delete points ??
     delete p1; delete p2;
 }
 

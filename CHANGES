@@ -26,6 +26,20 @@ make it shorter to compile.
 Simplified expression grammar by disallowing logical expressions
 outside if statements.  I also caught another memory leak here.
 
+Signifying a line break by using new (or draw) now works.  So code like
+.G1
+draw solid
+next at 2,4
+next at 3,5
+new
+next at 4,6
+next at 5,7
+.G2
+produces 2 solid line segments.  This forced a little rethinking of
+the syntax for changing the properties of a line using new/draw.  The
+implementation is on the man page.  If it breaks existing grap
+scripts, I'd love to hear about it.
+
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.
 

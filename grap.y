@@ -302,7 +302,7 @@ opt_expr:
 ;
 
 opt_linedesc:
-            { $$ = new linedesc; }
+            { $$ = new linedesc; $$ = 0;}
 |	linedesc
 	    {  $$ = $1;}
 ;
@@ -342,7 +342,7 @@ linedesc:
 ;
 
 draw_statement:
-	DRAW opt_ident linedesc opt_string SEP
+	DRAW opt_ident opt_linedesc opt_string SEP
 	    { draw_statement($2, $3, $4); }
 ;
 

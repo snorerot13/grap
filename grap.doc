@@ -247,6 +247,19 @@ If points are being connected, each
 .Ic draw
 command ends any current line and begins a new one.
 .Pp
+When defining a line style, that is the first 
+.Ic draw
+command for a given line name, specifying no plot string means that
+there are to be no plot strings.  Omitting the plot string on
+subsequent 
+.Ic draw
+commands means not to change the plot string.  If a line has been
+defined with a plot string, and the format is changed by a subsequent 
+.Ic draw
+statement, the plot string can be removed by specifying "" in the
+.Ic draw
+statement.
+.Pp
 .Ic new
 is a synonym for 
 .Ic draw .
