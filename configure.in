@@ -18,6 +18,13 @@ else
 fi
 rm -rf /tmp/test$$
 
+# Only use -Wall if we are using g++ (which understands it) 
+if test "$GXX" = "yes" ; then
+	GXXFLAGS="-Wall"
+else
+	GXXFLAGS=""
+fi
+AC_SUBST(GXXFLAGS)
 dnl Checks for libraries.
 
 dnl Checks for header files.

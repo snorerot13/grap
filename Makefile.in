@@ -21,7 +21,7 @@ LIBOBJS=@LIBOBJS@
 
 DISTDIR=grap-1.02
 
-CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
 # solaris make uses these as defaults:
 
