@@ -174,7 +174,8 @@ public:
     axis axisname;
     strmod stringmod;
 }
-%type <num> NUMBER expr opt_expr direction radius_spec bar_base opt_wid
+%type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
+%type <num> opt_wid
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <string> until_clause START string
@@ -453,16 +454,33 @@ num_list:
 	    }
 ;
 
-num_line:
+num_line_elem:
 	NUMBER
+	    {
+		$$ = $1;
+	    }
+|
+	MINUS NUMBER
+	    {
+		$$ = -$2;
+	    }
+;
+
+num_line:
+	num_line_elem
 	    {
 		$$ = new doublelist;
 		$$->push_back($1);
 	    }
-|	num_line NUMBER
+|	num_line num_line_elem
 	    {
 		$$ = $1;
 		$$->push_back($2);
+	    }
+|	num_line COMMA num_line_elem
+	    {
+		$$ = $1;
+		$$->push_back($3);
 	    }
 ;
 
