@@ -157,7 +157,7 @@ rand			{
 					yylval.val = i;
  			return FUNC0;
 			}
-log|exp|int|sin|cos|sqrt|rand	{
+log|exp|int|sin|cos|sqrt|rand|eexp	{
 			int i;
 
 			DEBUG("FUNC1\n",0);

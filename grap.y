@@ -409,6 +409,9 @@ expr:
 		    case EXP:
 			$$ = pow(10,$3);
 			break;
+		    case EEXP:
+			$$ = exp($3);
+			break;
 		    case INT:
 			$$ = int($3);
 			break;

@@ -26,6 +26,7 @@ typedef Stack<struct grap_buffer_state*> lexStack;
 #define SIN 3
 #define COS 4
 #define SQRT 5
+#define EEXP 6
 
 #define ATAN2 0
 #define MINFUNC 1
@@ -38,10 +39,10 @@ static char *f0names[NF0] = {
 "rand"
 };
 
-#define NF1 6
+#define NF1 7
 
 static char *f1names[NF1] = {
-"log", "exp", "int", "sin", "cos", "sqrt"
+"log", "exp", "int", "sin", "cos", "sqrt","eexp"
 };
 
 #define NF2 3
