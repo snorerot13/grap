@@ -1,5 +1,10 @@
 Change log
 
+0.92a: bug fix - string equality check.  Small change to Makefile.in
+to support default Solaris behavior.
+
+0.91a: small changes for the RPM
+
 0.9a: Added commands for making bars.  
 
 Error reporting is much closer to the correct line now.

@@ -1,11 +1,10 @@
 Summary: grap, a grapher for groff
 Name: grap
-Version: 0.91a
+Version: 0.92a
 Release: 0
 Copyright: BSD
 Group: Applications/Publishing
-Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.91a.tar.gz
-Patch1: grap-redhat-linux.patch
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.92a.tar.gz
 
 %description
 This is grap, an implementation of Kernigan and Bentley's grap
