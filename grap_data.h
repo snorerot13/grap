@@ -175,6 +175,38 @@ class copydesc {
     }
 };
 
+// encapsulate the information about the simple keyword tokens.
+class keyword {
+public:
+    vector<string> add;		// make these keywords active
+    vector<string> remove;	// make these keywords inactive
+    bool clear;			// clear the active keyword list if this true
+    int token;			// the lex token that corresponds to this
+                                // string.
+
+    keyword() : add(), remove(), clear(false), token(0) { }
+    
+    keyword(const keyword& k) :
+	add(k.add), remove(k.remove), clear(k.clear), token(k.token) { }
+
+    keyword(const vector<string>& a, const vector<string>& r, bool cl, int t) :
+	add(a), remove(r), clear(cl), token(t) { }
+
+    template <class I1, class I2>
+    keyword(I1 sa, I1 ea, I2 sr, I2 er, bool cl, int t) :
+	add(sa, ea), remove(sr, er), clear(cl), token(t) { }
+
+    keyword& operator=(const keyword& k) {
+	add = k.add;
+	remove = k.remove;
+	clear = k.clear;
+	token = k.token;
+	return *this;
+    }
+
+};
+
+
 // we use this to make yacc happier
 typedef pair<coord *, string *> coordid;
 #endif

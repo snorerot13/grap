@@ -20,30 +20,40 @@ CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
 
-DISTDIR=grap-1.20pre3
+DISTDIR=grap-1.20pre4
 SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS += @GXXFLAGS@ @DEFS@ 
+# CXXFLAGS = -pipe @GXXFLAGS@ @DEFS@ 
+
+# To suppress optimization of certain files under g++ where
+# optimization is costly at compilation time and of minimial use at
+# runtime.
+SUPPRESS_OPT=@SUPPRESS_OPT@
+NO_UNDEF=@NO_UNDEF@
+
+EXE=@EXEEXT@
 
 # solaris make uses these as defaults:
 
 CCC=$(CXX)
 CCFLAGS=$(CXXFLAGS)
 
-OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
+OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
+	version.o $(LIBOBJS)
 
 all:	grap
 
 .l.cc:
 	$(LEX) -o$@ $<
 
-grap:	$(OBJS)
+grap:	depend $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
-	if test -f grap.exe ; then mv -f grap.exe grap; fi
+	@EXE_CORRECT@
 
 y.tab.h grap.cc:	grap.y
 	$(YACC) -d grap.y
-	mv y.tab.c grap.cc;
+	mv y.tab.c grap.cc
 
 grap_lex.cc:	grap_lex.l y.tab.h
 
@@ -52,6 +62,19 @@ version.cc:	Makefile
 	echo "#include <string>" > version.cc
 	echo "using namespace std;" >> version.cc
 	echo "string version=\"$(DISTDIR)\";" >> version.cc
+
+# Under g++ the memory overhead for optimization of grap_tokenizer is
+# high.  Compilation time becomes prohibitive and the function is only
+# called once per execution, so this rule disables optimization for
+# that file under g++ by default.  If --optimize-grap_tokenizer is
+# given to configure, no attempt to suppress optimization is made.
+grap_tokenizer.o:	grap_tokenizer.cc
+	$(CXX) ${CXXFLAGS} ${SUPPRESS_OPT} -c grap_tokenizer.cc
+
+# flex defines an unused static function.  This rule supresses that
+# warning under g++.
+grap_lex.o:	grap_lex.cc
+	$(CXX) ${CXXFLAGS} ${NO_UNDEF} -c grap_lex.cc
 
 y.output:	grap.y
 	$(YACC) -v grap.y
@@ -84,15 +107,17 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && ${RM} -rf /tmp/${DISTDIR}
 
 clean:
-	${RM} grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output depend
+	${RM} grap $(OBJS) *.o grap.1 grap.man grap.ps \
+		${DISTDIR}.tar.gz *core* y.output
 
 veryclean:
 	${MAKE} clean
 	${RM} config.log config.status config.cache config.h version.cc *.tgz
+	${RM} depend grap_lex.cc grap.cc y.tab.h 
 
 spotless:
 	${MAKE} veryclean
-	${RM} configure
+	${RM} configure Makefile
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
@@ -121,7 +146,7 @@ deinstall:
 cleandepend:
 	${PERL} -i -ne 'print if 1 .. /^\# End of Makefile/;' Makefile
 
-depend:	${SOURCES}
+depend:	grap.cc grap_lex.cc
 	${MAKE} cleandepend
 	@MAKEDEP@
 	touch depend

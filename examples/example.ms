@@ -2542,8 +2542,8 @@ delim off
 \&for j = from to to do {
 \&   bullet at to - j, j
 \&}
-.ft
 \&.G2
+.ft
 .DE
 .EQ
 delim $$
@@ -2561,4 +2561,55 @@ for j = from to to do {
    bullet at to - j, j
 }
 .G2
+.KE
+.bp
+.KS
+.PP
+At the request of Bruce Lilly, coordinate spaces and variables now
+have distinct name spaces, and those names spaces can (usually)
+overlap both each other and keywords.  The result is that things like
+this are legal.
+.DS
+.ft CW
+\&.G1
+\&from = 0
+\&to = 10
+\&new next dotted delta
+\&for next from from to to do {
+\&	next next at next next, next
+\&}
+\&ticks left on next
+\&ticks bot on next
+\&.G2
+.ft
+.DE
+.G1
+from = 0
+to = 10
+new next dotted delta
+for next from from to to do {
+	next next at next next, next
+}
+ticks left on next
+ticks bot on next
+.G2
+.PP
+I think we're now ready for the first obfuscated 
+.CW grap
+contest.  The following is a more readable version:
+.DS
+.ft CW
+\&.G1
+\&start = 0
+\&finish = 10
+\&new line_style dotted delta
+\&coord coord_space
+\&for i from start to finish do {
+\&	next line_style at coord_space i, i
+\&}
+\&ticks left on coord_space
+\&ticks bot on coord_space
+\&.G2
+.ft
+.DE
 .KE

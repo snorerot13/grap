@@ -28,13 +28,16 @@ rm -rf /tmp/test$$
 # Also use g++ for generating dependencies if available
 if test "$GXX" = "yes" ; then
 	GXXFLAGS="-Wall"
+	NO_UNDEF="-Wno-unused"
 	MAKEDEP='${CXX} -MM ${CXXFLAGS} ${SOURCES} >> Makefile'
 else
 	GXXFLAGS=""
+	NO_UNDEF=""
 	MAKEDEP='cat default_depend >> Makefile'
 fi
 AC_SUBST(GXXFLAGS)
 AC_SUBST(MAKEDEP)
+AC_SUBST(NO_UNDEF)
 
 dnl Checks for libraries.
 
@@ -133,5 +136,36 @@ while echo $ddir | grep '\$' > /dev/null ; do
 done
 
 AC_DEFINE_UNQUOTED(DEFINES,"${ddir}/grap/grap.defines")
+
+AC_MSG_CHECKING(whether to optimize grap_tokenizer)
+AC_ARG_ENABLE(optimize-grap_tokenizer, 
+--enable-optimize-grap_tokenizer   do not prevent optimization of the 
+                                   grap_tokenize.cc file, 
+ac_cv_grap_opt_tok="yes",
+AC_CACHE_VAL(ac_cv_grap_opt_tok, ac_cv_grap_opt_tok="no"))
+AC_MSG_RESULT($ac_cv_grap_opt_tok)
+
+if test $GXX = "yes" ; then 
+	SUPPRESS_OPT="-O0"
+else
+	SUPPRESS_OPT=""
+fi
+
+if test $ac_cv_grap_opt_tok = "yes" ; then 
+	SUPPRESS_OPT=""
+fi
+
+AC_SUBST(SUPPRESS_OPT)
+
+# AC_EXEEXT isn't working for C++
+AC_LANG_C
+AC_EXEEXT
+AC_LANG_CPLUSPLUS
+if [ test $ac_cv_exeext != "no" ] ; then 
+	EXE_CORRECT="mv -f grap.$ac_cv_exeext grap"
+else
+	EXE_CORRECT=""
+fi
+AC_SUBST(EXE_CORRECT)
 
 AC_OUTPUT(examples/Makefile Makefile)

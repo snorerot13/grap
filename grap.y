@@ -88,6 +88,7 @@ void init_dict();
 
 int nlines;
 int in_copy=0;
+extern bool no_coord; 
 
 // adapeters to return complex (complex-ish) functions
 double grap_random() {  return double(random()) / (pow(2,32)-1); }
@@ -656,7 +657,6 @@ ticklist:
 
 by_clause:
 	    { $$.op = PLUS; $$.expr = 1; }
-/* used to be opt_expr */
 |	BY expr
 	    {
 		$$.op = PLUS;
@@ -692,10 +692,25 @@ tickdesc :
 ;
 
 autotick:
-	opt_coordname
-	    { $$ = $1;}
-|	ON opt_coordname
-            { $$ = $2;}
+	ON opt_ident
+            {
+		coordinateDictionary::iterator ci;
+
+		if ( $2 ) {
+		    ci = the_graph->coords.find(*$2);
+		    if ( ci != the_graph->coords.end()) 
+			$$ = (*ci).second;
+		    else {
+			yyerror("Name must name a coordinate space");
+		    }
+		}
+		else $$ = 0;
+		
+	    }
+|
+            {
+		$$ = 0;
+            }
 ;	    
 
 ticks_statement:
@@ -811,8 +826,7 @@ ident_or_coord:
             { $$ = new coordid((coord *) 0, (string *) 0); }
 |       IDENT
             { $$ = new coordid((coord *) 0,$1); }
-|       COORD_NAME
-            { $$ = new coordid($1, (string *) 0); }
+;
 
 coord_statement:
 	COORD ident_or_coord x_axis_desc y_axis_desc log_list SEP
@@ -952,7 +966,7 @@ copy_statement:
 ;
 
 define_statement:
-	DEFINE { lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP { define_macro($3, $5); }
+	DEFINE { no_coord = true; lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP { no_coord= false; define_macro($3, $5); }
 ;
 
 sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
@@ -1001,20 +1015,20 @@ for_statement:
 ;
 
 graph_statement:
-	GRAPH IDENT { lex_begin_rest_of_line(); } REST SEP
+	GRAPH { no_coord = true; } IDENT { lex_begin_rest_of_line(); } REST SEP
 	    {
 		if ( !first_line ) {
 		    the_graph->draw(0);
-		    the_graph->init($2, $4);
+		    the_graph->init($3, $5);
 		    init_dict();
 		}
 		else {
-		    the_graph->init($2, $4);
+		    the_graph->init($3, $5);
 		    init_dict();
 		}
 		    
-		if ( $2 ) delete $2;
-		if ( $4 ) delete $4;
+		if ( $3 ) delete $3;
+		if ( $5 ) delete $5;
 	    }
 ;
 

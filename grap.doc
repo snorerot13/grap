@@ -150,12 +150,12 @@ Commands are separated from one another by newlines or semicolons (;).
 .Ic frame 
 .Op Ar line_description 
 .Oo
-.Bk -word
+.Bk -words
 .Cm ht Ar height No \(or Cm wid Ar width
 .Ek
 .Oc
 .Oo
-.Bk -word
+.Bk -words
 .Oo
 .Sm off
 .Cm ( top No \(or Cm bottom No \(or 
@@ -170,13 +170,13 @@ Commands are separated from one another by newlines or semicolons (;).
 .sp
 .Ic frame 
 .Oo
-.Bk -word
+.Bk -words
 .Cm ht Ar height No \(or Cm wid Ar width
 .Ek
 .Oc
 .Op Ar line_description 
 .Oo
-.Bk -word
+.Bk -words
 .Oo
 .Sm off
 .Cm ( top No \(or Cm bottom No \(or 
@@ -397,12 +397,12 @@ expression (See
 .Pp
 .Ic ticks
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Oo
 .Sm on
-.No Xo ( Cm in Ns No \(or 
+.Xo ( Cm in Ns No \(or 
 .Ns Cm out )
 .Xc
 .Op Ar expr
@@ -411,16 +411,16 @@ expression (See
 .Oo 
 .Cm on \(or Cm auto
 .Sm on
-.Op Ar coord_name
+.Ar coord_name
 .Oc
 .Pp
 .Ic ticks 
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
-.No Xo ( Cm in Ns No \(or 
+.Xo ( Cm in Ns No \(or 
 .Ns Cm out )
 .Xc
 .Op Ar expr
@@ -446,16 +446,16 @@ expression (See
 .Pp
 .Ic ticks 
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
-.No Xo ( Cm in Ns No \(or 
+.Xo ( Cm in Ns No \(or 
 .Ns Cm out )
 .Xc
 .Op Ar expr
 .Oo
-.No Cm up Ar expr No \(or
+.Cm up Ar expr No \(or
 .Cm down Ar expr No \(or
 .Cm left Ar expr No \(or
 .Cm right Ar expr
@@ -586,7 +586,7 @@ is a synonym for
 .Pp
 .Ic grid
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
@@ -607,7 +607,7 @@ is a synonym for
 .Pp
 .Ic grid
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
@@ -635,14 +635,14 @@ is a synonym for
 .Pp
 .Ic grid 
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
 .Op Li ticks off
 .Op Ar line_description
 .Oo
-.No Cm up Ar expr No \(or
+.Cm up Ar expr No \(or
 .Cm down Ar expr No \(or
 .Cm left Ar expr No \(or
 .Cm right Ar expr
@@ -699,7 +699,7 @@ string as
 .Pp
 .Ic label
 .Sm off
-.No Xo ( Cm left No \(or Cm right 
+.Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
 .Sm on
@@ -713,7 +713,7 @@ string as
 .Oc
 \&...
 .Oo
-.No Cm up Ar expr No \(or
+.Cm up Ar expr No \(or
 .Cm down Ar expr No \(or
 .Cm left Ar expr No \(or
 .Cm right Ar expr

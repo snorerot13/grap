@@ -46,6 +46,7 @@ extern string pre_context(void);
 extern char *token_context(void);
 extern string post_context(void);
 extern bool include_file(string *, int =0, bool=true);
+extern void init_keywords();
 extern int yyparse();
 extern int nlines;
 
@@ -878,6 +879,8 @@ int main(int argc, char** argv) {
 	}
 	path.push_back(s);
     }
+
+    init_keywords();
 
     if ( argc == optind ) {
 	fname = "-";

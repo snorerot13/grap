@@ -1,6 +1,6 @@
 Change log
 
-1.20: The big jump reflects more internal changes than visible feature
+1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially
 revamped, and the code brought into better conformance with the
 current state of the C++ world.  As of version 1.20, grap no longer
@@ -8,13 +8,13 @@ attempts to compile under g++ 2.7.2.  grap 1.11 source will remain
 available from http://www.lunabase.org/~faber/Vault/software/grap for
 those who need it.
 
-The main feature change is that troff and pic commands are now placed
+One feature change is that troff and pic commands are now placed
 correctly in their relative order rather than being collected before
 and after the graph.  This required specifying more carefully where
 the frame generation is placed.  Frames are output either immediately
 before the first plotted object or after the frame statement, if any.
 This change motivated much of the class changes and actually cleaned
-them up somewhat.  I'd still like to do a little cleaning in here yet.
+them up somewhat.
 
 grap is now *much* more tolerant of variables with the keword names.
 Things like
@@ -22,16 +22,40 @@ Things like
 from=1; to = 10 
 for i from from to to do { ... }
 
-now work.  This is due to a sizable rewrite of the tokenizer.  Bruce
-Lilly has been asking for this for a while. :-) I'll probably neaten
-that code up at some point, too.
+now work.  This is due to a sizable rewrite of the tokenizer.  In
+fact, variables and coordinate spaces can share names.  Things like:
+
+for next = 0 to 10 do {
+	next at next next, next
+}
+
+now work (you have to add a couple ticks statements to really see that
+example). I'd say we're to the point where obfuscated grap programs
+are a possibility.
+
+The only change this necessitated was that if you specify a coordinate
+system in an automatic ticks statement, you have to use the on or auto
+keyword.  See the examples document for a document.
 
 I recoded macros to remove an antiquated construct that was confusing
 some non-g++ compilers.  A static array was recoded as an STL vector,
 with the result that an artificial constraint on the number of
 arguments in a macro went away.
 
+Part of the recoding of the tokenizer encoded a large data structure
+in a file called grap_tokenizer.cc.  The code is striaght-ahead
+initialization, but it drives the g++ optimizer stone crazy.
+(Optimizing this function is very memory intensive.)  By default,
+optimization is specifically disabled under g++.  You can override
+that behavior by specifying --enable-optimize-grap_tokenizer to
+./configure.  On the machines I use, optimizing this module has
+negligible effect on performance.
+
 Added some GNU standard Makefile targets to the Makefile.
+
+Fixed some bugs in the manual page.
+
+Lots of autoconf tweaks.
 
 Many additional compatibility changes suggested by Bruce Lilly.
 

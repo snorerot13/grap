@@ -8,6 +8,7 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 extern int errno;
 #else
 extern "C" {
@@ -17,6 +18,7 @@ extern "C" {
 #include <iostream>
 #include <sys/param.h>
 #include <set> 
+#include <map> 
 #include "grap.h"
 #include "grap_data.h"
 #include "grap_draw.h" 
@@ -56,8 +58,6 @@ int copystate =0;
 int continuation =0;
 unsigned int tokenpos =0;
 bool print_lex_debug = false;
-// A little kludge to not recognize identifier = as a LHS in a for statement. 
-bool in_for = false; 
 
 int lex_expand_macro =1;
 
@@ -87,27 +87,27 @@ char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
 
-set<int> active;
-// Keywords recognized in the initial GRAP state (AT, SPRINTF and all
-// the string modifiers are there for implicit PLOT statements).
-int grap_keys[] = { COPY, NEXT, DRAW, LINE, DEFINE, ARROW, CIRCLE, PLOT, AT,
-		    FRAME, GRAPH, COORD, FOR, IF, PRINT, SPRINTF, TICKS,
-		    LABEL, GRID, PIC, SH, BAR, LJUST, RJUST, ABOVE, BELOW,
-		    ALIGNED, UNALIGNED, SIZE };
-// These are the keywords recognized by any keyword that takes a line
-// descriptor:
-int linedesc_keys[] = { INVIS, SOLID, DOTTED, DASHED, FILL, FILLCOLOR, COLOR };
-// Keywords recognized for sting modifiers 
-int strmod_keys[] = { LJUST, RJUST, ABOVE, BELOW, ALIGNED, UNALIGNED, SIZE };
+// Set of currently active keywords 
+set<string> active;
 
+// Commonly used keyword sets
+extern vector<string> grap_keys;
+extern keywordDictionary keywords; 
+
+// There are a couple times when the possiblity of a COORD_NAME can be
+// ruled out.  If this is set, this is one of those times.
+bool no_coord=false;
 %}
 %x GRAP
+%x REJECTED_COORD
 %x MACROTEXT
 %x COPYSTATE
 %x HUNTMACRO
 %x RESTOFLINE
 
-identifier	[A-Za-z0-9_]*
+identifier	[A-Za-z][A-Za-z0-9_]*
+
+keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y
 %%
 <INITIAL>{
 ^.*$ 	{
@@ -140,7 +140,7 @@ identifier	[A-Za-z0-9_]*
 	BEGIN(GRAP);
 	debug("START");
 	active.clear();
-	active.insert(grap_keys, grap_keys+sizeof(grap_keys)/sizeof(int));
+	active.insert(grap_keys.begin(), grap_keys.end());
 	return START;
 	}
 .+	{
@@ -148,7 +148,7 @@ identifier	[A-Za-z0-9_]*
 		cout << yytext;
 	}
 }
-<GRAP>{
+<GRAP,REJECTED_COORD>{
 ^.*$			{
                           linebuf = yytext;
 			  tokenpos = 0;
@@ -160,10 +160,9 @@ identifier	[A-Za-z0-9_]*
 			  newline();
 			  // Back to square 1 after a SEP
 			  active.clear();
-			  active.insert(grap_keys,
-					grap_keys+
-					sizeof(grap_keys)/sizeof(int));
+			  active.insert(grap_keys.begin(), grap_keys.end());
                           debug("SEP");
+			  BEGIN(GRAP);
 			  return SEP; 
 			}
 \#.*$
@@ -173,6 +172,7 @@ identifier	[A-Za-z0-9_]*
 			debug("Number: ",yytext);
 			yylval.num = atof(yytext);
 			tokenpos += yyleng;
+			BEGIN(GRAP);
 			return NUMBER;
 			}
 
@@ -180,7 +180,8 @@ identifier	[A-Za-z0-9_]*
                            // in a for statement, identifier = is a
                            // synonym for identifier FROM, so don't
                            // identify it as a LHS.
-                           if ( in_for ) REJECT;
+                           if ( active.count("do") && active.count("from"))
+				REJECT;
                            tokenpos += yyleng;
                            for ( int i = 0; i < yyleng; i++ )
                                if ( yytext[i] == ' ' || yytext[i] == '\t' ||
@@ -190,18 +191,16 @@ identifier	[A-Za-z0-9_]*
 			       }
 			   yylval.String = new string(yytext);
 			   debug("LHS: ", yytext);
+			   BEGIN(GRAP);
 			   return LHS;
                         }
-} 
-<GRAP>{
 ;			{
 			  tokenpos += yyleng;
                           debug("SEP");
 			  // Back to square 1 after a SEP
 			  active.clear();
-			  active.insert(grap_keys,
-					grap_keys+
-					sizeof(grap_keys)/sizeof(int));
+			  active.insert(grap_keys.begin(), grap_keys.end());
+			  BEGIN(GRAP);
 			  return SEP; 
                         }
 \(			tokenpos += yyleng; debug("LPAREN"); return LPAREN;
@@ -217,8 +216,10 @@ identifier	[A-Za-z0-9_]*
 			  // if this is in a for statement, the EQUALS
 			  // has taken the place of the from, so
 			  // remove the from from active.
-			  if ( in_for ) active.erase(FROM);
+			  if ( active.count("do") && active.count("from"))
+			      active.erase("from");
 			  debug("EQUALS");
+			  BEGIN(GRAP);
 			  return EQUALS;
                         }
 \=\=			tokenpos += yyleng; debug("EQ"); return EQ;
@@ -230,279 +231,141 @@ identifier	[A-Za-z0-9_]*
 \&\&			tokenpos += yyleng; debug("AND"); return AND;
 \|\|			tokenpos += yyleng; debug("OR"); return OR;
 \!			tokenpos += yyleng; debug("NOT"); return NOT;
-copy			{
-                          if ( active.count(COPY) ) {
- 			      tokenpos += yyleng;
-			      // Copy only needs to see UNTIL and THRU
-			      active.clear();
-			      active.insert(THRU);
-			      active.insert(UNTIL);
-			      debug("COPY");
-			      return COPY;
+log[ \t]+(x|y|log)	{
+                          int rc = LOG_LOG;
+			  string ls(yytext);
+			  
+                          if (active.count("log") ) {
+			      tokenpos += yyleng;
+			      // LOG_whatever doesn't change the active
+			      // state.
+			      debug(yytext);
+			      BEGIN(GRAP);
+			      if ( ls.find('x') != string::npos ) rc = LOG_X;
+			      else
+				  if ( ls.find('y') != string::npos)
+				      rc = LOG_Y;
+			      return rc;
 			  }
 			  else {
-			      debug("COPY not active");
+			      debug(yytext, " not active");
 			      REJECT;
 			  }
+			}
+}
+<GRAP>{identifier}[ \t][ \t]*{identifier} {
+			   // The yyless/YY_BREAK allows us to redo the
+                           // match under the new start condition.
+
+                           // Early rejection if a COORD_NAME is
+                           // illegal here.
+                           if ( no_coord ) {
+			       debug("<REJECTED_COORD>");
+			       BEGIN(REJECTED_COORD);
+			       yyless(0);
+			       YY_BREAK;
+			   }
+
+			   
+                           // Here we go - parse out the two
+                           // identifiers.  If the first is an active
+                           // keyword, REJECT.  If the second
+                           // identifier is not an active keyword,
+                           // then this is a coordinate name, so put
+                           // the whitespace and the second identifier
+                           // back into the input and return the
+                           // coordinate name.  If no REJECT.
+
+                           string first(yytext);	// first id
+			   string second;
+			   string::size_type f, l;
+			   coordinateDictionary::iterator ci;
+			   coord *c;
+
+			   for (f = 0;isalnum(first[f]) ||first[f] == '_'; f++)
+			       ;
+			   // Now f is on the first whitespace character;
+			   for (l = f; first[l] == ' '|| first[l] =='\t'; l++)
+			       ;
+			   // l is now the first character of the
+			   // second identifier.
+			   second = first.substr(l);
+			   first.erase(f);
+			   
+			   debug("Coord search");
+			   debug(first, second);
+			   
+			   if (active.count(first) || active.count(second)) {
+			       debug("<REJECTED_COORD>");
+			       BEGIN(REJECTED_COORD);
+			       yyless(0);
+			       YY_BREAK;
+			   }
+			   ci = the_graph->coords.find(first);
+			   if ( ci != the_graph->coords.end()) {
+			       c = (*ci).second;
+			       yylval.coordptr = c;
+			   }
+			   else {
+			       yylval.coordptr = new coord;
+			       the_graph->coords[first] = yylval.coordptr;
+			   }
+			   yyless(first.length());
+			   tokenpos += first.length();
+			   debug("COORD_NAME");
+			   return COORD_NAME;
                         }
-next			{
-                          if (active.count(NEXT) ) {
-			      tokenpos += yyleng;
-			      // Next needs to see AT and linedescriptors
-			      active.clear();
-			      active.insert(AT);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("NEXT");
-			      return NEXT;
-			  }
-			  else {
-			      debug("NEXT not active");
-			      REJECT;
-			  }
-			}
-draw|new		{
-                          if (active.count(DRAW) ) {
-			      tokenpos += yyleng;
-			      // Draw needs to see linedescriptors and
-			      // stringmodifiers
-			      active.clear();
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      active.insert(strmod_keys,
-					    strmod_keys +
-					    sizeof(strmod_keys)/sizeof(int));
-			      debug("DRAW");
-			      return DRAW;
-			  }
-			  else {
-			      debug("DRAW not active");
-			      REJECT;
-			  }
-			}
-line			{
-                          if (active.count(LINE) ) {
-			      tokenpos += yyleng;
-			      // Line needs to see linedescriptors and
-			      // FROM/TO
-			      active.clear();
-			      active.insert(FROM);
-			      active.insert(TO);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("LINE");
-			      return LINE;
-			  }
-			  else {
-			      debug("LINE not active");
-			      REJECT;
-			  }
-			}
-define			{
-                          if (active.count(DEFINE) ) {
-			      tokenpos += yyleng;
-			      // define doesn't need to parse, really
-			      active.clear();
-			      debug("DEFINE");
-			      return DEFINE;
-			  }
-			  else {
-			      debug("DEFINEnot active");
-			      REJECT;
-			  }
-			}
-arrow			{
-                          if (active.count(ARROW) ) {
-			      tokenpos += yyleng;
-			      // Arrow needs to see linedescriptors and
-			      // FROM/TO
-			      active.clear();
-			      active.insert(FROM);
-			      active.insert(TO);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("ARROW");
-			      return ARROW;
-			  }
-			  else {
-			      debug("ARROW not active");
-			      REJECT;
-			  }
-			}
-circle			{
-                          if (active.count(CIRCLE) ) {
-			      tokenpos += yyleng;
-			      // circle needs to see linedescriptors and
-			      // AT and RADIUS
-			      active.clear();
-			      active.insert(AT);
-			      active.insert(RADIUS);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("CIRCLE");
-			      return CIRCLE;
-			  }
-			  else {
-			      debug("CIRCLE not active");
-			      REJECT;
-			  }
-			}
-radius|rad		{
-                          if (active.count(RADIUS) ) {
-			      tokenpos += yyleng;
-			      // RADIUS only appears once, so deactivate it.
-			      active.erase(RADIUS);
-			      debug("RADIUS");
-			      return RADIUS;
-			  }
-			  else {
-			      debug("RADIUS not active");
-			      REJECT;
-			  }
-			}
-plot			{
-                          if (active.count(PLOT) ) {
-			      tokenpos += yyleng;
-			      // Plot needs to see AT
-			      active.clear();
-			      active.insert(AT);
-			      debug("PLOT");
-			      return PLOT;
-			  }
-			  else {
-			      debug("PLOT not active");
-			      REJECT;
-			  }
-			}
-frame			{
-                          if (active.count(FRAME) ) {
-			      tokenpos += yyleng;
-			      // FRAME needs to see ht/wid,
-			      // linedescriptions, and multiple
-			      // top/bottom/left/rights.
-			      active.clear();
-			      active.insert(TOP);
-			      active.insert(BOTTOM);
-			      active.insert(LEFT);
-			      active.insert(RIGHT);
-			      active.insert(HT);
-			      active.insert(WID);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("FRAME");
-			      return FRAME;
-			  }
-			  else {
-			      debug("FRAME not active");
-			      REJECT;
-			  }
-			}
-graph			{
-                          if (active.count(GRAPH) ) {
-			      tokenpos += yyleng;
-			      // graph dosn't need to parse keywords
-			      active.clear();
-			      debug("GRAPH");
-			      return GRAPH;
-			  }
-			  else {
-			      debug("GRAPHnot active");
-			      REJECT;
-			  }
-			}
-coord			{
-                          if (active.count(COORD) ) {
-			      tokenpos += yyleng;
-			      // Coord needs to see XDIM YDIM and
-			      // the logscale indicators
-			      active.clear();
-			      active.insert(XDIM);
-			      active.insert(YDIM);
-			      active.insert(LOG_X);
-			      active.insert(LOG_Y);
-			      active.insert(LOG_LOG);
-			      debug("COORD");
-			      return COORD;
-			  }
-			  else {
-			      debug("COORD not active");
-			      REJECT;
-			  }
-			}
-for			{
-                          if (active.count(FOR) ) {
-			      tokenpos += yyleng;
-			      // FOR needs to see FROM/TO/BY/DO
-			      active.clear();
-			      active.insert(FROM);
-			      active.insert(TO);
-			      active.insert(BY);
-			      active.insert(DO);
-			      // don't recognize identifier= as an LHS
-			      // while in the for statement.
-			      in_for = true;
-			      debug("FOR");
-			      return FOR;
-			  }
-			  else {
-			      debug("FOR not active");
-			      REJECT;
-			  }
-			}
-from			{
-                          if (active.count(FROM) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one from keyword
-			      // per statement.
-			      active.erase(FROM);
-			      debug("FROM");
-			      return FROM;
-			  }
-			  else {
-			      debug("FROM not active");
-			      REJECT;
-			  }
-			}
-thru|through		{
-                          if (active.count(THRU) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one thru keyword
-			      // per statement.
-			      active.erase(THRU);
-			      debug("THRU");
-			      return THRU;
-			  }
-			  else {
-			      debug("THRU not active");
-			      REJECT;
-			  }
-			}
-to			{
-                          if (active.count(TO) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one to keyword
-			      // per statement.
-			      active.erase(TO);
-			      // If we see a TO, any potential
-			      // misidentification of a LHS in a for
-			      // loop has been avoided.
-			      in_for = false;
-			      debug("TO");
-			      return TO;
-			  }
-			  else {
-			      debug("TO not active");
-			      REJECT;
-			  }
-			}
+<GRAP,REJECTED_COORD>{
+{identifier}/[ \t][ \t]*[0123456789\.] {
+			   coordinateDictionary::iterator ci;
+			   coord *c;
+
+			   if ( active.count(yytext) ) {
+			       REJECT;
+			   }
+			   ci = the_graph->coords.find(yytext);
+			   if ( ci != the_graph->coords.end()) {
+			       c = (*ci).second;
+			       yylval.coordptr = c;
+			   }
+			   else {
+			       yylval.coordptr = new coord;
+			       the_graph->coords[yytext] = yylval.coordptr;
+			   }
+			   tokenpos += yyleng;
+			   debug("COORD_NAME: ",yytext);
+			   return COORD_NAME;
+                        }
+{keyword}               {
+                           if (active.count(yytext) ) {
+			       keywordDictionary::iterator ki;
+
+			       if ( (ki = keywords.find(yytext))
+				    == keywords.end()) {
+				   cerr << "keyword not in map!?" << endl;
+				   return(0);
+			       }
+			       // The alias runs faster
+			       const keyword& k = (*ki).second;
+			       
+			       if ( k.clear ) active.clear();
+			       for ( int i = 0; i < (int) k.add.size(); i++ )
+				   active.insert(k.add[i]);
+			       for ( int i = 0; i < (int) k.remove.size(); i++)
+				   active.erase(k.remove[i]);
+
+			       debug(yytext);
+			       tokenpos += yyleng;
+			       BEGIN(GRAP);
+			       return(k.token);
+			   }
+			   else {
+			       debug(yytext, " not active");
+			       REJECT;
+			   }
+                        }
 at			{
-                          if (active.count(AT) ) {
+                          if (active.count(yytext) ) {
 			      tokenpos += yyleng;
 			      // AT can be active for 2 reasons.  It's
 			      // been found in an expression that
@@ -516,675 +379,14 @@ at			{
 			      // PLOT because active is in the initial
 			      // state.
 
-			      if ( active.count(COPY)) active.clear();
-			      else active.erase(AT);
+			      if ( active.count("plot")) active.clear();
+			      else active.erase("at");
 			      debug("AT");
+			      BEGIN(GRAP);
 			      return AT;
 			  }
 			  else {
 			      debug("AT not active");
-			      REJECT;
-			  }
-			}
-by			{
-                          if (active.count(BY) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one BY keyword
-			      // per statement.
-			      active.erase(BY);
-			      debug("BY");
-			      return BY;
-			  }
-			  else {
-			      debug("BY not active");
-			      REJECT;
-			  }
-			}
-until			{
-                          if (active.count(UNTIL) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one UNTIL keyword
-			      // per statement.
-			      active.erase(UNTIL);
-			      debug("UNTIL");
-			      return UNTIL;
-			  }
-			  else {
-			      debug("UNTIL not active");
-			      REJECT;
-			  }
-			}
-do			{
-                          if (active.count(DO) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one DO keyword
-			      // per statement.
-			      active.erase(DO);
-			      debug("DO");
-			      return DO;
-			  }
-			  else {
-			      debug("DO not active");
-			      REJECT;
-			  }
-			}
-if			{
-                          if (active.count(IF) ) {
-			      tokenpos += yyleng;
-			      // if needs to see THEN
-			      active.clear();
-			      active.insert(THEN);
-			      debug("IF");
-			      return IF;
-			  }
-			  else {
-			      debug("IF not active");
-			      REJECT;
-			  }
-			}
-then			{
-                          if (active.count(THEN) ) {
-			      tokenpos += yyleng;
-			      // THEN needs to see ELSE
-			      active.clear();
-			      active.insert(ELSE);
-			      debug("THEN");
-			      return THEN;
-			  }
-			  else {
-			      debug("THEN not active");
-			      REJECT;
-			  }
-			}
-else			{
-                          if (active.count(ELSE) ) {
-			      tokenpos += yyleng;
-			      // Else doesn't need to see keywords
-			      active.clear();
-			      debug("ELSE");
-			      return ELSE;
-			  }
-			  else {
-			      debug("ELSE not active");
-			      REJECT;
-			  }
-			}
-print			{
-                          if (active.count(PRINT) ) {
-			      tokenpos += yyleng;
-			      // Print doesn't need to see keywords
-			      // FROM/TO
-			      active.clear();
-			      debug("PRINT");
-			      return PRINT;
-			  }
-			  else {
-			      debug("PRINT not active");
-			      REJECT;
-			  }
-			}
-sprintf			{
-                          if (active.count(SPRINTF) ) {
-			      tokenpos += yyleng;
-			      // Sprintf behaves like a string, so it
-			      // doesn't change the active state.
-			      debug("SPRINTF");
-			      return SPRINTF;
-			  }
-			  else {
-			      debug("SPRINTF not active");
-			      REJECT;
-			  }
-			}
-x			{
-                          if (active.count(XDIM) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one from keyword
-			      // per statement.
-			      active.erase(XDIM);
-			      debug("XDIM");
-			      return XDIM;
-			  }
-			  else {
-			      debug("XDIM not active");
-			      REJECT;
-			  }
-			}
-y			{
-                          if (active.count(YDIM) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one YDIM keyword
-			      // per statement.
-			      active.erase(YDIM);
-			      debug("YDIM");
-			      return YDIM;
-			  }
-			  else {
-			      debug("YDIM not active");
-			      REJECT;
-			  }
-			}
-log[ \t]+x	        {
-                          if (active.count(LOG_X) ) {
-			      tokenpos += yyleng;
-			      // LOG_X doesn't change the active
-			      // state.
-			      debug("LOG_X");
-			      return LOG_X;
-			  }
-			  else {
-			      debug("LOG_X not active");
-			      REJECT;
-			  }
-			}
-log[ \t]+y		{
-                          if (active.count(LOG_Y) ) {
-			      tokenpos += yyleng;
-			      // LOG_Y doesn't change the active
-			      // state.
-			      debug("LOG_Y");
-			      return LOG_Y;
-			  }
-			  else {
-			      debug("LOG_Y not active");
-			      REJECT;
-			  }
-			}
-log[ \t]+log		{
-                          if (active.count(LOG_LOG) ) {
-			      tokenpos += yyleng;
-			      // LOG_LOG doesn't change the active
-			      // state.
-			      debug("LOG_LOG");
-			      return LOG_LOG;
-			  }
-			  else {
-			      debug("LOG_LOG not active");
-			      REJECT;
-			  }
-			}
-ticks|tick		{
-                          if (active.count(TICKS) ) {
-			      tokenpos += yyleng;
-			      // Ticks needs to see lots of keywords
-			      active.clear();
-			      active.insert(LEFT);
-			      active.insert(RIGHT);
-			      active.insert(UP);
-			      active.insert(DOWN);
-			      active.insert(BOTTOM);
-			      active.insert(TOP);
-			      active.insert(IN);
-			      active.insert(OUT);
-			      active.insert(FROM);
-			      active.insert(TO);
-			      active.insert(BY);
-			      active.insert(AT);
-			      active.insert(OFF);
-			      active.insert(ON);
-			      debug("TICKS");
-			      return TICKS;
-			  }
-			  else {
-			      debug("TICKS not active");
-			      REJECT;
-			  }
-			}
-label			{
-                          if (active.count(LABEL) ) {
-			      tokenpos += yyleng;
-			      // Label needs to see string moifiers and
-			      // a bunch of placement keywords
-			      active.clear();
-			      active.insert(LEFT);
-			      active.insert(RIGHT);
-			      active.insert(UP);
-			      active.insert(DOWN);
-			      active.insert(BOTTOM);
-			      active.insert(TOP);
-			      active.insert(strmod_keys,
-					    strmod_keys +
-					    sizeof(strmod_keys)/sizeof(int));
-			      debug("LABEL");
-			      return LABEL;
-			  }
-			  else {
-			      debug("LABEL not active");
-			      REJECT;
-			  }
-			}
-grid			{
-                          if (active.count(GRID) ) {
-			      tokenpos += yyleng;
-			      // Draw needs to see linedescriptors and
-			      // everything TICK needs.  And TICK.
-			      active.clear();
-			      active.insert(LEFT);
-			      active.insert(RIGHT);
-			      active.insert(UP);
-			      active.insert(DOWN);
-			      active.insert(BOTTOM);
-			      active.insert(TOP);
-			      active.insert(IN);
-			      active.insert(OUT);
-			      active.insert(OFF);
-			      active.insert(ON);
-			      active.insert(FROM);
-			      active.insert(TO);
-			      active.insert(BY);
-			      active.insert(AT);
-			      active.insert(TICKS);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("GRID");
-			      return GRID;
-			  }
-			  else {
-			      debug("GRID not active");
-			      REJECT;
-			  }
-			}
-pic			{
-                          if (active.count(PIC) ) {
-			      tokenpos += yyleng;
-			      // Pic doesn't need to parse keywords
-			      active.clear();
-			      debug("PIC");
-			      return PIC;
-			  }
-			  else {
-			      debug("PIC not active");
-			      REJECT;
-			  }
-			}
-top			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(TOP) ) {
-			      tokenpos += yyleng;
-			      debug("TOP");
-			      return TOP;
-			  }
-			  else {
-			      debug("TOP not active");
-			      REJECT;
-			  }
-			}
-bottom|bot 		{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(BOTTOM) ) {
-			      tokenpos += yyleng;
-			      debug("BOTTOM");
-			      return BOTTOM;
-			  }
-			  else {
-			      debug("BOTTOM not active");
-			      REJECT;
-			  }
-			}
-left			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(LEFT) ) {
-			      tokenpos += yyleng;
-			      debug("LEFT");
-			      return LEFT;
-			  }
-			  else {
-			      debug("LEFT not active");
-			      REJECT;
-			  }
-			}
-right			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(RIGHT) ) {
-			      tokenpos += yyleng;
-			      debug("RIGHT");
-			      return RIGHT;
-			  }
-			  else {
-			      debug("RIGHT not active");
-			      REJECT;
-			  }
-			}
-up			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(UP) ) {
-			      tokenpos += yyleng;
-			      debug("UP");
-			      return UP;
-			  }
-			  else {
-			      debug("UP not active");
-			      REJECT;
-			  }
-			}
-
-down			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(DOWN) ) {
-			      tokenpos += yyleng;
-			      debug("DOWN");
-			      return DOWN;
-			  }
-			  else {
-			      debug("DOWN not active");
-			      REJECT;
-			  }
-			}
-ljust			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(LJUST) ) {
-			      tokenpos += yyleng;
-			      debug("LJUST");
-			      return LJUST;
-			  }
-			  else {
-			      debug("LJUST not active");
-			      REJECT;
-			  }
-			}
-rjust			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(RJUST) ) {
-			      tokenpos += yyleng;
-			      debug("RJUST");
-			      return RJUST;
-			  }
-			  else {
-			      debug("RJUST not active");
-			      REJECT;
-			  }
-			}
-above			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(ABOVE) ) {
-			      tokenpos += yyleng;
-			      debug("ABOVE");
-			      return ABOVE;
-			  }
-			  else {
-			      debug("ABOVE not active");
-			      REJECT;
-			  }
-			}
-below			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(BELOW) ) {
-			      tokenpos += yyleng;
-			      debug("BELOW");
-			      return BELOW;
-			  }
-			  else {
-			      debug("BELOW not active");
-			      REJECT;
-			  }
-			}
-aligned			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(ALIGNED) ) {
-			      tokenpos += yyleng;
-			      debug("ALIGNED");
-			      return ALIGNED;
-			  }
-			  else {
-			      debug("ALIGNED not active");
-			      REJECT;
-			  }
-			}
-unaligned		{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(UNALIGNED) ) {
-			      tokenpos += yyleng;
-			      debug("UNALIGNED");
-			      return UNALIGNED;
-			  }
-			  else {
-			      debug("UNALIGNED not active");
-			      REJECT;
-			  }
-			}
-size			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(SIZE) ) {
-			      tokenpos += yyleng;
-			      debug("SIZE");
-			      return SIZE;
-			  }
-			  else {
-			      debug("SIZE not active");
-			      REJECT;
-			  }
-			}
-sh			{
-                          if (active.count(SH) ) {
-			      tokenpos += yyleng;
-			      // SH doesn't need to parse keywords
-			      active.clear();
-			      debug("SH");
-			      return SH;
-			  }
-			  else {
-			      debug("SH not active");
-			      REJECT;
-			  }
-			}
-in			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(IN) ) {
-			      tokenpos += yyleng;
-			      debug("IN");
-			      return IN;
-			  }
-			  else {
-			      debug("IN not active");
-			      REJECT;
-			  }
-			}
-out			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(OUT) ) {
-			      tokenpos += yyleng;
-			      debug("OUT");
-			      return OUT;
-			  }
-			  else {
-			      debug("OUT not active");
-			      REJECT;
-			  }
-			}
-off			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(OFF) ) {
-			      tokenpos += yyleng;
-			      debug("OFF");
-			      return OFF;
-			  }
-			  else {
-			      debug("OFF not active");
-			      REJECT;
-			  }
-			}
-on|auto			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(ON) ) {
-			      tokenpos += yyleng;
-			      debug("ON");
-			      return ON;
-			  }
-			  else {
-			      debug("ON not active");
-			      REJECT;
-			  }
-			}
-bar			{
-                          if (active.count(BAR) ) {
-			      tokenpos += yyleng;
-			      // BAR needs to see HT/WID, UP, RIGHT,
-			      // BASE and line descriptors
-			      active.clear();
-			      active.insert(HT);
-			      active.insert(WID);
-			      active.insert(UP);
-			      active.insert(RIGHT);
-			      active.insert(BASE);
-			      active.insert(linedesc_keys,
-					    linedesc_keys +
-					    sizeof(linedesc_keys)/sizeof(int));
-			      debug("BAR");
-			      return BAR;
-			  }
-			  else {
-			      debug("BAR not active");
-			      REJECT;
-			  }
-			}
-fill			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(FILL) ) {
-			      tokenpos += yyleng;
-			      debug("FILL");
-			      return FILL;
-			  }
-			  else {
-			      debug("FILL not active");
-			      REJECT;
-			  }
-			}
-base			{
-                          if (active.count(BASE) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one BASE keyword
-			      // per statement.
-			      active.erase(BASE);
-			      debug("BASE");
-			      return BASE;
-			  }
-			  else {
-			      debug("BASE not active");
-			      REJECT;
-			  }
-			}
-ht			{
-                          if (active.count(HT) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one HT keyword
-			      // per statement.
-			      active.erase(HT);
-			      debug("HT");
-			      return HT;
-			  }
-			  else {
-			      debug("HT not active");
-			      REJECT;
-			  }
-			}
-wid			{
-                          if (active.count(WID) ) {
-			      tokenpos += yyleng;
-			      // There's only ever one WID keyword
-			      // per statement.
-			      active.erase(WID);
-			      debug("WID");
-			      return WID;
-			  }
-			  else {
-			      debug("WID not active");
-			      REJECT;
-			  }
-			}
-invis			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(INVIS) ) {
-			      tokenpos += yyleng;
-			      debug("INVIS");
-			      return INVIS;
-			  }
-			  else {
-			      debug("INVIS not active");
-			      REJECT;
-			  }
-			}
-solid			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(SOLID) ) {
-			      tokenpos += yyleng;
-			      debug("SOLID");
-			      return SOLID;
-			  }
-			  else {
-			      debug("SOLID not active");
-			      REJECT;
-			  }
-			}
-dotted			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(DOTTED) ) {
-			      tokenpos += yyleng;
-			      debug("DOTTED");
-			      return DOTTED;
-			  }
-			  else {
-			      debug("DOTTED not active");
-			      REJECT;
-			  }
-			}
-dashed			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(DASHED) ) {
-			      tokenpos += yyleng;
-			      debug("DASHED");
-			      return DASHED;
-			  }
-			  else {
-			      debug("DASHED not active");
-			      REJECT;
-			  }
-			}
-fillcolor		{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(FILLCOLOR) ) {
-			      tokenpos += yyleng;
-			      debug("FILLCOLOR");
-			      return FILLCOLOR;
-			  }
-			  else {
-			      debug("FILLCOLOR not active");
-			      REJECT;
-			  }
-			}
-color			{
-                          // Just report if this keyword is active and
-                          // ignore if not.
-                          if (active.count(COLOR) ) {
-			      tokenpos += yyleng;
-			      debug("COLOR");
-			      return COLOR;
-			  }
-			  else {
-			      debug("COLOR not active");
 			      REJECT;
 			  }
 			}
@@ -1196,6 +398,7 @@ rand			{
 				if ( !strcmp(yytext,f0names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;
+			BEGIN(GRAP);
  			return FUNC0;
 			}
 log|exp|int|sin|cos|sqrt|rand|eexp|ln	{
@@ -1206,6 +409,7 @@ log|exp|int|sin|cos|sqrt|rand|eexp|ln	{
 				if ( !strcmp(yytext,f1names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;
+			BEGIN(GRAP);
  			return FUNC1;
 			}
 atan2|min|max		{
@@ -1216,6 +420,7 @@ atan2|min|max		{
 				if ( !strcmp(yytext,f2names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;
+			BEGIN(GRAP);
 			return FUNC2;
 			}
 [.\'][ \t]*[^\t 0-9].*$                  {
@@ -1224,7 +429,8 @@ atan2|min|max		{
 				    if ( lexstack.empty() ||
 					 lexstack.front()->report_start == 1 )
 				    {
-					debug("Start: ", yytext); 
+					debug("Start: ", yytext);
+					BEGIN(GRAP);
 					return START;
 				    }
 				    else YY_BREAK;
@@ -1243,19 +449,19 @@ atan2|min|max		{
 				}			
                                 yylval.String = new string(yytext);
                                 debug("Troff: ", yytext);
+				BEGIN(GRAP);
 				return TROFF;
                         }
 \"([^\"\n]|\\\")*\"	{ 
 			debug("String: ", yytext);
 			yylval.String = new string(yytext);
 			tokenpos += yyleng;
+			BEGIN(GRAP);
 			return STRING;
 			}
 {identifier}		{ 
 			macro *m;
 			macroDictionary::iterator mi;
-			coordinateDictionary::iterator ci;
-			coord *c;
 			string *id;
 			char ch;
 
@@ -1278,15 +484,9 @@ atan2|min|max		{
 			        tokenpos += yyleng;
 			}
 			else {
-			    ci = the_graph->coords.find(*id);
-			    if ( ci != the_graph->coords.end()) {
-				c = (*ci).second;
-				yylval.coordptr = c;
-				return COORD_NAME;
-			    } else {
-				yylval.String = id;
-				return IDENT;
-			    }
+			    yylval.String = id;
+			    BEGIN(GRAP);
+			    return IDENT;
 			}
                         }
 .			tokenpos += yyleng; debug("unknown: ", yytext); return 0;
@@ -1467,6 +667,7 @@ atan2|min|max		{
     else
 	yylval.String = 0;
 
+    no_coord = false;
     return REST;
     }
 }
@@ -1483,6 +684,7 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
+
 bool include_file(string *s, int rs, bool usepath) {
     FILE *f=0;
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
@@ -1703,3 +905,4 @@ char *token_context(void) {
 string post_context(void) {
     return linebuf.substr(tokenpos);
 }
+

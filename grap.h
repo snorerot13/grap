@@ -68,6 +68,7 @@ class tick;
 class grid;
 class circle;
 class shiftdesc;
+class keyword;
 
 
 #ifndef HAVE_HASH_MAP
@@ -78,6 +79,7 @@ typedef map<string, double *, Strcmp> doubleDictionary;
 typedef map<string, coord *, Strcmp> coordinateDictionary;
 typedef map<string, line *, Strcmp> lineDictionary;
 typedef map<string, macro *, Strcmp> macroDictionary;
+typedef map<string, keyword, Strcmp> keywordDictionary;
 #else
 #include <hash_map>
 // A functor for hashing strings - it is an adapter to get to the
@@ -95,6 +97,7 @@ typedef hash_map<string, double *, Strhash> doubleDictionary;
 typedef hash_map<string, coord *, Strhash> coordinateDictionary;
 typedef hash_map<string, line *, Strhash> lineDictionary;
 typedef hash_map<string, macro *, Strhash> macroDictionary;
+typedef hash_map<string, keyword, Strhash> keywordDictionary;
 #endif
 typedef list<plot *> plotSequence;
 typedef list<double> doublelist;
