@@ -19,11 +19,11 @@ extern "C" {
 #include "grap_draw.h" 
 #include "y.tab.h"
 
-#define LEX_DEBUG
+//#define LEX_DEBUG
 #ifndef LEX_DEBUG
 #define DEBUG(a,b) {}
 #else
-#define DEBUG(a,b) fprintf(stderr,a,b); fprintf(stderr," %d %d\n",tokenpos, yyleng);
+#define DEBUG(a,b) fprintf(stderr,a,b);
 #endif
 
 int return_macro = 0;
@@ -517,15 +517,11 @@ bool include_file(String *s, int rs=0) {
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
 
     if ( s ) {
+	DEBUG("include_file(%s)\n",s->c_str());
         if ( gg ) {
             gg->tokenpos = tokenpos;
             tokenpos = 0;
         }
-	if ( !lexstack.empty()) {
-	    unput('\n');
-	    lexstack.front()->line--;
-	}
-	DEBUG("include_file(%s)\n",s->c_str());
 	if ( *s != "-" ) {
 	    strncpy(file, s->c_str(), MAXPATHLEN);
 	    if ( ( f = fopen(file,"r")) == 0 ) {
