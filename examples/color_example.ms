@@ -44,7 +44,7 @@ ticks left out at 44 , 46 "", 48, 50 "", 52, 54 ""
 ticks bot in from 1900 to 1980 by 20
 grid bot ticks off  color "yellow" from 1900 to 1980 by 20
 grid left ticks off  color "yellow" at 44, 46, 48, 50, 52, 54 
-draw solid color "green"
+draw solid color "green" delta color "blue"
 copy "400mpairs.d"
 new dotted color "red"
 copy "400wpairs.d"

@@ -38,13 +38,13 @@ string lk[] = {
 // Keywords recognized for sting modifiers 
 string sk[] = {
     "ljust", "rjust", "above", "below", "aligned", "unaligned", "size", 
-    "clipped", "unclipped"
+    "clipped", "unclipped", "color"
 };
 
 // Keywords recognized by ticks and graph
 string tk[] = {
     "left", "right", "up", "down", "bottom", "bot", "top", "in", "out",
-    "from", "to", "by", "at", "off", "on", "auto", "sprintf"
+    "from", "to", "by", "at", "off", "on", "auto", "sprintf", "color"
 };
 
 

@@ -69,12 +69,15 @@ public:
 	double size;
 	int rel;
 	bool clip;
-	modaccumulator() : just(0), size(0), rel(0) {};
+	string *color;
+	modaccumulator() : just(0), size(0), rel(0), clip(true), color(0) {};
 	int operator()(DisplayString* s) {
 	    just = s->j;
 	    size = s->size;
 	    rel = s->relsz;
 	    clip = s->clip;
+	    delete color;
+	    color = s->color;
 	    return 0;
 	}
 };
@@ -153,25 +156,9 @@ void draw_statement(string *ident, linedesc *ld, DisplayString *plot) {
     if ( ident ) {
 	li = the_graph->lines.find(*ident);
 	if ( li == the_graph->lines.end() ) {
-	    /*macroDictionary::iterator md;
-	    macro *m;
-	    DisplayString *s;
-
-	    // We need to create a new line with default parameters.
-	    // Initialize the line to be invisible with a bullet
-	    // plotting string.
-	    if ( ( md = macros.find("bullet")) != macros.end()) {
-		m = (*md).second;
-		string *ss = m->invoke();
-		s = new DisplayString(*ss);
-		delete ss;
-	    }
-	    else s = new  DisplayString("\"\\(bu\""); */
-
 	    if ( *ident == "grap_internal_default") defline = l = new line();
 	    else l = new line(*defline);
 	    the_graph->lines[*ident] = l;
-	    // delete s;
 	}
 	else {
 	    l = (*li).second;
@@ -189,8 +176,8 @@ void draw_statement(string *ident, linedesc *ld, DisplayString *plot) {
 
     if ( plot ) {
 	if ( *plot != "" ) {
-	    if ( l->plotstr ) *l->plotstr = *plot;
-	    else l->plotstr = new DisplayString(*plot);
+	    delete l->plotstr;
+	    l->plotstr = new DisplayString(*plot);
 	}
 	else {
 	    // If the string is "", don't issue the pic commands to
@@ -207,10 +194,8 @@ void draw_statement(string *ident, linedesc *ld, DisplayString *plot) {
 	// plot string, the user will have to explicitly specify an
 	// empty plot string.
 	if ( !extant ) {
-	    if (l->plotstr) {
-		delete l->plotstr;
-		l->plotstr = 0;
-	    }
+	    delete l->plotstr;
+	    l->plotstr = 0;
 	}
     }
     l->lastplotted(0);
@@ -286,7 +271,15 @@ stringlist *combine_strings(stringlist *sl, string *st, strmod &sm)  {
 	last.rel = sm.rel;
     }
 
-    s = new DisplayString(*st,last.just,last.size,last.rel);
+    // If there is a color in the string modifier, it will be used to create
+    // the new display string, otherise if there is a color specified for an
+    // earlier string use a copy of that string for the color to avoid freeing
+    // that string twice.
+    if ( sm.color ) last.color = sm.color;
+    else if ( last.color ) last.color = new string(*last.color);
+
+    s = new DisplayString(*st,last.just, last.size, last.rel, last.clip,
+	last.color);
     delete st;
     sl->push_back(s);
     return sl;

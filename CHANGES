@@ -1,5 +1,8 @@
 Change log
 
+1.30: Made the undocumented color commands support GNU pic color commands.  In
+other words added color to grap.
+
 1.27: A couple compilation bugs reported under later g++ versions by a couple
 people have been fixed.  Brian Mays caught a clipping bug, and Bruce Lilly also
 caught a couple compiler dependencies.

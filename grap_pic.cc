@@ -104,35 +104,39 @@ void PicDisplayString::draw(frame *) {
 // Draw a display string.  Basically just a straight translation into
 // pic/troff idioms.
 
+    cout << '"';
     if ( size ) {
 	if ( relsz ) {
 	    char relchar = ( size > 0 ) ? '+' : '-';
 	    size = fabs(size);
 	    if ( compat_mode ) {
-		cout << "\"\\s" << relchar;
+		cout << "\\s" << relchar;
 		cout << ((size > 9) ? "(" : "") << size;
 	    }
 	    else {
-		cout << "\"\\s[" << relchar << size << "]";
+		cout << "\\s[" << relchar << size << "]";
 	    }
 	}
 	else {
 	    // double digit size changes need the ( using classic troff.  Groff
 	    // allows a general [] syntax, that we use if available ).
 	    if ( compat_mode ) 
-		cout << "\"\\s" << ((size > 9) ? "(" : "") << size;
+		cout << "\\s" << ((size > 9) ? "(" : "") << size;
 	    else
-		cout << "\"\\s[" << size << "]";
+		cout << "\\s[" << size << "]";
 	}
     }
-    else cout << '"';
-
-    unquote(this);
+    if ( color && !compat_mode ) {
+	unquote(color);
+	cout << "\\m[" << *color << "]";
+    }
     
+    unquote(this);
     cout << *(string*)this;
 
-    if ( size ) cout << "\\s" << 0 << "\" ";
-    else cout << "\" ";
+    if ( color && !compat_mode ) cout << "\\m[]";
+    if ( size ) cout << "\\s" << 0 ;
+    cout << "\" ";
 
     if ( j & (int) ljust ) cout << "ljust ";
     if ( j & (int) rjust ) cout << "rjust ";
@@ -145,10 +149,6 @@ void PicDisplayString::draw(frame *) {
 void Picframe::frame_line(double x2, double y2, sides s) {
 // straightforward line drawing of one frame line
 
-    if ( desc[s].color ) {
-	unquote(desc[s].color);
-	cout << ".grap_color " << *desc[s].color << endl;
-    }
     switch (s) {
 	case left_side:
 	    cout << "Left: ";
@@ -182,10 +182,9 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 		cout << desc[s].param << " ";
 	    break;
     }
+    if ( desc[s].color&& !compat_mode  ) 
+	cout << " color " << *desc[s].color << " " ;
     cout << "right " << x2 << " up " << y2 << endl;
-    if ( desc[s].color ) {
-	cout << ".grap_color prev" << endl;
-    }
 }
 
 void Picframe::label_line(sides s) {
@@ -488,10 +487,6 @@ void Piclinesegment::draw(frame *f) {
 	// If clipping has left us a (partial) line to draw, do
 	// so.  This also is invoked on the first point of a line.
 	    
-	if ( desc.color ) {
-	    unquote(desc.color);
-	    cout << ".grap_color " << *desc.color << endl;
-	}
 	if ( !from ) {
 	    if ( inbox(x) && inbox(y) )
 		cout << "move to Frame.Origin + (" << x * f->wid << ", "
@@ -517,6 +512,8 @@ void Piclinesegment::draw(frame *f) {
 		    if ( desc.param ) cout << desc.param << " ";
 		    break;
 	    }
+	    if ( desc.color && !compat_mode ) 
+		cout << " color " << *desc.color << " " ;
 	    cout << "from Frame.Origin + (" << lastcx * f->wid << ", "
 		 << lastcy * f->ht << ") ";
 	    cout << "to Frame.Origin + (" << cx * f->wid << ", "
@@ -532,8 +529,6 @@ void Piclinesegment::draw(frame *f) {
 		     << y * f->ht << ")" << endl;
 	    else cout << " at last line.end" << endl;
 	}
-	if ( desc.color )
-	    cout << ".grap_color prev" << endl;
     }
 }
 
@@ -637,10 +632,6 @@ void Picgrid::draw(frame *f) {
     else a *= f->wid;
     if ( b < 0 || b > 1 ) return;
     else b *= f->ht;
-    if ( desc.color ) {
-	unquote(desc.color);
-	cout << ".grap_color " << *desc.color << endl;
-    }
     cout << "line ";
     switch (desc.ld) {
 	case invis:
@@ -660,10 +651,11 @@ void Picgrid::draw(frame *f) {
 		cout << desc.param << " ";
 	    break;
     }
+    if ( desc.color && !compat_mode ) 
+	cout << " color " << *desc.color << " ";
     cout << "from Frame.Origin + (" << a << ", " << b;
     cout << ") then " << dir << " ";
     cout << len << endl;
-    if ( desc.color ) cout << ".grap_color prev" << endl;
     if ( prt ) {
 	cout << "move from Frame.Origin + (" << a << ", " << b;
 	cout << ") then " << dir << " ";
@@ -697,24 +689,6 @@ void Piccircle::draw(frame *f) {
     }
     x *= f->wid;
     y *= f->ht;
-    if ( ld.fillcolor ) {
-	// fillcolor takes precedence over fill - if fillcolor is not
-	// null, we draw one box filled with that color, and then a
-	// second unfilled one in color (black is none specified)
-
-	ld.fill = 0;
-	unquote(ld.fillcolor);
-	cout << ".grap_color " << *ld.fillcolor << endl;
-	cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
-	cout << " rad " << rad << " invis fill 10" << endl;
-	cout << ".grap_color prev" << endl;
-    }	
-
-    // Draw the circle with appropriate line style, fill, and color
-    if ( ld.color ) {
-	unquote(ld.color);
-	cout << ".grap_color " << *ld.color << endl;
-    }
     cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
     cout << " rad " << rad ;
     switch (ld.ld) {
@@ -735,11 +709,21 @@ void Piccircle::draw(frame *f) {
 		cout << ld.param << " ";
 	    break;
     }
+    if ( ld.fillcolor && !compat_mode ) {
+	// fillcolor takes precedence over fill - if fillcolor is not
+	// null, we draw one box filled with that color, and then a
+	// second unfilled one in color (black is none specified)
+
+	ld.fill = 0;
+	cout << " shaded " << *ld.fillcolor << " ";
+    }	
+
+    // Draw the circle with appropriate line style, fill, and color
+    if ( ld.color && !compat_mode ) 
+	cout << " outline " << *ld.color << " ";
 
     if ( ld.fill ) cout << " fill " << ld.fill;
     cout << endl;
-    if ( ld.color )
-	cout << ".grap_color prev" << endl;
 }
 
 void Picbox::draw(frame *f) {
@@ -779,24 +763,6 @@ void Picbox::draw(frame *f) {
     wid = fabs(x1-x2);
     ht = fabs(y1-y2);
 
-    if ( ld.fillcolor ) {
-	// fillcolor takes precedence over fill - if fillcolor is not
-	// null, we draw one box filled with that color, and then a
-	// second unfilled one in color (black is none specified)
-
-	ld.fill = 0;
-	unquote(ld.fillcolor);
-	cout << ".grap_color " << *ld.fillcolor << endl;
-	cout << "box ht " << ht << " wid " << wid ;
-	cout << " with .ne at Frame.Origin + (" << x1 << ", " << y1 << ")";
-	cout << " invis fill 10" << endl;
-	cout << ".grap_color prev" << endl;
-    }	
-
-    if ( ld.color ) {
-	unquote(ld.color);
-	cout << ".grap_color " << *ld.color << endl;
-    }
     cout << "box ht " << ht << " wid " << wid ;
     cout << " with .ne at Frame.Origin + (" << x1 << ", " << y1 << ")";
     
@@ -819,10 +785,20 @@ void Picbox::draw(frame *f) {
 	    break;
     }
 
+    if ( ld.fillcolor && !compat_mode ) {
+	// fillcolor takes precedence over fill - if fillcolor is not
+	// null, we draw one box filled with that color, and then a
+	// second unfilled one in color (black is none specified)
+
+	ld.fill = 0;
+	cout << " shaded " << *ld.fillcolor << " ";
+    }	
+
+    if ( ld.color && !compat_mode ) 
+	cout << " outline " << *ld.color << " " ;
+
     if ( ld.fill ) cout << " fill " << ld.fill;
     cout << endl;
-    if ( ld.color )
-	cout << ".grap_color prev" << endl;
 }
 
 void Picplot::draw(frame *f) {

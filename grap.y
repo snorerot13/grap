@@ -281,7 +281,10 @@ opt_ident:
 opt_display_string:
 	    { $$ = 0; } 
 |	string strmod
-	    { $$ = new DisplayString(*$1, $2.just, $2.size, $2.rel); }
+	    {
+		$$ = new DisplayString(*$1, $2.just, $2.size, $2.rel, 
+		    $2.clip, $2.color);
+	    }
 ;
 
 string:
@@ -548,6 +551,7 @@ strmod:
 		$$.rel =0;
 		$$.just = (unaligned_default) ? unaligned : 0;
 		$$.clip = clip_default;
+		$$.color = 0;
 	    }
 | 	strmod SIZE expr
 	    { $$.size = $3; $$.rel = ($3<0); }
@@ -569,6 +573,8 @@ strmod:
 	    { $$.clip = true; }
 |	strmod UNCLIPPED
 	    { $$.clip = false; }
+|	strmod COLOR STRING
+	    { $$.color = $3; }
 ;
 
 strlist:
@@ -576,7 +582,8 @@ strlist:
 	    {
 		DisplayString *s;
 
-		s = new DisplayString(*$1,$2.just,$2.size, $2.rel, $2.clip);
+		s = new DisplayString(*$1,$2.just,$2.size, $2.rel, 
+		    $2.clip, $2.color);
 		delete $1;
 		$$ = new stringlist;
 		$$->push_back(s);

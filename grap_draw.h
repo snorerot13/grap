@@ -28,6 +28,7 @@ typedef struct {
     int rel;
     int just;
     bool clip;
+    string *color;
 } strmod;
 
 class linedesc  {
@@ -162,16 +163,23 @@ public:
     double size;	// Fontsize
     int relsz;		// True if the fontsize is relative
     bool clip;		// True if the string can only appear in the frame
+    string *color;	// color of the string
 
-    DisplayString() : string(), j(none), size(0), relsz(0), clip(true) {}
-    DisplayString(char *s, int ju=0, double sz=0, int rsz=0, bool c=true) :
-	string(s), j(ju), size(sz), relsz(rsz), clip(c) { }
-    DisplayString(string s, int ju=0, double sz=0, int rsz=0, bool c=true) :
-	string(s), j(ju), size(sz), relsz(rsz), clip(c) { }
+    DisplayString() : string(), j(none), size(0), relsz(0), clip(true), 
+	color(0) { }
+    DisplayString(char *s, int ju=0, double sz=0, int rsz=0, bool c=true,
+	    string *col=0) :
+	string(s), j(ju), size(sz), relsz(rsz), clip(c), color(col) { }
+    DisplayString(string s, int ju=0, double sz=0, int rsz=0, bool c=true,
+	    string *col=0) :
+	string(s), j(ju), size(sz), relsz(rsz), clip(c), color(col) { }
     DisplayString(DisplayString& ds) :
-	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz), clip(ds.clip) { }
+	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz), clip(ds.clip),
+	color(ds.color) { 
+	    if ( color ) color = new string(*color);
+    }
     DisplayString(double e, const DisplayString *fmt=0) :
-	j(0), size(0), relsz(0), clip(true) {
+	j(0), size(0), relsz(0), clip(true), color(0) {
 	char *c = new char[64];
 	bool delf = false;
 
@@ -185,9 +193,16 @@ public:
 	delete[] c;
 	if ( delf ) delete fmt;
 	else { 
-	    j = fmt->j; size = fmt->size; relsz = fmt->relsz; clip = fmt->clip;
+	    j = fmt->j;
+	    size = fmt->size;
+	    relsz = fmt->relsz;
+	    clip = fmt->clip;
+	    if ( fmt->color ) color = new string(*fmt->color);
+	    else color = 0;
 	}
     }
+
+    ~DisplayString() { delete color; } 
 };
 
 // A grap coordinate system
