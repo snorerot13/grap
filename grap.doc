@@ -33,9 +33,9 @@ is a
 pre-processor.  It takes commands embedded in a 
 .Xr troff 1
 source file which are surrounded by 
-.Li .G1
+.Ic .G1
 and
-.Li .G2
+.Ic .G2
 macros, and rewrites them into pic commands to display the graph.
 Other lines are copied.  Output is always to the standard output,
 which is usually reidrected.  Input is from the given
@@ -70,19 +70,19 @@ option inhibits the reading of any initial macros file.
 All
 .Nm
 commands are included between 
-.Li .G1
+.Ic .G1
 and
-.Li .G2
+.Ic .G2
 macros, which are consumed by 
 .Nm .
 The output contains pic between
-.Li .PS
+.Ic .PS
 and
-.Li .PE
+.Ic .PE
 macros.  Any arguments to the
-.Li .G1
+.Ic .G1
 macro in the input are arguments to the
-.Li .PS
+.Ic .PS
 macro in the output, so graphs can be scaled just like pic diagrams.
 .Pp
 The 
