@@ -129,26 +129,6 @@ public:
 	}
     };
 
-    // Convert the abstract types to Pictypes and draw them.  These
-    // are called from for_each.
-    template <class FROM, class TO>
-    class draw_f :
-	public UnaryFunction<FROM *, int> {
-	frame *f;
-    public:
-	draw_f(frame *fr) : f(fr) { }
-	int operator()(FROM *ds) {
-	    TO p(*ds);
-	    p.draw(f);
-	    return 0;
-	}
-    };
-
-    // Simpler declarations
-    typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
-    typedef draw_f<tick, Pictick> draw_tick_f;
-    typedef draw_f<grid, Picgrid> draw_grid_f;
-
     // Print strings to the given ostream.  These two are not strictly
     // beautiful things, but those above are, and mixing for_each and
     // direct iterator manipulation in Picgraph::draw is ugly.  This

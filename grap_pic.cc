@@ -12,6 +12,27 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
+// Convert the abstract types to Pictypes and draw them.  These are
+// called from for_each.  These are declared outside the pic classes
+// to keep g++ 2.7.3 happy.
+template <class FROM, class TO>
+class draw_f :
+    public UnaryFunction<FROM *, int> {
+    frame *f;
+public:
+    draw_f(frame *fr) : f(fr) { }
+    int operator()(FROM *ds) {
+	TO p(*ds);
+	p.draw(f);
+	return 0;
+    }
+};
+
+// Simpler declarations
+typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
+typedef draw_f<tick, Pictick> draw_tick_f;
+typedef draw_f<grid, Picgrid> draw_grid_f;
+
 void Picgraph::init(String *n=0, String* p=0) {
     // Start a new graph, but maybe not a new block.
     
@@ -23,7 +44,7 @@ void Picgraph::init(String *n=0, String* p=0) {
     if ( p ) pos = new String(*p);
 }
 	
-void Picgraph::draw(frame *f) {
+void Picgraph::draw(frame *) {
 // Do the work of drawing the current graph.  Convert non-drawable
 // lines to Piclines, and put them in the object list for this graph.
 // Do pic specific setup for the graph, and let the base class plot
@@ -184,7 +205,7 @@ void Picframe::label_line(sides s) {
 // is straightforward.
 
     // Functor to convert a DisplayString to a PicdisplayString and print it
-    Picgraph::draw_string_f draw_string(this);
+    draw_string_f draw_string(this);
     double dx, dy; // Used to place the alignment line relative to the axis
     shiftlist::const_iterator csi;
 
@@ -350,8 +371,8 @@ void Picframe::draw(frame *) {
     
     // functors to draw ticks and grids out of the lists.  
 
-    Picgraph::draw_tick_f draw_tick(this);
-    Picgraph::draw_grid_f draw_grid(this);
+    draw_tick_f draw_tick(this);
+    draw_grid_f draw_grid(this);
 
     cout << "Frame: [" << endl;
     cout << "Origin: " << endl;
@@ -708,7 +729,7 @@ void Picplot::draw(frame *f) {
     double x, y;  // To transform the point into device coordinates
 
     // To print a set of strings
-    Picgraph::draw_string_f draw_string(f);
+    draw_string_f draw_string(f);
 
     if ( !strs || !loc ) return;
 
