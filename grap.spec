@@ -33,3 +33,4 @@ make install
 /usr/bin/grap
 /usr/share/man/man1/grap.1
 /usr/share/grap/
+/usr/share/doc/grap/
