@@ -214,6 +214,7 @@ atan2|min|max		{
 					 lexstack.front()->report_start == 1) {
 
 					yyinput(); // Gobble up the newline
+					newline();
 					DEBUG("End: %s\n",yytext);
 					BEGIN(INITIAL);
 					return END;

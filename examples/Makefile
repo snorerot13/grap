@@ -16,7 +16,7 @@ local.color_example.ps:	color_example.ms
 	../grap -d ../grap.defines color_example.ms | groff -pe $(MACROS) $(COLOR) > local.color_example.ps
 
 clean:
-	rm -f *.ps
+	rm -f *.ps file* embed*
 
 #html conversions
 
