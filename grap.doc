@@ -1168,6 +1168,12 @@ as a separate statement, it is not part of a valid expression.
 .Ic srand
 is not portable.
 .Pp
+The
+.Ic getpid
+function takes no arguments and returns the process id.  This may be
+used to seed the random number generator, but do not expect
+cryptographically random values to result.
+.Pp
 Other than string comparison, no expressions can use strings.  One
 string valued function exists: 
 .Ic sprintf ( Ar format ,
