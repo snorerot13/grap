@@ -64,7 +64,7 @@ install:	grap grap.defines grap.1
 	$(INSTALL) -c -g bin -o root -m 644 grap.defines $(DEFINESDIR)
 	$(INSTALL) -c -g bin -o root -m 644 examples/*.d examples/*.ms examples/Makefile $(DEFINESDIR)/examples
 
-uninstall:
+deinstall:
 	$(RM) $(BINDIR)/grap
 	$(RM) $(MANDIR)/grap.1
 	$(RM) $(DEFINESDIR)/grap.defines

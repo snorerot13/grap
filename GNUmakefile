@@ -41,8 +41,8 @@ grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
 y.output:	grap.y
 	$(YACC) -v $(.ALLSRC)
 
-grap.1:	grap.doc
-	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1
+grap.1:	grap.an
+	cp grap.an grap.1
 
 clean:
 	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1
