@@ -56,12 +56,14 @@ inline int snprintf(char *s, int lim, char *fmt, double d) {
 #endif
 
 #include <stl.h>
-#include <hash_map>
 #ifdef USE_STD_STRING
 #include <string>
 typedef string String;
 #else
-class String;
+// need to include the full definition of the kludgy string class so
+// that less<String> is defined when we have no hash map.
+#include <string.h>
+#include "grap_string.h"
 #endif
 
 class DisplayString;
@@ -83,6 +85,7 @@ typedef map<String, coord *, Strcmp> coordinateDictionary;
 typedef map<String, line *, Strcmp> lineDictionary;
 typedef map<String, macro *, Strcmp> macroDictionary;
 #else
+#include <hash_map>
 // A functor for hashing strings - it is an adapter to get to the
 // standard library char * hash function.
 class Strhash : public unary_function<const String&, size_t> {

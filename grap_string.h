@@ -1,3 +1,5 @@
+#ifndef GRAP_STRING_H
+#define GRAP_STRING_H
 
 // These should be replaced by the standard string library, but under
 // g++ 2.7.2.1 that library is incompatible with the STL
@@ -100,6 +102,11 @@ public:
     int operator!=(const char *s) const {
 	return strcmp(str,s);
     }
+
+    int operator<(String& s) {
+	return strcmp(str,s.str) < 0;
+    }
+
     friend ostream& operator<<(ostream&, String&);
 
     void quote() {
@@ -213,3 +220,4 @@ public:
 	str = n;
     }
 };
+#endif

@@ -98,7 +98,7 @@ install:	grap grap.defines grap.1
 deinstall:
 	$(RM) $(BINDIR)/grap
 	$(RM) $(MANDIR)/grap.1
-	$(RM) $(DEFINESDIR)/grap.defines
-	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile
+	$(RM) $(DEFINESDIR)/grap.defines $(DEFINESDIR)/README $(DEFINESDIR)/CHANGES $(DEFINESDIR)/COPYRIGHT
+	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile $(DEFINESDIR)/examples/*result
 	$(RMDIR) $(DEFINESDIR)/examples
 	$(RMDIR) $(DEFINESDIR)
