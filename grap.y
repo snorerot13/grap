@@ -943,12 +943,14 @@ copy_statement:
 		    else if (t) delete t;
 		    t = $5->invoke();
 		    *expand += *t;
-		    // "here" macros should end with a SEP.  If the user
-		    // hasn't done so, we add a SEP for them.
+		    // "here" macros should end with a SEP.  If the
+		    // user hasn't done so, we add a SEP for them.
+		    // Even named macros should get a sep when they're
+		    // copied through,
 
 		    end = (*expand)[expand->length()-1];
 
-		    if ( !$5->name && end != ';' && end != '\n' ) 
+		    if ( end != ';' && end != '\n' ) 
 			*expand += ';';
 		    delete t;
 		    delete s;
