@@ -49,6 +49,11 @@ grap.defines needs to be fooled with.  If you use TeX and find a set
 of grap.defines that work, please let me know.  Some people have used
 the given grap.tex.defines.  Modifications always welcome.
 
+If you want to generate a GNU makefile when the system make command is
+not GNU make, use the --enable-force-gnu-make option to configure.
+configure does it's best to tell if you have GNU make and create an
+appropriate make file, but can be confused.
+
 The man page uses the BSD macros.  If your system doesn't, there's an
 ASCII version in grap.man, and a postscript version in grap.ps.
 

@@ -16,22 +16,33 @@ AC_CHECK_PROGS(CKSUM_PROG,md5 sum, echo)
 # byacc generates, and compiling those tables aren't the problem
 # anyway.  So don't try it again.
 
-AC_MSG_CHECKING(whether $INSTALL supports -d)
-if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$; then 
-	AC_MSG_RESULT(yes)
-else
-	INSTALL=$ac_install_sh
-	AC_MSG_RESULT(no (directory installs will use $INSTALL))
-fi
-rm -rf /tmp/test$$
+AC_CACHE_CHECK(whether $INSTALL supports -d, grap_cv_prog_install_d, 
+	if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$ ; then 
+		grap_cv_prog_install_d="yes"
+	else
+		grap_cv_prog_install_d="no"
+	fi
+	rm -rf /tmp/test$$
+)
 
-AC_CACHE_CHECK(whether make is GNU make, grap_cv_prog_gmake,
+if test "$grap_cv_prog_install_d" = "no" ; then
+	INSTALL=$ac_install_sh
+fi
+
+
+AC_MSG_CHECKING(whether make is GNU make)
+AC_ARG_ENABLE(force-gnu-make, 
+--enable-force-gnu-make            create a GNU make file,
+grap_cv_prog_gmake="yes",
+AC_CACHE_VAL(grap_cv_prog_gmake, 
 	if  make -n -v 2>/dev/null | grep GNU > /dev/null; then
 		grap_cv_prog_gmake="yes"
 	else
 		grap_cv_prog_gmake="no"
 	fi
-)
+))
+AC_MSG_RESULT($grap_cv_prog_gmake)
+
 
 # If we're using GNU make, include a line in the makefile including
 # the dependencies

@@ -90,26 +90,18 @@ grap.ps:	grap.1
 	groff -mdoc grap.1 > grap.ps
 
 grap.1:	grap.doc
-	perl -pe "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
+	sed "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;
 
-dist:	
-	${MAKE} makesum
-	${MAKE} clean
-	cd examples && ${MAKE} clean
-	${MAKE} grap.man
-	${MAKE} grap.ps
-	cd .. && tar cf - grap | (cd /tmp && tar xf -)
-	cd /tmp && mv grap ${DISTDIR}
-	${RM} /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile \
-		/tmp/${DISTDIR}/examples/Makefile /tmp/${DISTDIR}/.cvsignore \
-		/tmp/${DISTDIR}/examples/.cvsignore 
-	${RM} /tmp/${DISTDIR}/examples/Makefile.local \
-		/tmp/${DISTDIR}/examples/color_example.ms
-	${RM} /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
-	${RM} -r /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
-	${RM} -r /tmp/${DISTDIR}/examples/*.ps.gz /tmp/${DISTDIR}/examples/*.pdf 
-	cd /tmp && tar czf ${DISTDIR}.tar.gz ${DISTDIR}
-	mv /tmp/${DISTDIR}.tar.gz . && ${RM} -rf /tmp/${DISTDIR}
+manifest:	manifest.in
+	sed 's/^/${DISTDIR}\//;' < manifest.in > manifest
+
+dist:	cksum.md5 cksum.sum cksum.echo manifest grap.man grap.ps
+	${RM} examples/test.grap
+	cd .. && tar cf - grap | (cd /tmp && tar xf - && mv grap ${DISTDIR} )
+	cd /tmp && tar --create --gzip --file ${DISTDIR}.tar.gz \
+		 --files-from ${DISTDIR}/manifest
+	mv /tmp/${DISTDIR}.tar.gz .
+	${RM} -r /tmp/${DISTDIR}
 
 clean:
 	${RM} grap $(OBJS) *.o grap.1 grap.man grap.ps \
@@ -125,7 +117,7 @@ veryclean:
 spotless:
 	${MAKE} veryclean
 	${MAKE} cleanconfig
-	${RM} .depend configure Makefile config.h cksum.*
+	${RM} .depend configure Makefile config.h cksum.* manifest
 
 
 # The || true lines allow make to continue on systems where install -d

@@ -17,7 +17,6 @@ version of grap, so I built one.
 
 %build
 ./configure --prefix=/usr/
-make depend
 make 
 
 %install

@@ -35,7 +35,7 @@ are a possibility.
 
 The only change this necessitated was that if you specify a coordinate
 system in an automatic ticks statement, you have to use the on or auto
-keyword.  See the examples document for a document.
+keyword.  See the examples document for an example.
 
 I recoded macros to remove an antiquated construct that was confusing
 some non-g++ compilers.  A static array was recoded as an STL vector,
@@ -49,13 +49,19 @@ initialization, but it drives the g++ optimizer stone crazy.
 optimization is specifically disabled under g++.  You can override
 that behavior by specifying --enable-optimize-grap_tokenizer to
 ./configure.  On the machines I use, optimizing this module has
-negligible effect on performance.
+absolutely no effect on performance, and I suggest you don't bother
+spending the time optimizing it.
+
+The autoconf and make stuff has been revamped to use GNU make's
+automatic makefile generation or BSD pmake's automatic .depend
+inclusion, as well as simplifying the distribution creation and
+caching all configuration values.  If you want to use GNU make, but
+it's not the default make on your system, you can force a gnu makefile
+creation with the --enable-force-gnu-make option to configure.
 
 Added some GNU standard Makefile targets to the Makefile.
 
 Fixed some bugs in the manual page.
-
-Lots of autoconf tweaks.
 
 Many additional compatibility changes suggested by Bruce Lilly.
 
