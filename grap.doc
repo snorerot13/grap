@@ -1031,7 +1031,8 @@ first x value.  Number lists in DWB
 .Nm
 can be comma-separated, and this 
 .Nm
-supports that as well.
+supports that as well.  More precisely, numbers in number lists can be
+separated by either whitespace, commas, or both.
 .Bd -literal -offset indent-two
 1 2 3
 4 5 6
