@@ -14,10 +14,12 @@ class tick;
 class grid;
 class circle;
 
-typedef Dictionary<double *> doubleDictionary;
-typedef Dictionary<coord *> coordinateDictionary;
-typedef Dictionary<line *> lineDictionary;
-typedef Dictionary<macro *> macroDictionary;
+typedef less<String> Strcmp;
+
+typedef map<String, double *, Strcmp> doubleDictionary;
+typedef map<String, coord *, Strcmp> coordinateDictionary;
+typedef map<String, line *, Strcmp> lineDictionary;
+typedef map<String, macro *, Strcmp> macroDictionary;
 typedef list<plot *> plotSequence;
 typedef list<double> doublelist;
 typedef list<tick *> ticklist;

@@ -11,7 +11,7 @@ MKDIR=mkdir
 LDLIBS=-ll -ly
 CXXFLAGS=-g
 #CXXFLAGS += -DLEX_DEBUG
-CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
+CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" -DHAVE_SNPRINTF
 OBJS=grap.o grap_lex.o grap_draw.o
 
 .o.out:

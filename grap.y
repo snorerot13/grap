@@ -298,12 +298,16 @@ draw_statement:
 	DRAW opt_ident linedesc opt_string SEP
 	    {
 		line *l;
+		lineDictionary::iterator li;
 		linedescval defld = { invis,0,0 };
 
 		if ( $2 ) {
-		    if ( !lines.find($2,l) ) {
+		    if ( ( li = lines.find($2)) == lines.end() ) {
 			l = new line(&defld,&String("\"\\(bu\""));
-			lines.insert($2,l);
+			lines[$2] = l;
+		    }
+		    else {
+			l = (*li).second;
 		    }
 		} else l = defline;
 
@@ -465,8 +469,12 @@ expr:
 |	IDENT
  	    {
 		double *d;
+		doubleDictionary::iterator di;
 		
-		if ( vars.find($1,d)) $$ = *d;
+		if ( (di = vars.find($1)) != vars.end()) {
+		    d = (*di).second;
+		    $$ = *d;
+		}
 		else cout << "Can't find " << $1 << endl;
 
 		delete $1;
@@ -479,11 +487,15 @@ assignment_statement:
 	IDENT EQUALS expr SEP
 	    {
 		double *d;
+		doubleDictionary::iterator di;
 		
-		if ( vars.find($1,d) ) *d = $3;
+		if ( ( di = vars.find($1)) != vars.end() ) {
+		    d = (*di).second;
+		    *d = $3;
+		}
 		else {
 		    d = new double($3);
-		    vars.insert($1,d);
+		    vars[$1] = d;
 		}
 	    }
 
@@ -598,12 +610,14 @@ next_statement:
 	NEXT opt_ident AT point opt_linedesc SEP
 	    {
 		line *l;
+		lineDictionary::iterator li;
 
 		if ( $2 ) {
-		    if ( !lines.find($2,l) ) {
+		    if ( ( li = lines.find($2)) == lines.end() ) {
 			l = new line((linedescval *)0, &String("\"\\(bu\"") );
-			lines.insert($2,l);
+			lines[$2] = l;
 		    }
+		    else { l = (*li).second; }
 		} else l = defline;
 		
 		if ( $5.ld != def )
@@ -1005,15 +1019,17 @@ line_statement:
 	line_token opt_linedesc FROM point TO point opt_linedesc SEP
 	    {
 		line *l;
+		lineDictionary::iterator li;
 		linedescval des;
 
-		if ( !lines.find("grap.internal", l) ) {
+		if ( ( li = lines.find("grap.internal")) == lines.end() ) {
 		    des.ld = solid;
 		    des.param = 0;
 		    des.color = 0;
 		    l = new line(&des);
-		    lines.insert("grap.internal",l);
+		    lines["grap.internal"] = l;
 		}
+		else { l = (*li).second; } 
 
 		des = $2;
 		if ( $7.ld != def ) {
@@ -1078,11 +1094,14 @@ coord_statement:
 	COORD opt_ident x_axis_desc y_axis_desc log_desc SEP
 	    {
 		coord *c;
+		coordinateDictionary::iterator ci;
+
 		if ($2) {
-		    if (!coordinates.find($2,c)) {
+		    if ( (ci = coordinates.find($2)) == coordinates.end()) {
 			c = new coord;
-			coordinates.insert($2,(coord *) c);
+			coordinates[$2] = c;
 		    }
+		    else { c = (*ci).second; }
 		    delete $2;
 		} else {
 		    c = defcoord;
@@ -1169,14 +1188,16 @@ define_statement:
 	DEFINE { lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP
 	    {
 		macro *m;
-		if ( macros.find($3,m) ) {
+		macroDictionary::iterator mi;
+		if ( ( mi = macros.find($3)) != macros.end() ) {
+		    m = (*mi).second;
 		    if ( m->text ) {
 			delete m->text;
 			m->text = $5;
 		    }
 		} else {
 		    m = new macro($5);
-		    macros.insert($3,m);
+		    macros[$3] = m;
 		}
 	    }
 ;
@@ -1218,14 +1239,18 @@ for_statement:
 	FOR IDENT from expr TO expr by_clause DO { lex_begin_macro_text(); } TEXT SEP
 	    {
 		struct for_descriptor *f;
+		doubleDictionary::iterator di;
 		double *d;
 		
 		f = new (struct for_descriptor);
 
-		if ( vars.find($2,d) ) *d = $4;
+		if ( ( di = vars.find($2)) != vars.end() ) {
+		    d = (*di).second;
+		    *d = $4;
+		}
 		else {
 		    d = new double($4);
-		    vars.insert($2,d);
+		    vars[$2] = d;
 		}
 		f->loop_var = d;
 		if ( $6 -$4 > 0 ) f->dir = 1;
@@ -1313,7 +1338,8 @@ void draw_graph() {
     plot *p;
     circle *cir;
     String *s;
-
+    coordinateDictionary::iterator ci;
+    
     class string_out_f : public UnaryFunction<String*, int> {
 	ostream &f;
     public:
@@ -1335,13 +1361,32 @@ void draw_graph() {
 	int operator() (circle *c) { c->draw(f); }
     } circle_out(&the_frame);
 	
+    class line_out_f : public UnaryFunction<line *,int> {
+	frame *f;
+    public:
+	line_out_f(frame *ff) : f(ff) {};
+	int operator() (lineDictionary::value_type li) {
+	    line *l = li.second;
+	    l->draw(f);
+	}
+    } line_out(&the_frame);
+	
+    class addm_f :
+    public UnaryFunction<coordinateDictionary::value_type, int> {
+    public:
+	int operator() (coordinateDictionary::value_type cp) {
+	    coord *c = cp.second;
+	    c->addmargin(0.07);
+	}
+    } addm;
 
-    for ( gn = coordinates.first(c); gn; gn = coordinates.next(c)) 
-	c->addmargin(0.07);
-    if ( !coordinates.find("grap.internal.default",c) ) {
+    for_each(coordinates.begin(), coordinates.end(), addm);
+    if ((ci = coordinates.find("grap.internal.default"))
+	 == coordinates.end()) {
 	cerr << "Lost default coords!!" << endl;
 	exit(20);
     }
+    else { c = (*ci).second; }
     if ( visible ) {
 	if ( !graphs++ ) {
 	    cout << ".PS";
@@ -1349,21 +1394,14 @@ void draw_graph() {
 	    cout << endl;
 	}
 	for_each(troff.begin(), troff.end(), string_out);
-// 	for ( gn = troff.first(s); gn; gn = troff.next(s)) 
-// 	    cout << *s << endl;
 	if ( graph_name ) cout << *graph_name << ": ";
 	cout << "[" << endl;
 	the_frame.draw();
 	
 	for_each(plots.begin(), plots.end(), plot_out);
 	for_each(circles.begin(), circles.end(), circle_out);
+	for_each(lines.begin(), lines.end(), line_out ) ;
 	
- 	for ( gn = lines.first(l); gn; gn = lines.next(l))
- 	    l->draw(&the_frame);
-// 	for ( gn = plots.first(p); gn; gn = plots.next(p))
-// 	    p->draw(&the_frame);
-// 	for ( gn = circles.first(cir); gn; gn = circles.next(cir))
-// 	    cir->draw(&the_frame);
 	cout << "]";
 	if ( graph_pos ) cout << " " << *graph_pos << endl;
 	else cout << endl;
@@ -1403,29 +1441,35 @@ void init_graph() {
 	int operator() (circle *c) { delete c; }
     } del_circle;
 
+    class del_coords_f :
+    public UnaryFunction<coordinateDictionary::value_type, int> {
+    public:
+	int operator() (coordinateDictionary::value_type ci) {
+	    coord * c = ci.second;
+	    delete c;
+	}
+    } del_coords;
+
+    class del_line_f :
+    public UnaryFunction<lineDictionary::value_type, int> {
+    public:
+	int operator() (lineDictionary::value_type li) {
+	    line * l = li.second;
+	    delete l;
+	}
+    } del_line;
+
     visible = 0;
 
-    for ( gotnext = coordinates.first(c); gotnext ;
-	  gotnext = coordinates.next(c)) 
-	delete c;
-    for ( gotnext = lines.first(l); gotnext; gotnext = lines.next(l))
-	delete l;
+    for_each(coordinates.begin(), coordinates.end(), del_coords);
+    for_each(lines.begin(), lines.end(), del_line);
     for_each(plots.begin(), plots.end(), del_plot);
     for_each(circles.begin(), circles.end(), del_circle);
     for_each(troff.begin(), troff.end(), del_str);
     for_each(pic.begin(), pic.end(), del_str);
     
-//     for ( gotnext = plots.first(p); gotnext; gotnext = plots.next(p))
-// 	delete p;
-//     for ( gotnext = circles.first(cir); gotnext; gotnext = circles.next(cir))
-// 	delete cir;
-//     for ( gotnext = pic.first(s); gotnext; gotnext= pic.next(s))
-// 	delete s;
-//     for ( gotnext = troff.first(s); gotnext; gotnext= troff.next(s))
-// 	delete s;
-    
-    coordinates.clear();
-    lines.clear();
+    coordinates.erase(coordinates.begin(), coordinates.end());
+    lines.erase(lines.begin(), lines.end());
     plots.erase(plots.begin(), plots.end());
     circles.erase(circles.begin(), circles.end());
     pic.erase(pic.begin(), pic.end());
@@ -1433,13 +1477,13 @@ void init_graph() {
     the_frame.clear();
 		
     defcoord = new coord;
-    coordinates.insert("grap.internal.default",defcoord);
+    coordinates["grap.internal.default"] = defcoord;
     for ( int i = 0 ; i < 4; i++) {
 	the_frame.tickdef[i].c = defcoord;
 	the_frame.griddef[i].c = defcoord;
     }
     defline = new line(&defld,&String("\"\\(bu\"") );
-    lines.insert("grap.internal.default",defline);
+    lines["grap.internal.default"] = defline;
     nlines = 0;
 }
 

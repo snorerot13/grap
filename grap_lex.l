@@ -212,6 +212,8 @@ atan2|min|max		{
 			}
 [A-Za-z0-9_]*		{ 
 			macro *m;
+			macroDictionary::iterator mi;
+			coordinateDictionary::iterator ci;
 			coord *c;
 			line *l;
 			String *id;
@@ -219,7 +221,9 @@ atan2|min|max		{
 
 			DEBUG("ident: %s\n",yytext);
 			id = new String(yytext);
-			if ( lex_expand_macro && macros.find(id,m) ) {
+			if ( lex_expand_macro &&
+			     ( mi = macros.find(id)) != macros.end() ) {
+			        m = (*mi).second;
 				delete id;
 				ch = yyinput();
 				if ( ch == '(') macro_args(m);
@@ -229,7 +233,9 @@ atan2|min|max		{
 				delete id;
 			}
 			else {
-				if ( coordinates.find(id,c) ) {
+				if ( ( ci = coordinates.find(id)) !=
+				            coordinates.end()) {
+				        c = (*ci).second;
 					yylval.coordptr = c;
 					return COORD_NAME;
 				} else {
@@ -346,9 +352,11 @@ atan2|min|max		{
 [ \t]+
 [A-Za-z0-9_]* 	{
     macro *m;
+    macroDictionary::iterator mi;
     
     String *id = new String(yytext);
-    if ( macros.find(id,m)) {
+    if ( ( mi = macros.find(id)) != macros.end()) {
+	m = (*mi).second;
 	delete id;
 	BEGIN(GRAP);
 	yylval.macro_val = m;

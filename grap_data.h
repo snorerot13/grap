@@ -5,6 +5,9 @@
 #include <stl.h>
 
 
+// These should be replaced by the standard string library, but under
+// g++ 2.7.2.1 that library is incompatible with the STL
+
 const static int strchunk = 256;
 
 class String {
@@ -93,6 +96,10 @@ public:
 
     int operator==(const String &s) const {
 	return !strcmp(str,s.str);
+    }
+
+    int operator<(const String &s) const {
+	return ( strcmp(str,s.str) < 0) ;
     }
 
     int operator==(const char *s) const {
@@ -205,59 +212,59 @@ public:
     }
 };
 
-template <class objtype>
-class Dictionary {
-public:
-    Dictionary() : list(0), it(0) {};
-    ~Dictionary() { clear();}
-    int find(String n, objtype &found ) {
-	node *v = list;
-	while ( v != NULL && v->name != n )
-	    v= v->next;
-	if ( v )
-	    found = v->obj;
-	return (v) ? 1 : 0;
-    }
-    void insert(String n, objtype o) {
-	node *v;
+// template <class objtype>
+// class Dictionary {
+// public:
+//     Dictionary() : list(0), it(0) {};
+//     ~Dictionary() { clear();}
+//     int find(String n, objtype &found ) {
+// 	node *v = list;
+// 	while ( v != NULL && v->name != n )
+// 	    v= v->next;
+// 	if ( v )
+// 	    found = v->obj;
+// 	return (v) ? 1 : 0;
+//     }
+//     void insert(String n, objtype o) {
+// 	node *v;
 	
-	if ( list ) {
-	    for ( v = list; v->next != 0; v = v->next)
-		;
-	    v->next = new node(n,o);
-	} else list = new node(n,o);
-    }
-    int first(objtype& found) {
-	it = (list ) ? list->next : 0;
-	if ( list) found = list->obj;
-	return (list) ? 1 : 0;
-    }
-    int next(objtype& found) {
-	node *i = it;
-	if ( it ) found = it->obj;
-	it = (it) ? it->next : 0;
-	return (i) ? 1 : 0;
-    }
-    void clear() {
-	node *v, *u;
- 	for ( v = list; v; v = u ) {
-	    u = v->next;
-	    delete v;
-	}  
-	list = it = 0;
-    } 
+// 	if ( list ) {
+// 	    for ( v = list; v->next != 0; v = v->next)
+// 		;
+// 	    v->next = new node(n,o);
+// 	} else list = new node(n,o);
+//     }
+//     int first(objtype& found) {
+// 	it = (list ) ? list->next : 0;
+// 	if ( list) found = list->obj;
+// 	return (list) ? 1 : 0;
+//     }
+//     int next(objtype& found) {
+// 	node *i = it;
+// 	if ( it ) found = it->obj;
+// 	it = (it) ? it->next : 0;
+// 	return (i) ? 1 : 0;
+//     }
+//     void clear() {
+// 	node *v, *u;
+//  	for ( v = list; v; v = u ) {
+// 	    u = v->next;
+// 	    delete v;
+// 	}  
+// 	list = it = 0;
+//     } 
 
-protected:
-    class node {
-    public:
-	node(String n, objtype o) : name(n), obj(o), next(0) {}
-	String name;
-	objtype obj;
-	node *next;
-    };
-    node *list;
-    node *it;
-};
+// protected:
+//     class node {
+//     public:
+// 	node(String n, objtype o) : name(n), obj(o), next(0) {}
+// 	String name;
+// 	objtype obj;
+// 	node *next;
+//     };
+//     node *list;
+//     node *it;
+// };
 /*
 template <class objtype>
 class Sequence {
