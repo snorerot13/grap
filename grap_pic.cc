@@ -353,11 +353,17 @@ void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
 	idx = pow(10,floor(log10(lo)));
     }
 
+    // On machines with signed 0 representations, this ensures that
+    // tickmarks have a 0 label (not a -0).  See math(3).
+
+    if ( idx == 0.0 ) idx = 0.0;
+    
     // Are ticks increasing or decreasing?
     if ( hi - lo < 0 ) dir = -1;
     else dir = 1;
 
     lim = hi;
+    cerr << "ts " << ts << " lo " << lo << " hi " << hi << "idx " << idx << endl;
 }
 
 
