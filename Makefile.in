@@ -19,7 +19,7 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 
-DISTDIR=grap-1.0
+DISTDIR=grap-1.01
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
@@ -68,11 +68,11 @@ grap.1:	grap.doc grap.an
 		mv grap.an grap.1; fi
 
 dist:	
-	make clean
-	make grap.an
+	${MAKE} veryclean
+	${MAKE} grap.an
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
-	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile /tmp/${DISTDIR}/config.h /tmp/${DISTDIR}/grap.h
+	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
 	rm /tmp/${DISTDIR}/examples/Makefile.local /tmp/${DISTDIR}/examples/color_example.ms
 	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
 	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
@@ -81,7 +81,11 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.log config.status config.cache ${DISTDIR}.tar.gz *core* y.output
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 ${DISTDIR}.tar.gz *core* y.output
+
+veryclean:
+	${MAKE} clean
+	rm -f config.log config.status config.cache config.h version.cc grap.h
 
 install:	grap grap.defines grap.1
 	strip grap
