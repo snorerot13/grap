@@ -983,6 +983,28 @@ copy_statement:
 		unquote($2);
 		if (!include_file($2, 0)) return 0;
 	    }
+|	COPY UNTIL string SEP
+            {
+		unquote($3);
+		lex_begin_copy($3);
+	    }
+        COPYTEXT
+            {
+		String s="";
+		while ($6 && !$6->empty() ) {
+		    String *ss;
+		    ss = $6->front();
+		    $6->pop_front();
+		    if ( ss ) {
+			s+= *ss;
+			s+= '\n';
+			delete ss;
+			ss = 0;
+		    }
+		}
+		include_string(&s, 0, GINTERNAL);
+		delete $6;
+	    }
 |	COPY until_clause THRU { lex_hunt_macro(); } MACRO  until_clause SEP
 	    {
 		copydesc *c = 0; // To shut the compiler up about uninit

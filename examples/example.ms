@@ -227,9 +227,9 @@ delim off
 \&1992 43.50
 \&END
 \&new dotted
-\&copy thru {next at $1, $2;} until "END" 
-\&1964 52
-\&1968 52
+\&copy until "END" 
+\&1964 52.
+\&1968 52.
 \&[...]
 \&1992 48.83
 \&END
@@ -274,9 +274,9 @@ copy until "END" thru {next at $1, $2;}
 1992 43.50
 END
 new dotted
-copy thru {next at $1, $2;} until "END" 
-1964 52
-1968 52
+copy until "END" 
+1964 52.
+1968 52.
 1972 51.08
 1976 49.29
 1980 48.88

@@ -240,7 +240,7 @@ atan2|min|max		{
 			tokenpos += yyleng;
 			return FUNC2;
 			}
-([0-9]*\.?[0-9]+)|([0-9]*\.?[0-9]+[eE](\+|\-)?[0-9]+)	{ 
+([0-9]*\.?[0-9]+)|([0-9]*\.?[0-9]+[eE](\+|\-)?[0-9]+)|([0-9]+\.)	{ 
 			DEBUG("Number: %s\n",yytext);
 			yylval.num = atof(yytext);
 			tokenpos += yyleng;

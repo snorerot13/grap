@@ -1,6 +1,10 @@
 Change log
 
-1.03: Added the -m path option to make groff handle grap better.  I
+1.05: kromJx@crosswinds.net noticed that numbers like 1. weren't
+accepted.  They are now.  While I was fixing that I noticed that copy
+until commands without a macor weren't supported.  They are now.  Made a minor change to the examples to test the fixes.
+
+1.03: Added the -M path option to make groff handle grap better.  I
 also added the GRAP_DEFINES environment variable to change the defines
 file.  I also added a new source file, grap_parse.cc in an attempt to
 break up the monolithic and gigantic grap.y.  I had some small
