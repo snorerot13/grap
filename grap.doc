@@ -84,7 +84,7 @@ to the text of the paper.  I personally like it better that way and it
 saves space, but 
 .Fl u
 disables it.  This may be useful in porting old 
-.Nm .
+.Nm grap .
 .Pp
 All
 .Nm
@@ -93,7 +93,7 @@ commands are included between
 and
 .Ic .G2
 macros, which are consumed by 
-.Nm .
+.Nm grap .
 The output contains pic between
 .Ic .PS
 and
@@ -802,17 +802,10 @@ This assigns
 .Ar expr 
 to the variable
 .Ar name .
-.Nm 
-has only numeric (double) variables.  Unlike K&B 
-.Nm grap ,
-assignment is not part of an expression, so 
-.Bd -literal -offset indent-two
-a = b = c = 3
-.Ed
+.Nm
+has only numeric (double) variables.
 .Pp
-is illegal.
-.Pp
-Assignment creates a variable if it does not exist.  Variables presist
+Assignment creates a variable if it does not exist.  Variables persist
 across graphs.
 .Ed
 .Pp
@@ -1060,7 +1053,7 @@ copy "./data"
 .Sh AUTHOR
 This implementation was done by
 .An Ted Faber Ao faber@lunabase.org Ac .
-.Nm 
+.Nm
 was designed and specified by 
 .An Brian Kernighan
 and 
@@ -1069,7 +1062,7 @@ and
 .Pp
 There are several small incompatibilities with K&R
 .Nm grap .
-They include assignments not being treated as expressions, the
+They include the
 .Ic sh
 command not expanding variables and macros, and a more strict
 adherence to parameter order in the internal commands.
