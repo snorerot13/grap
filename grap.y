@@ -40,7 +40,7 @@ graph *the_graph =0;
 lexStack lexstack;
 macroDictionary macros;
 int first_line;
- bool unaligned_default = 0;	// Should strings be unaligned by default 
+bool unaligned_default = 0;	// Should strings be unaligned by default 
 
 extern int lex_expand_macro;
 extern char *version; 
