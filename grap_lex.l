@@ -12,7 +12,7 @@
 #define DEBUG(a,b) fprintf(stderr,a,b)
 #endif
 
-#define YY_USER_ACTION  if ( !stack_init ) init_stack();
+// #define YY_USER_ACTION  if ( !stack_init ) init_stack();
     
 int return_macro = 0;
 int slashcount = 0;
@@ -185,7 +185,7 @@ atan2|min|max		{
                                 DEBUG("Troff: %s\n",yytext);
 				if ( !strncmp(".G1", yytext, 3) ) {
 				    if ( lexstack.empty() ||
-					 lexstack.size() == 1 ) {
+					 lexstack.top()->report_start == 1 ) {
 					DEBUG("Start: %s\n",yytext); 
 					return START;
 				    }
@@ -193,7 +193,9 @@ atan2|min|max		{
 				}
 				if ( !strncmp(".G2", yytext, 3) ) {
 				    if ( lexstack.empty() ||
-					 lexstack.size() == 1) {
+					 lexstack.top()->report_start == 1) {
+
+					yyinput(); // Gobble up the newline
 					DEBUG("End: %s\n",yytext);
 					BEGIN(INITIAL);
 					return END;
@@ -392,15 +394,15 @@ atan2|min|max		{
     
 %%
 void init_stack() {
-grap_buffer_state *g = new grap_buffer_state;
+    grap_buffer_state *g = new grap_buffer_state;
 
-    g->yy = YY_CURRENT_BUFFER;
+    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
     g->f = 0;
     g->name = new String("stdin");
     g->line = 1;
     g->type = GFILE;
+    g->report_start =1;
     lexstack.push(g);
-    stack_init=1;
 }
 
 bool include_file(String *s) {
@@ -420,6 +422,7 @@ bool include_file(String *s) {
     g->name = new String(s);
     g->line = 1;
     g->type = GFILE;
+    g->report_start=0;
     lexstack.push(g);
     yy_switch_to_buffer(g->yy);
     return 1;
@@ -453,6 +456,7 @@ int include_string(String *s, struct for_descriptor *f=0,
 	g->name = 0;
 	g->line = 1;
 	g->type = it;
+	g->report_start = 1;
 	lexstack.push(g);
 	delete cbuf;
 	return 1;

@@ -83,6 +83,7 @@ struct grap_buffer_state {
     struct for_descriptor *f;
     String *name;
     int line;
+    int report_start;
     grap_input type;
 };
 

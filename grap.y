@@ -4,6 +4,10 @@
 #include <math.h>
 #include "grap.h"
 
+#ifndef DEFINES
+#define DEFINES "/usr/share/grap/grap.defines"
+#endif
+
 doubleDictionary vars;
 coordinateDictionary coordinates;
 lineDictionary lines;
@@ -27,6 +31,7 @@ String *graph_pos;
 String *ps_param;
 
 // defined in grap_lex.l
+extern void init_stack();
 extern bool include_file(String *);
 extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
@@ -245,10 +250,11 @@ draw_statement:
 	DRAW opt_ident linedesc opt_string SEP
 	    {
 		line *l;
+		linedescval defld = { invis,0,0 };
 
 		if ( $2 ) {
 		    if ( !lines.find($2,l) ) {
-			l = new line((linedescval*)0,&String("\"\\(bu\""));
+			l = new line(&defld,&String("\"\\(bu\""));
 			lines.insert($2,l);
 		    }
 		} else l = defline;
@@ -1242,6 +1248,7 @@ void init_graph() {
     plot *p;
     circle *cir;
     String *s;
+    linedescval defld = { invis,0,0 };
 
     visible = 0;
 
@@ -1273,13 +1280,17 @@ void init_graph() {
 	the_frame.tickdef[i].c = defcoord;
 	the_frame.griddef[i].c = defcoord;
     }
-    defline = new line((linedescval*) 0,&String("\"\\(bu\"") );
+    defline = new line(&defld,&String("\"\\(bu\"") );
     lines.insert("grap.internal.default",defline);
     nlines = 0;
 }
 
 int main(int argc, char** argv) {
     int i;
-    
+    String defines=DEFINES;
+
+    init_stack();
+    include_file(&defines);
+    lexstack.top()->report_start = 1;
     yyparse();
 }

@@ -2,7 +2,7 @@
 
 LDLIBS=-ll -ly
 CXXFLAGS=-g
-
+CXXFLAGS += -DDEFINES=\"/home/faber/src/grap/grap.defines\"
 OBJS=grap.o grap_lex.o grap_draw.o
 
 .o.out:
