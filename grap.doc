@@ -155,7 +155,7 @@ is a synonym for
 .Pp
 .Ic next
 .Op Ar line_name
-.Li at
+.Cm at
 .Op Ar coordinates_name 
 .Ar expr ,  expr
 .Op Ar line_description 
@@ -194,14 +194,14 @@ The coordinates may optionally be enclosed in parentheses:
 .Oc
 .Oc
 \&...
-.Li at
+.Cm at
 .Op Ar coordinates_name 
 .Ar expr , expr
 .Pp
 .Ic plot 
 .Ar expr
 .Op Ar format_string 
-.Li at
+.Cm at
 .Op Ar coordinates_name 
 .Ar expr , expr
 .Bd -filled -offset indent
@@ -271,7 +271,7 @@ experssion (See
 .Cm left Ar expr No \(or
 .Cm right Ar expr
 .Oc
-.Li at
+.Cm at
 .Op Ar coord_name
 .Ar expr
 .Op Ar format_string
@@ -301,13 +301,13 @@ experssion (See
 .Cm left Ar expr No \(or
 .Cm right Ar expr
 .Oc
-.Li from
+.Cm from
 .Op coord_name
 .Ar start_expr
-.Li to
+.Cm to
 .Ar end_expr
 .Oo 
-.Li by 
+.Cm by 
 .Sm off
 .Oo
 .No + \(or - \(or * \(or /
@@ -357,6 +357,11 @@ To place ticks with no labels, specify
 as
 .Qq \& .
 .Pp
+The labels on the ticks may be shifted by specifying a direction and
+the distance in inches to offset the label.  That is the optional
+direction and expression immediately preceding the 
+.Cm at .
+.Pp
 The third format of the 
 .Ic ticks
 command over-rides the default tick generation with a set of ticks ar
@@ -366,7 +371,7 @@ language for loops.  Ticks are placed starting at
 ending at
 .Ar end_expr
 one unit apart.  If the
-.Li by
+.Cm by
 clause is specified, ticks are
 .Ar by_expr
 units apart.  If an operator appears before
@@ -377,10 +382,18 @@ ticks left out from 2 to 32 by *2
 .Ed
 .Pp
 will put ticks at 2, 4, 8, 16, and 32.  If
-.Ar fromat_string
+.Ar format_string
 is specified, all ticks are formatted using it.
 .Pp
-The second two forms of tick command may both be issued on the same
+The parameters preceding the
+.Cm from
+act as described above.
+.Pp
+The 
+.Cm at
+and 
+.Cm for
+forms of tick command may both be issued on the same
 side of a frame.  For example:
 .Bd -literal -offset indent-two
 ticks left out from 2 to 32 by *2
@@ -398,6 +411,269 @@ all sides are cancelled.
 .Ic tick
 is a synonym for 
 .Ic ticks .
+.Ed
+.Pp
+.Ic grid
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.Op Li ticks off
+.Op Ar line_description
+.Oo
+.Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Pp
+.Ic grid
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.Op Li ticks off
+.Op Ar line_description
+.Oo
+.Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Cm at
+.Op Ar coord_name
+.Ar expr
+.Op Ar format_string
+.Oo
+.Oo
+.No , Ar expr
+.Oo
+.Ar format_string
+.Oc
+.Oc
+.No ...
+.Oc
+.Pp
+.Ic grid 
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.Op Li ticks off
+.Op Ar line_description
+.Oo
+.No Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Cm from
+.Op coord_name
+.Ar start_expr
+.Cm to
+.Ar end_expr
+.Oo 
+.Cm by 
+.Sm off
+.Oo
+.No + \(or - \(or * \(or /
+.Sm on
+.Oc
+.Ar by_expr
+.Oc
+.Op format_string
+.Bd -filled -offset indent
+The
+.Ic grid
+command is similar to the 
+.Ic ticks
+command except that 
+.Ic grid
+specifies the placement of lines in the frame.  The sysntax is similar
+to 
+.Ic ticks
+as well.  
+.Pp
+By specifying 
+.Li ticks off
+in the command, no ticks are drawn on that side of the frame.  If
+ticks appear on a side by default, or have been declared by an earlier
+.Ic ticks
+command, 
+.Ic grid
+does not cancel them unless 
+.Li tciks off
+is specified.
+.Pp
+Instead of a direction for ticks, 
+.Ic grid
+allows the user to pick a line descriptionfor the grid lines.  The
+usual
+.Xr pic 1
+line descriptions are allowed.
+.Pp
+Grids are labelled by default.  To omit labels, specify the format
+string as 
+.Qq \& .
+.Ed
+.Pp
+.Ic label
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.Ar quoted_string 
+.Op Ar string_modifiers 
+.Oo
+.No , Ar quoted_string 
+.Oo 
+.Ar string_modifiers
+.Oc
+.Oc
+\&...
+.Oo
+.No Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Bd -filled -offset indent
+The 
+.Ic label
+command places a label on the given axis.  It is possible to specify
+several labels, which will be stacked over each other as in 
+.Xr pic 1 .
+The final argument, if present, specifies how many inches the label is
+shifted from the axis.
+.Pp
+By default the labels on the left and right labels run parallel to the
+frame.  You can cancel this by specifying 
+.Li unaligned 
+as a 
+.Ar string_modifier .
+.Ed
+.Pp
+.Ic circle
+.Cm at
+.Op Ar coordinate_name
+.Ar expr , expr
+.Op Cm radius Ar expr
+.Bd -filled -offset indent
+This draws an unfilled circle at the point indicated.  By default, the
+circle is small, 0.025 inches.  This can be over-ridden by specifying
+a radius.  The coordinates of the point are relative to the named
+coordinate system, or the default system if none is specified.
+.Ed
+.Pp
+.Ic line 
+.Op Ar line_description
+.Cm from
+.Op Ar coordinate_name
+.Ar expr , expr
+.Cm to 
+.Op Ar coordinate_name
+.Ar expr , expr
+.Op Ar line_description
+.Pp
+.Ic arrow
+.Op Ar line_description
+.Cm from
+.Op Ar coordinate_name
+.Ar expr , expr
+.Cm to 
+.Op Ar coordinate_name
+.Ar expr , expr
+.Op Ar line_description
+.Bd -filled -offset indent
+This draws a line or arrow from the first point to the second using
+the given style.  The default line style is 
+.Li solid .
+The 
+.Ar line_description
+can be given either before the
+.Cm from
+or after the 
+.Cm to
+clause.  If both are given the second is used.  It is possible to
+specify one point in one coordinate system and one in another, note
+that if both points are in a named coordinate system, both points must
+have
+.Ar coordinate_name
+given.
+.Ed
+.Pp
+.Ic coord
+.Op Ar name
+.Op Cm x Ar expr , expr
+.Op Cm y Ar expr , expr
+.Oo
+.Cm log x No \(or
+.Cm log y No \(or
+.Cm log log 
+.Oc
+.Bd -filled -offset indent
+The
+.Ic coord
+command specifies a new coordinate system or sets limits on the
+default system.  It defines the largest and smallest values that can
+be plotted, and therefore the scale of the data in the frame.  The
+limits for the x and y coordinate systems can be given separately.  If
+a 
+.Ar name
+is given, that coordinate system is defined, if not the default system
+is modified.
+.Pp
+This command also determines if a scale is plotted logarithmically.
+Unlike K&B 
+.Nm grap ,
+this program accepts exactly one of the three logarithm
+specifications.
+.Ed
+.Pp
+.Ic copy 
+.Qo 
+.Ar filename 
+.Qc
+.Pp
+.Ic copy
+.Op Qq Ar filename
+.Op Cm until Qq Ar string
+.Cm thru Ar macro
+.Bd -filled -offset indent
+The
+.Ic copy
+command imports data from another file into the current graph.  The
+first form is a simple file inclusion; the included file is simply
+read into the input stream and can contain arbitrary
+.Nm
+commands.
+.Pp
+The second form takes lines from the file, splits them into words
+delimited by one or more spaces, and calls the given macro with those
+words as parameters.  The macro may either be defined here, or be a
+macro defined earlier.  See
+.Sx Macros
+for more information on macros.
+.Pp
+The
+.Ar filename
+may be omitted from the second form if the 
+.Cm until
+clause is present.  If so the current file is treated as the input
+file until
+.Ar string
+is encountered at the beginning of the line.
+.Pp
+.Ic copy
+is one of the workhorses of 
+.Nm grap .
+Check out the paper and 
+.Pa EXAMPLES
+for more details.
 .Ed
 .Sh FILES
 .Sh SEE ALSO
