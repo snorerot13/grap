@@ -19,7 +19,7 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 
-DISTDIR=grap-0.98b
+DISTDIR=grap-1.0
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 

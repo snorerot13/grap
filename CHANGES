@@ -1,5 +1,9 @@
 Change log
 
+1.0: Incorporated Bruce Lilley's error reporting code.  Cleaned up the
+documents (including a menton for Bruce in the man page) for v1.0
+release.  Cleared up a file reading bug.
+
 0.98b: Bruce Lilly reported some bugs and DWP incompatibilities,
 mainly with negative numbers in number lists and comma separations in
 them.  He also compiles in UWIN under NT, which broke autoconf in some

@@ -51,7 +51,7 @@ of grap.defines that work, please let me know.
 Check out the examples in the examples directory.
 
 So far I've compiled the code on Sunos 4.1.3, Solaris 5.5.1, FreeBSD
-2.2.7-3.0, and an unknown version of RedHat Linux.  It may run under
+2.2.7-3.4, and an unknown version of RedHat Linux.  It may run under
 other systems, and your c++ compiler and yacc/lex versions are
 probably more important than the type of Unix you run.  Flex 2.5.4 and
 the yacc on FreeBSD 2.2.7 are known to work as well as later versions
