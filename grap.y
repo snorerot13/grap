@@ -3,6 +3,7 @@
 #include <iostream.h>
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #ifdef NO_RANDOM
 extern "C" { long random(); }

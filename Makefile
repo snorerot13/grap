@@ -24,6 +24,8 @@ CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
 
+all:	grap
+
 .o.out:
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(.ALLSRC) $(LDLIBS) -o $(.TARGET)
 .y.cc:
