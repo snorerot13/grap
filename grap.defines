@@ -1,8 +1,12 @@
 .G1
-define delta {"\s-2\(*D\s0"}
-define bullet {"\s-1\(bu\s0"}
-define vtick {"\s-2|\s0"}
-define square {"\s-2\(sq\s0"}
-define box {square}
-define times {"\s-2\(mu\s0"}
+define delta {"\s8\(*D\s0"}
+define bullet {"\s9\v'0.1m'\(bu\v'-0.1m'\s0"}
+define vtick {"\s8|\s0"}
+define square {"\s8\(sq\s0"}
+define box {"\f(ZD\s8\N'110'\s0\fP"}
+define times {"\s8\(mu\s0"}
+define htick {"\s8\(em\s0"}
+define plus {"\s8\(pl\s0"}
+define star {"\s8\(**\s0"}
+define dot {"\s8\v'-0.2m'.\v'0.2m'\s0"}
 .G2
