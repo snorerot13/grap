@@ -73,11 +73,12 @@ dist:
 	rm /tmp/${DISTDIR}/examples/Makefile.local /tmp/${DISTDIR}/examples/color_example.ms
 	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
 	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
+	rm -rf /tmp/${DISTDIR}/examples/*.ps.gz /tmp/${DISTDIR}/examples/*.pdf 
 	cd /tmp && tar czf ${DISTDIR}.tar.gz ${DISTDIR}
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* grap.tar.gz
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* ${DISTDIR}.tar.gz
 
 install:	grap grap.defines grap.1
 	strip grap
