@@ -64,7 +64,7 @@ Because
 .Nm
 is a 
 .Xr pic 
-preprocessor, and gnu 
+preprocessor, and GNU 
 .Xr pic 
 will output TeX, it is possible to use
 .Nm
@@ -159,7 +159,7 @@ attribute, and all strings to be
 .Pp
 The 
 .Fl h
-flag prints a brief help message and exist.  
+flag prints a brief help message and exits.  
 .Fl -help 
 is a synonym for
 .Fl h .
@@ -259,7 +259,7 @@ or the literal
 It may also include a 
 .Ic color
 keyword followed by the color to draw the string in double quotes.  Any color
-understood by the underlying groff system can be used.  Color can nly be used
+understood by the underlying groff system can be used.  Color can only be used
 under GNU pic, and is not available in compatibility mode.
 .Pp
 If the first 
@@ -1002,7 +1002,7 @@ to
 Unlike K&B 
 .Nm
 no macro or variable expansion is done.  I believe that this is also
-true for gnu 
+true for GNU 
 .Xr pic
 version 1.10.  See the 
 .Sx Macros
@@ -1050,9 +1050,9 @@ The current graph is given the
 .Xr pic
 name
 .Ar Name
-(
+(names used by 
 .Xr pic
-names begin with capital letters).  Any 
+begin with capital letters).  Any 
 .Xr pic
 commands following the graph are used to position the next graph.  The
 frame of the graph is available for use with
@@ -1220,7 +1220,7 @@ can be used in place of
 .Ss Expressions
 .Pp
 .Nm
-supports a most standard arithmetic operators: + - / * ^.  The carat
+supports most standard arithmetic operators: + - / * ^.  The carat
 (^) is exponentiation.  In an 
 .Ic if
 statement
@@ -1253,7 +1253,7 @@ implementations.
 .Pp
 .Ic rand
 returns a random number uniformly
-distributed on [0,1).  The following two argument functions are supported:
+distributed on [0,1).  The following two-argument functions are supported:
 .Ic atan2 , min , max .
 .Ic atan2 
 works just like
@@ -1330,7 +1330,7 @@ Macros can take parameters, too.  If a macro call is followed by a
 parenthesized, comma-separated list the values starting with $1 will
 be replaced in the macro with the elements of the list.  A $ not
 followed by a digit is left unchanged.  This parsing
-is very rudimentary, no nesting or parentheses or escaping of commas
+is very rudimentary; no nesting or parentheses or escaping of commas
 is allowed.  Also, there is no way to say argument 1 followed by a
 digit (${1}0 in sh(1)).
 .Pp
