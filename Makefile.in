@@ -55,19 +55,16 @@ version.cc:	Makefile
 y.output:	grap.y
 	$(YACC) -v grap.y
 
-grap.an:	grap.doc
-	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc | groff -Tascii -mdoc | rman -f roff > grap.an
+grap.man:	grap.1
+	groff -mdoc -Tascii grap.1 > grap.man
 
-grap.1:	grap.doc grap.an
-	if [ `uname` = 'FreeBSD' ] || [ `uname` = 'Linux' ]; then \
-		perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
-	else \
-		mv grap.an grap.1; fi
+grap.1:	grap.doc
+	perl -pe "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
 
 dist:	
 	cd examples && ${MAKE} clean
 	${MAKE} veryclean
-	${MAKE} grap.an
+	${MAKE} grap.man
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
 	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
@@ -79,7 +76,7 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 ${DISTDIR}.tar.gz *core* y.output
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man ${DISTDIR}.tar.gz *core* y.output
 
 veryclean:
 	${MAKE} clean
@@ -96,12 +93,13 @@ install:	grap grap.defines grap.1
 	$(INSTALL_DATA) README $(DEFINESDIR)
 	$(INSTALL_DATA) CHANGES $(DEFINESDIR)
 	$(INSTALL_DATA) COPYRIGHT $(DEFINESDIR)
+	$(INSTALL_DATA) grap.man $(DEFINESDIR)
 	$(INSTALL_DATA) examples/*.d examples/example.ms examples/*.result examples/Makefile $(DEFINESDIR)/examples
 
 deinstall:
 	$(RM) $(BINDIR)/grap
 	$(RM) $(MANDIR)/grap.1
-	$(RM) $(DEFINESDIR)/grap.defines $(DEFINESDIR)/README $(DEFINESDIR)/CHANGES $(DEFINESDIR)/COPYRIGHT
+	$(RM) $(DEFINESDIR)/grap.defines $(DEFINESDIR)/README $(DEFINESDIR)/CHANGES $(DEFINESDIR)/COPYRIGHT $(DEFINESDIR)/grap.man
 	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile $(DEFINESDIR)/examples/*result
 	$(RMDIR) $(DEFINESDIR)/examples
 	$(RMDIR) $(DEFINESDIR)

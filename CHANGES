@@ -47,6 +47,8 @@ Automatic tock or grid generation can now be requested relative to a
 named coordinate system, formerly automatic ticks/grid lines were only
 generated for the default coordinate system.
 
+Added the ln function.  Why did that take me so long?
+
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.
 

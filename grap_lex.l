@@ -58,7 +58,7 @@ char *strdup(const char *);
 #endif 
 
 char *f0names[NF0] = { "rand" };
-char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt","eexp" };
+char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt","eexp","ln" };
 char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
@@ -220,7 +220,7 @@ rand			{
 			tokenpos += yyleng;
  			return FUNC0;
 			}
-log|exp|int|sin|cos|sqrt|rand|eexp	{
+log|exp|int|sin|cos|sqrt|rand|eexp|ln	{
 			int i;
 
 			DEBUG("FUNC1\n",0);

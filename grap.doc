@@ -6,7 +6,7 @@
 .Dt GRAP 1
 .Sh NAME
 .Nm grap 
-.Nd Kernighan and Bentley's langauge for typesetting graphs
+.Nd Kernighan and Bentley's language for typesetting graphs
 .Sh SYNOPSIS
 .Nm
 .Op Fl d Ar defines_file
@@ -43,11 +43,13 @@ source file which are surrounded by
 .Ic .G1
 and
 .Ic .G2
-macros, and rewrites them into pic commands to display the graph.
+macros, and rewrites them into 
+.Xr pic
+commands to display the graph.
 Other lines are copied.  Output is always to the standard output,
 which is usually redirected.  Input is from the given
 .Ar filename Ns No s ,
-which are read in the order given.  A 
+which are read in order.  A 
 .Ar filename 
 of 
 .Fl 
@@ -78,17 +80,16 @@ file can also be given using the
 environment variable. (See below).
 .Pp
 .Fl v
-prints the version on the standard output and exits.
+prints the version information on the standard output and exits.
 .Pp
 .Fl u
 makes labels unaligned by default.  This version of 
 .Nm
-uses new features of gnu pic to align the left and right labels with
+uses new features of gnu 
+.Xr pic
+to align the left and right labels with
 the axes, that is that the left and right labels run at right angles
-to the text of the paper.  I personally like it better that way and it
-saves space, but 
-.Fl u
-disables it.  This may be useful in porting old 
+to the text of the paper.  This may be useful in porting old 
 .Nm 
 programs.
 .Pp
@@ -112,7 +113,9 @@ and
 .Ic .G2
 macros, which are consumed by 
 .Nm grap .
-The output contains pic between
+The output contains 
+.Xr pic
+between
 .Ic .PS
 and
 .Ic .PE
@@ -120,7 +123,9 @@ macros.  Any arguments to the
 .Ic .G1
 macro in the input are arguments to the
 .Ic .PS
-macro in the output, so graphs can be scaled just like pic diagrams.
+macro in the output, so graphs can be scaled just like 
+.Xr pic
+diagrams.
 If 
 .Fl C
 is given, any macro beginning with \&.G1 or \&.G2 is treated as a \&.G1 or
@@ -186,7 +191,12 @@ Commands are separated from one another by newlines or semicolons (;).
 .Bd -filled -offset indent
 This describes how the axes for the graph are drawn. A
 .Ar line_description 
-is a pic line description, e.g., dashed 0.5, or the literal
+is a 
+.Xr pic
+line description, e.g., 
+.Li dashed 
+.Li 0.5 , 
+or the literal
 .Li solid .
 If the first 
 .Ar line_description 
@@ -219,9 +229,25 @@ a
 is given, that coordinate system is defined, if not the default system
 is modified.
 .Pp
-This command also determines if a scale is plotted logarithmically.
+A coordinate system created by one 
+.Ic coord
+command may be modified by subsequent 
+.Ic coord
+commands.  A
+.Nm
+program may declare a coordinate space using
+.Ic coord ,
+.Ic copy
+a file of data through a macro that plots the data and finds its
+maxima and minima, and then define the size of the coordinate system
+with a second 
+.Ic coord
+statement.
 .Pp
-It is acceptable to change the attributes of a coordinate system.
+This command also determines if a scale is plotted logarithmically.  
+.Cm log log
+means the same thing as 
+.Cm log x log y .
 .Ed
 .Pp
 .Ic draw
@@ -236,13 +262,15 @@ command defines the style with which a given line will be plotted.  If
 is given, the style is associated with that name, otherwise the
 default style is set.  
 .Ar line_description
-is a pic line description, and the optional
+is a 
+.Xr pic
+line description, and the optional
 .Ar plot_string
 is a string to be centered at each point.  The default line
 description is
 .Li invis ,
 and the default plotting string is a centered bullet, so by default
-each point is a filled cricle, and they are unconnected.
+each point is a filled circle, and they are unconnected.
 If points are being connected, each
 .Ic draw
 command ends any current line and begins a new one.
@@ -253,8 +281,9 @@ command for a given line name, specifying no plot string means that
 there are to be no plot strings.  Omitting the plot string on
 subsequent 
 .Ic draw
-commands means not to change the plot string.  If a line has been
-defined with a plot string, and the format is changed by a subsequent 
+commands addressing the same named line means not to change the plot
+string.  If a line has been defined with a plot string, and the format
+is changed by a subsequent
 .Ic draw
 statement, the plot string can be removed by specifying "" in the
 .Ic draw
@@ -344,47 +373,36 @@ is a
 format string.  Only formatting escapes for printing
 floating point numbers make sense.
 .Pp
-points are specified the same way as for 
+Points are specified the same way as for 
 .Ic next
 commands, with the same consequences for undefined coordinate systems.
 .Pp
-The second form of this command is completely unnecessary because the
-first form can be used with a 
+The second form of this command is because the first form can be used
+with a
 .Nm
 .Ic sprintf
-experssion (See
+expression (See
 .Sx Expressions ) .
 .Ed
-.Pp
-.Ic ticks
-.Sm off
-.Oo
-.Cm left Xo No \(or Cm right 
-.No \(or Cm top No \(or Cm bottom
-.Oc
-.Xc
-.Cm on \(or auto
-.Sm on
-.Pp
-.Ic ticks
-.Sm off
-.Oo
-.Cm left Xo No \(or Cm right 
-.No \(or Cm top No \(or Cm bottom
-.Oc
-.Xc
-.Sm on
 .Pp
 .Ic ticks
 .Sm off
 .No Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
+.Oo
 .Sm on
 .No Xo ( Cm in Ns No \(or 
 .Ns Cm out )
 .Xc
 .Op Ar expr
+.Oc
+.Sm off
+.Oo 
+.Cm on \(or Cm auto
+.Sm on
+.Op Ar coord_name
+.Oc
 .Pp
 .Ic ticks 
 .Sm off
@@ -462,19 +480,30 @@ This command controls the placement of ticks on the frame.  By
 default, ticks are automatically generated on the left and bottom
 sides of the frame.
 .Pp
-The simplest version of this command turns on the automatic tick
-generation for a given side.  The top 2 commands, e.g ticks bottom on,
-turn on automatic tick generation.  For more control over tick sizes,
-the third command specifys
+The first version of this command turns on the automatic tick
+generation for a given side.  The 
 .Cm in
 or
-.Cm out ,
-modified by an expression that gives the length of the ticks in
-inches.
+.Cm out
+parameter controls the direction and length of the ticks.  If a 
+.Ar coord_name
+is specified, the ticks are automatically generated using that
+coordinate system.  If no system is specified, the default coordinate
+system is used.  As with
+.Ic next
+and
+.Ic plot ,
+the coordinate system must be declared before the 
+.Ic ticks
+statement that references it.  This syntax for requesting
+automatically generated ticks is an extension, and will not port to
+older 
+.Nm
+implementations.
 .Pp
 The second version of the
 .Ic ticks
-command over-rides the automatic placement of the ticks by specifying
+command overrides the automatic placement of the ticks by specifying
 a list of coordinates at which to place the ticks.  If the ticks are
 not defined with respect to the default coordinate system, the
 .Ar coord_name
@@ -559,6 +588,12 @@ is a synonym for
 .Cm left Ar expr No \(or
 .Cm right Ar expr
 .Oc
+.Oo
+.Sm off
+.Cm on \(or Cm auto
+.Sm on
+.Op Ar coord_name
+.Oc
 .Pp
 .Ic grid
 .Sm off
@@ -642,9 +677,9 @@ is specified.
 .Pp
 Instead of a direction for ticks, 
 .Ic grid
-allows the user to pick a line descriptionfor the grid lines.  The
+allows the user to pick a line description for the grid lines.  The
 usual
-.Xr pic 1
+.Xr pic 
 line descriptions are allowed.
 .Pp
 Grids are labelled by default.  To omit labels, specify the format
@@ -678,7 +713,7 @@ The
 .Ic label
 command places a label on the given axis.  It is possible to specify
 several labels, which will be stacked over each other as in 
-.Xr pic 1 .
+.Xr pic .
 The final argument, if present, specifies how many inches the label is
 shifted from the axis.
 .Pp
@@ -694,7 +729,7 @@ as a
 .Op Ar coordinate_name
 .Ar expr , expr
 .Op Cm radius Ar expr
-.Op linedesc
+.Op Ar linedesc
 .Bd -filled -offset indent
 This draws an circle at the point indicated.  By default, the
 circle is small, 0.025 inches.  This can be over-ridden by specifying
@@ -702,8 +737,9 @@ a radius.  The coordinates of the point are relative to the named
 coordinate system, or the default system if none is specified.
 .Pp
 This command has been extended to take a line description,
-e.g. dotted.  It also accepts the filling extensions described below
-in the 
+e.g., 
+.Li dotted .
+It also accepts the filling extensions described below in the
 .Ic bar
 command.
 .Ed
@@ -739,29 +775,28 @@ or after the
 .Cm to
 clause.  If both are given the second is used.  It is possible to
 specify one point in one coordinate system and one in another, note
-that if both points are in a named coordinate system, both points must
-have
+that if both points are in a named coordinate system (even if they are
+in the same named coordinate system), both points must have
 .Ar coordinate_name
 given.
 .Ed
 .Pp
-.Ic copy 
-.Qo 
-.Ar filename 
-.Qc
 .Pp
 .Ic copy
 .Op Qq Ar filename
 .Op Cm until Qq Ar string
-.Cm thru Ar macro
+.Op Cm thru Ar macro
 .Bd -filled -offset indent
 The
 .Ic copy
 command imports data from another file into the current graph.  The
-first form is a simple file inclusion; the included file is simply
-read into the input stream and can contain arbitrary
+form with only a filename given is a simple file inclusion; the
+included file is simply read into the input stream and can contain
+arbitrary
 .Nm
-commands.
+commands.  The more common case is that it is a number list; see
+.Sx Number Lists
+below.
 .Pp
 The second form takes lines from the file, splits them into words
 delimited by one or more spaces, and calls the given macro with those
@@ -772,7 +807,7 @@ for more information on macros.
 .Pp
 The
 .Ar filename
-may be omitted from the second form if the 
+may be omitted if the 
 .Cm until
 clause is present.  If so the current file is treated as the input
 file until
@@ -803,7 +838,9 @@ to
 Unlike K&B 
 .Nm
 no macro or variable expansion is done.  I believe that this is also
-true for gnu pic version 1.10.  See the 
+true for gnu 
+.Xr pic
+version 1.10.  See the 
 .Sx Macros
 section for information on defining blocks.
 .Ed
@@ -867,7 +904,12 @@ to the variable
 has only numeric (double) variables.
 .Pp
 Assignment creates a variable if it does not exist.  Variables persist
-across graphs.
+across graphs.  Assignments can cascade; 
+.Li a = b = 35
+assigns 35 to 
+.Li a
+and 
+.Li b .
 .Ed
 .Pp
 .Ic bar 
@@ -941,10 +983,12 @@ after the
 .Ic else
 is executed, if present.  See
 .Sx Macros
-for the definition of blocks.  Early versions of my grap treated the
-blocks as macros defined and expanded in place.  This led to
-unnecessary confusion because explicit separators were sometimes
-called for.  Now,
+for the definition of blocks.  Early versions of this implementation
+of
+.Nm
+treated the blocks as macros that were defined and expanded in place.
+This led to unnecessary confusion because explicit separators were
+sometimes called for.  Now,
 .Nm
 inserts a separator (;) after the last character in 
 .Ar block ,
@@ -996,7 +1040,7 @@ can be used in place of
 .Ss Expressions
 .Pp
 .Nm
-supports a most standard arithmatic operators: + - / * ^.  The carat
+supports a most standard arithmetic operators: + - / * ^.  The carat
 (^) is exponentiation.  In an 
 .Ic if
 statement
@@ -1007,13 +1051,27 @@ also supports the C logical operators ==, !=,
 == and != are overloaded for the comparison of
 quoted strings.  Parentheses are used for grouping.  
 .Pp
-Assignment is not allowed in an expression in any context.
+Assignment is not allowed in an expression in any context, except for
+simple cascading of assignments.
+.Li a = b = 35
+works as expected;
+.Li a = 3.5 * (b = 10)
+does not execute.
 .Pp
 .Nm
 supports the following functions that take one argument:
 .Ic log , exp , int , sin , cos , sqrt , rand .
 The logarithms are base 10 and the trigonometric functions are in
-radians.  If 
+radians.  
+.Ic eexp
+returns Euler's number to the given power and
+.Ic ln
+returns the natural logarithm.  The natural log and exponentiation
+functions are extensions and are probably not available in other
+.Nm
+implementations.
+.Pp
+If 
 .Ic rand
 is given an argument, it seeds the random number generator with that
 value.  Called with no arguments, it returns a random number uniformly
@@ -1043,7 +1101,7 @@ command :
 .Pp
 .Ic define Ar name block
 .Bd -filled -offset indent
-Every occurrance of 
+Every occurrence of 
 .Ar name
 in the program text is replaced by the contents of 
 .Ar block .

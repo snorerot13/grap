@@ -113,7 +113,7 @@ typedef list<shiftdesc *> shiftlist;
 // functions are in grap_lex.l and the implementations in the
 // jumptables in grap.y
 const int NF0=1;
-const int NF1=7;
+const int NF1=8;
 const int NF2=3;
 
 enum size { ht = 0, wid};
