@@ -26,6 +26,11 @@ now work.  This is due to a sizable rewrite of the tokenizer.  Bruce
 Lilly has been asking for this for a while. :-) I'll probably neaten
 that code up at some point, too.
 
+I recoded macros to remove an antiquated construct that was confusing
+some non-g++ compilers.  A static array was recoded as an STL vector,
+with the result that an artificial constraint on the number of
+arguments in a macro went away.
+
 Added some GNU standard Makefile targets to the Makefile.
 
 Many additional compatibility changes suggested by Bruce Lilly.

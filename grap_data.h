@@ -92,58 +92,27 @@ public:
 /*  #endif */
 
 class macro {
-private:
-#ifdef __GNUC__    
-    // g++ knows this is a compile time constant, other compilers get
-    // confused.  As a result non-GCC compilers allocate arg
-    // dynamically.
-    static const int numargs = 32;	// maximum number of arguments
-#else
-    static const int numargs;
-#endif
 public:
     int next_arg;			// the index into the next argument
     string *text;			// the text of the macro
-#ifdef __GNUC__
-    string *arg[numargs];		// the current argument values
-#else
-    string **arg;
-#endif
+    vector<string *> arg;		// The current argument values
     string *name;			// the name of the macro if it's in a
                                         // dictionary.
-    macro(string *t=0, string *n =0) : next_arg(0), text(t), name(n) {
-#ifndef __GNUC__
-	arg = new string *[numargs];
-#endif
-	for ( int i = 0; i < numargs ; i++ )
-	    arg[i] = 0;
-    }
+    macro(string *t=0, string *n =0) : next_arg(0), text(t), arg(), name(n) { }
     ~macro() {
-	if ( text ) {
-	    delete text;
-	    text = 0;
+	delete text;
+	text = 0;
+	delete name;
+	name = 0;
+	while ( !arg.empty() ) {
+	    string *d = arg.back();
+	    arg.pop_back();
+	    delete d;
 	}
-	if ( name ) {
-	    delete name;
-	    name = 0;
-	}
-	for ( int i = 0; i < numargs ; i++ )
-	    if ( arg[i] ) {
-		delete arg[i];
-		arg[i] = 0;
-	    }
-#ifndef __GNUC__
-	delete arg;
-#endif
-	
     }
     int add_arg(string *s ) {
-	if ( next_arg < numargs ) {
-	    if ( arg[next_arg] ) delete arg[next_arg];
-	    arg[next_arg++] = s;
-	    return 1;
-	}
-	else return 0;
+	arg.push_back(s);
+	return 1;
     }
     
     string *invoke() {
@@ -166,7 +135,7 @@ public:
 			argn += (*text)[i] - 0x30;
 			i++; dig++;
 		    }
-		    if ( argn > 0 && argn <= numargs ) {
+		    if ( argn > 0 && argn <= (int) arg.size() ) {
 			if ( arg[argn-1] )
 			    *s += *(arg[argn-1]);
 		    }
@@ -182,9 +151,10 @@ public:
 	    }
 	}
 	next_arg = 0;
-	for ( i = 0 ; i < numargs; i ++ ) {
-	    if ( arg[i] ) delete arg[i];
-	    arg[i] =0;
+	while ( !arg.empty() ) {
+	    string *d = arg.back();
+	    arg.pop_back();
+	    delete d;
 	}
 	return s;		
     }
