@@ -1,0 +1,8 @@
+.G1
+define delta {"\s-2\(*D\s0"}
+define bullet {"\s-1\(bu\s0"}
+define vtick {"\s-2|\s0"}
+define square {"\s-2\(sq\s0"}
+define box {square}
+define times {"\s-2\(mu\s0"}
+.G2
