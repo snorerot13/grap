@@ -8,7 +8,7 @@
 .SH \fBSynopsis\fR
 
 .LP
-\fBgrap\fR [\fB\-d\fR \fIdefines\fR\fB_\fR\fIfile\fR] [\fB\-D\fR] [\fIfilename\fR \fI...\fR]
+\fBgrap\fR [\fB\-d\fR \fIdefines\fR\fB_\fR\fIfile\fR] [\fB\-D\fR] [\fB\-V\fR] [fl u] [\fIfilename\fR \fI...\fR]
 .SH \fBDescription\fR
 
 .LP
@@ -37,6 +37,16 @@ possible to use \fBgrap\fR with TeX.
 The \fB\-d\fR option specifies a file of macro definitions to be read at startup,
 and defaults to /usr/local/share/grap/grap.defines. The \fB\-D\fR option
 inhibits the reading of any initial macros file.
+.IP "\fB\-v\fR prints the version on the standard output and exits."
+"
+
+"\fB\-u\fR makes labels unaligned by default. "
+"
+This version of \fBgrap\fR uses new features
+of gnu pic to align the left and right labels with the axes, that
+is that the left and right labels run at right angles to the text of the
+paper. I personally like it better that way and it saves space, but \fB\-u\fR
+disables it. This may be useful in porting old .
 .LP
 All \fBgrap\fR commands are included between \fB.G1\fR and \fB.G2\fR macros, which are consumed
 by . The output contains pic between \fB.PS\fR and \fB.PE\fR macros. Any arguments
@@ -362,14 +372,26 @@ under them.
 The \fBif\fR statement provides simple conditional execution. If \fIexpr\fR is
 non\-zero, the \fIblock\fR after the \fBthen\fR statement is executed. If not
 the \fIblock\fR after the \fBelse\fR is executed, if present. See \fIMacros\fR for
-the definition of blocks.
+the definition of blocks. Early versions of my grap treated the
+blocks as macros defined and expanded in place. This led to unnecessary
+confusion because explicit separators were sometimes called
+for. Now, \fBgrap\fR inserts a separator (;) after the last character in
+\fIblock\fR, so constructs like
+.LP
+if (x == 3) { y = y + 1 }
+.br
+x = x + 1
+.LP
+behave as expected. A separator is also appended to the end of a
+\fBfor\fR block.
 .LP
 \fBfor\fR \fIname\fR \fBfrom\fR \fIfrom\fR\fB_\fR\fIexpr\fR \fBto\fR [\fBby\fR [+|\-|*|/] \fIby\fR\fB_\fR\fIexpr\fR] \fIblock\fR
 .LP
 This command executes \fIblock\fR iteratively. The variable \fIname\fR is set
 to \fIfrom\fR\fB_\fR\fIexpr\fR and incremented by \fIby\fR\fB_\fR\fIexpr\fR until it exceeds \fIto\fR\fB_\fR\fIexpr\fR.
 The iteration has the semantics defined in the \fBticks\fR command. The
-definition of \fIblock\fR is discussed in \fIMarcos\fR.
+definition of \fIblock\fR is discussed in \fIMarcos\fR. See also the note about
+implicit separators in the description of the \fBif\fR command.
 .LP
 An \fB=\fR can be used in place of \fBfrom\fR.
 .LP

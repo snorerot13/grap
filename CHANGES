@@ -4,6 +4,18 @@ Change log
 more than one shift description on ticks, grids, and labels.  Thanks to
 Anindo Banerjea at ISI for spotting my misimplementation.
 
+Another couple of Bannerjea catches: through is now recognized as a
+synonym for thru.  "For," "then" and "else" clauses were previously
+treated as macros but now have a terminating separator added to them.  The result is that things like
+
+if (x == 3) { y = y + 1 }
+x = x + 1
+
+work now.  (If the { } is treated as a macro defined and expanded on
+the spot, the grap parser sees y = y + 1x = x + 1 and cannot parse the
+expression y+1x).  The new behavior is both more intuitive and more in
+line with previous grap implementations.
+
 0.92a: bug fix - string equality check.  Small change to Makefile.in
 to support default Solaris behavior.  Added -v for version info.  Some
 general internals fiddling (I'd like to call it cleanup, but I think

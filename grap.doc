@@ -866,7 +866,22 @@ after the
 .Ic else
 is executed, if present.  See
 .Sx Macros
-for the definition of blocks.
+for the definition of blocks.  Early versions of my grap treated the
+blocks as macros defined and expanded in place.  This led to
+unnecessary confusion because explicit separators were sometimes
+called for.  Now,
+.Nm
+inserts a separator (;) after the last character in 
+.Ar block ,
+so constructs like 
+.Bd -literal
+if (x == 3) { y = y + 1 }
+x = x + 1
+
+.Ed
+behave as expected.  A separator is also appended to the end of a
+.Ic for
+block.
 .Ed
 .Pp
 .Ic for Ar name Ic from Ar from_expr Ic to Ar to_expr
@@ -893,6 +908,9 @@ command.  The definition of
 .Ar block
 is discussed in 
 .Sx Marcos .
+See also the note about implicit separators in the description of the
+.Ic if
+command.
 .Pp
 An 
 .Ic =
