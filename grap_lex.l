@@ -119,7 +119,7 @@ graph			DEBUG("GRAPH\n",0); return GRAPH;
 coord			DEBUG("COORD\n",0); return COORD;
 for			DEBUG("FOR\n",0); return FOR;
 from			DEBUG("FROM\n",0); return FROM;
-thru			DEBUG("THRU\n",0); return THRU;
+thru|through		DEBUG("THRU\n",0); return THRU;
 to			DEBUG("TO\n",0); return TO;
 at			DEBUG("AT\n",0); return AT;
 by			DEBUG("BY\n",0); return BY;
