@@ -3,7 +3,9 @@
 /* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
    COPYRIGHT file for the full copyright and limitations of
    liabilities. */
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdio.h>
 #include <iostream.h>
 #include <math.h>
@@ -151,7 +153,7 @@ public:
 %token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN HT WID
 %token IN OUT TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
 %token PLUS MINUS TIMES DIV CARAT EQUALS SIZE UNALIGNED LABEL RADIUS CIRCLE
-%token ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
+%token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
 %token BASE
@@ -1333,7 +1335,7 @@ line_statement:
 
 x_axis_desc:
 	    { $$.which=none; }
-|	X expr COMMA expr
+|	XDIM expr COMMA expr
 	    {
 		$$.which = x_axis;
 		if ($2 < $4 ) {
@@ -1345,7 +1347,7 @@ x_axis_desc:
 ;
 y_axis_desc:
 	    { $$.which=none; }
-|	Y expr COMMA expr
+|	YDIM expr COMMA expr
 	    {
 		$$.which = y_axis;
 		if ($2 < $4 ) {

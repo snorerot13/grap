@@ -2,6 +2,9 @@
 %{
 /* This code is (c) 1998 Ted Faber see COPYRIGHT
    for the full copyright and limitations of liabilities. */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #else
@@ -171,8 +174,8 @@ sprintf			tokenpos += yyleng; DEBUG("SPRINTF\n",0); return SPRINTF;
 log[ \t]+x			tokenpos += yyleng; DEBUG("LOG_X\n",0); return LOG_X;
 log[ \t]+y			tokenpos += yyleng; DEBUG("LOG_Y\n",0); return LOG_Y;
 log[ \t]+log			tokenpos += yyleng; DEBUG("LOG_LOG\n",0); return LOG_LOG;
-x			tokenpos += yyleng; DEBUG("X\n",0); return X;
-y			tokenpos += yyleng; DEBUG("Y\n",0); return Y;
+x			tokenpos += yyleng; DEBUG("XDIM\n",0); return XDIM;
+y			tokenpos += yyleng; DEBUG("YDIM\n",0); return YDIM;
 ticks|tick			tokenpos += yyleng; DEBUG("TICKS\n",0); return TICKS;
 label			tokenpos += yyleng; DEBUG("LABEL\n",0); return LABEL;
 grid			tokenpos += yyleng; DEBUG("GRID\n",0); return GRID;

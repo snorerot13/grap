@@ -72,7 +72,7 @@ dist:
 	make grap.an
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
-	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
+	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile /tmp/${DISTDIR}/config.h /tmp/${DISTDIR}/grap.h
 	rm /tmp/${DISTDIR}/examples/Makefile.local /tmp/${DISTDIR}/examples/color_example.ms
 	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
 	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
@@ -81,7 +81,7 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.* ${DISTDIR}.tar.gz *core* y.output
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 config.log config.status config.cache ${DISTDIR}.tar.gz *core* y.output
 
 install:	grap grap.defines grap.1
 	strip grap

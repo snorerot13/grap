@@ -1,0 +1,18 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+// This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+// for the full copyright and limitations of liabilities.
+
+// The following are set by configure
+
+#undef STDC_HEADERS
+#undef HAVE_UNISTD_H
+#undef HAVE_HASH_MAP
+#undef USE_STD_STRING
+#undef HAVE_SNPRINTF
+#undef HAVE_RANDOM
+#undef HAVE_RAND
+#undef HAVE_STRDUP
+#undef RANDOM_DECLARED
+
+#endif
