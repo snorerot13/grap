@@ -12,7 +12,7 @@
 .Op Fl d Ar defines_file
 .Op Fl D
 .Op Fl M Ar include path
-.Op Fl V
+.Op Fl v
 .Op fl u
 .Op Ar filename ...
 .Sh DESCRIPTION
@@ -68,7 +68,7 @@ with TeX.
 The 
 .Fl d
 option specifies a file of macro definitions to be read at startup,
-and defaults to DEFINES.
+and defaults to DEFINES_FILE.
 The
 .Fl D
 option inhibits the reading of any initial macros file.  The defines
@@ -1025,7 +1025,7 @@ define foo { next at $1, $2 }
 for i from 1 to 5 { foo(i,i) }
 .Ed
 Macros persist across graphs.  The file 
-.Pa DEFINES
+.Pa DEFINES_FILE
 contains simple macros for plotting common characters.
 .Pp
 See the file
@@ -1076,7 +1076,7 @@ or
 .Fl D
 flags.
 .Sh FILES
-.Pa DEFINES
+.Pa DEFINES_FILE
 .Sh SEE ALSO
 .Xr atan2 3 ,
 .Xr groff 1 ,

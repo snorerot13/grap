@@ -1,0 +1,23 @@
+.G1
+# This file adds support for TeX to grap
+# (assuming that your 'pic' implementation allows that. Eg. the pic program
+# that comes with the GNU groff package does so)
+#
+#
+# All symbols defined here come standard with LaTeX2e,
+# with the exception of square and box
+#
+# If you want to use these two symbols, you must load the 'amssym' package,
+# ie. put \usepackage{amssymb} in the preamble of your document.
+# 
+define delta	{"\textrm{\fontsize{8}{0}\selectfont{$\triangle$}}"}
+define bullet	{"\textrm{\fontsize{9}{0}\selectfont{$\bullet$}}"}
+define vtick	{"\textrm{\fontsize{8}{0}\selectfont{$\mid$}}"}
+define square	{"\textrm{\fontsize{8}{0}\selectfont{$\square$}}"}
+define box	{"\textrm{\fontsize{8}{0}\selectfont{$\blacksquare$}}"}
+define times	{"\textrm{\fontsize{8}{0}\selectfont$\times$}"}
+define htick	{"\textrm{\fontsize{8}{0}\selectfont{--}}"}
+define plus	{"\textrm{\fontsize{8}{0}\selectfont{+}}"}
+define star	{"\textrm{\fontsize{8}{0}\selectfont$\star$}"}
+define dot	{"\textrm{\fontsize{8}{0}\selectfont$\cdot$}"}
+.G2

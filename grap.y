@@ -48,12 +48,13 @@ coord *defcoord;
 String *graph_name;
 String *graph_pos;
 String *ps_param;
+bool compat_mode=false;			//  Compatibility mode
 
 // bison wants these defined....
 int yyerror(char*);
 int yylex();
-void init_dict();
- 
+void init_dict(); 
+
 // defined in grap_lex.l
 extern bool include_file(String *, int =0, bool=true);
 extern void lex_begin_macro_text();
@@ -97,7 +98,7 @@ int in_copy=0;
 //  extern char *optarg;
 //  extern int optind;
 
-const char *opts = "d:lDvuM:";
+const char *opts = "d:lDvuM:C";
 
 // Classes for various for_each calls
 
@@ -1298,6 +1299,9 @@ int main(int argc, char** argv) {
 		break;
 	    case 'M':
 		pathstring = (pathstring + ":") + optarg;
+		break;
+	    case 'C':
+		compat_mode = true;
 		break;
 	    case '?':
 		exit(20);

@@ -20,7 +20,7 @@ CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
 
-DISTDIR=grap-1.05
+DISTDIR=grap-1.06
 SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS += @GXXFLAGS@ @DEFS@ -g -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
@@ -65,6 +65,7 @@ grap.1:	grap.doc grap.an
 		mv grap.an grap.1; fi
 
 dist:	
+	cd examples && ${MAKE} clean
 	${MAKE} veryclean
 	${MAKE} grap.an
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)

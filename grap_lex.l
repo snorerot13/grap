@@ -46,7 +46,8 @@ String linebuf;
 
 extern macroDictionary macros;
 extern graph *the_graph;
-extern stringSequence path; 
+extern stringSequence path;
+extern bool compat_mode; 
 
 int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
@@ -95,10 +96,19 @@ char *f2names[NF2] = {
 	  tokenpos += yyleng;
 	  cout << yytext;
 	}
-.G1([ \t].*)? 	{
+.G1.* 	{
 
-        if ( strlen(yytext) > 3)
-	    yylval.string = new String(yytext+3);
+        if ( yyleng > 3 && yytext[3] != '\t' && yytext[3] != ' ' )
+	    if ( !compat_mode ) REJECT;
+        if ( yyleng > 3) {
+	    // Some extra characters after the macro invocation (or an
+	    // extension of the macro under compat mode).
+	    char *c;
+
+	    for (c = yytext; *c != '\t' && *c != ' '&& *c != '\0'; c++ )
+		;
+	    yylval.string =  ( *c != '\0' ) ? new String(yytext+3) : 0;
+	}
 	else
 	    yylval.string = 0;
 	tokenpos += yyleng;
