@@ -62,7 +62,7 @@ grap.an:	grap.doc
 	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc | groff -Tascii -mdoc | rman -f roff > grap.an
 
 grap.1:	grap.doc grap.an
-	if [ `uname` = 'FreeBSD' ]; then \
+	if [ `uname` = 'FreeBSD' ] || [ `uname` = 'Linux' ]; then \
 		perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
 	else \
 		mv grap.an grap.1; fi
