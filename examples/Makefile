@@ -1,6 +1,8 @@
 COLOR=-mcolor
 MACROS=-ms 
 
+.include "${HOME}/lib/mk/makefile.groff"
+
 example.ps:	example.ms
 	grap example.ms | groff -pe $(MACROS) > example.ps
 
@@ -15,4 +17,15 @@ local.color_example.ps:	color_example.ms
 
 clean:
 	rm -f *.ps
+
+#html conversions
+
+file17.gif:	file17.grap
+	perl -e 'print ".EQ\ndelim \$$\$$\n.EN\n";' | cat - file17.grap | grap | pic2gif - > file17.gif
+
+file22.gif:	file22.grap
+	perl -e 'print ".EQ\ndelim \$$\$$\n.EN\n";' | cat - file22.grap | grap | pic2gif - > file22.gif
+
+file23.gif:	file23.grap
+	perl -e 'print ".EQ\ndelim \$$\$$\n.EN\n";' | cat - file23.grap | grap | pic2gif - > file23.gif
 
