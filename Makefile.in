@@ -23,7 +23,8 @@ PERL=@PERL@
 DISTDIR=grap-1.20
 SOURCES=grap.cc grap_lex.cc *.cc
 
-CXXFLAGS += @GXXFLAGS@ @DEFS@ 
+#CXXFLAGS += @GXXFLAGS@ @DEFS@ 
+CXXFLAGS = @GXXFLAGS@ @DEFS@ 
 
 # solaris make uses these as defaults:
 

@@ -54,6 +54,8 @@ extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
 extern void lex_begin_coord();
 extern void lex_end_coord();
+extern void lex_begin_expr();
+extern void lex_end_expr();
 extern void lex_begin_copy( string*s=0);
 extern int include_string(string *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
@@ -115,7 +117,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON
+%token BASE ON LHS
 %start graphs
 %union {
     int val;
@@ -142,10 +144,10 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     coordid *coordident;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
-%type <num> opt_wid assignment_statement lexpr pure_lexpr
+%type <num> opt_wid assignment_statement lexpr pure_lexpr right_hand_side
 %type <stringmod> strmod
 %type <String> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
-%type <String> START string
+%type <String> START string LHS
 %type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME autotick
@@ -155,7 +157,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <string_list> strlist
 %type <double_list> num_line expr_list
 %type <tick_list> ticklist tickat tickfor tickdesc
-%type <pt> point
+%type <pt> point coord_pair
 %type <shift_list> opt_shift
 %type <shift> shift 
 %type <by> by_clause
@@ -273,18 +275,19 @@ opt_string:
 string:
 	STRING
              { $$ = $1; }
-|       SPRINTF LPAREN STRING COMMA expr_list RPAREN
+|       SPRINTF LPAREN STRING COMMA { lex_begin_expr(); } expr_list RPAREN
              {
 		 grap_sprintf_String *s = new grap_sprintf_String($3);
 		 doublelist::iterator d;
 
-		 for ( d = $5->begin(); d != $5->end(); d++)
+		 for ( d = $6->begin(); d != $6->end(); d++)
 		     s->next_number(*d);
 		 s->finish_fmt();
-		 delete $5;
+		 delete $6;
 		 delete $3;
 
 		 $$ = (string *) s;
+		 lex_end_expr();
 	     }
 ;
 
@@ -328,14 +331,14 @@ linedesc_elem:
             { $$ = new linedesc(invis); }
 |	 SOLID
             { $$ = new linedesc(solid); }
-|	 DOTTED opt_expr
-            { $$ = new linedesc(dotted, $2); }
-|	 DASHED opt_expr
-            { $$ = new linedesc(dashed, $2); }
+|	 DOTTED { lex_begin_expr(); } opt_expr
+            { $$ = new linedesc(dotted, $3); lex_end_expr(); }
+|	 DASHED { lex_begin_expr(); } opt_expr
+            { $$ = new linedesc(dashed, $3);  lex_end_expr(); }
 |	 COLOR string
             { $$ = new linedesc(def, 0, $2); }
-|	 FILL opt_expr
-            { $$ = new linedesc(def, 0, 0, $2); }
+|	 FILL { lex_begin_expr(); } opt_expr
+            { $$ = new linedesc(def, 0, 0, $3);  lex_end_expr(); }
 |	 FILLCOLOR string
             { $$ = new linedesc(def, 0, 0, 0, $2); }
 ;
@@ -455,18 +458,25 @@ pure_lexpr:
             { $$ = (*$1 != *$3); delete $1; delete $3; }
 ;
 
-assignment_statement:
-	IDENT EQUALS expr SEP
-            { $$ = assignment_statement($1, $3); }
-|	IDENT EQUALS assignment_statement
-            { $$ = assignment_statement($1, $3); }
+right_hand_side:
+        expr SEP { $$ = $1; }
+|	assignment_statement { $$ = $1; }
 ;
 
+assignment_statement:
+	LHS { lex_begin_expr(); } right_hand_side
+            { $$ = assignment_statement($1, $3);  lex_end_expr(); }
+;
+
+coord_pair:
+        expr COMMA expr
+            { $$ = new point($1, $3, 0); }
+|       LPAREN expr COMMA expr RPAREN
+            { $$ = new point($2, $4, 0); }
+;
 point:
-	opt_coordname expr COMMA expr
-            { $$ = new point($2, $4, $1); }
-|	opt_coordname LPAREN expr COMMA expr RPAREN
-	    { $$ = new point($3, $5, $1); }
+	opt_coordname { lex_begin_expr(); } coord_pair
+            { $$ = new point($3->x, $3->y, $1); delete $3; lex_end_expr(); }
 ;
 
 strmod:
@@ -475,10 +485,10 @@ strmod:
 		$$.rel =0;
 		$$.just = (unaligned_default) ? unaligned : 0;
 	    }
-| 	strmod SIZE expr
-	    { $$.size = $3; $$.rel = ($3<0);}
-| 	strmod SIZE PLUS expr
-	    { $$.size = $4; $$.rel = 1;}
+| 	strmod SIZE { lex_begin_expr(); } expr
+	    { $$.size = $4; $$.rel = ($4<0); lex_end_expr(); }
+| 	strmod SIZE PLUS { lex_begin_expr(); } expr
+	    { $$.size = $5; $$.rel = 1; lex_end_expr(); }
 |	strmod LJUST
 	    { $$.just |= (int) ljust; }
 |	strmod RJUST
@@ -512,8 +522,8 @@ plot_statement:
 	    {
   		the_graph->new_plot($1,$3);
 	    }
-|	PLOT expr opt_string AT point SEP
-	    { plot_statement($2, $3, $5); }
+|	PLOT { lex_begin_expr(); } expr { lex_end_expr(); } opt_string AT point SEP
+	    { plot_statement($3, $5, $7); }
 ;
 
 next_statement:
@@ -522,17 +532,19 @@ next_statement:
 ;
 
 size_elem:
-	HT expr
+	HT { lex_begin_expr(); } expr
             {
 		$$ = new frame;
-		$$->ht = $2;
+		$$->ht = $3;
 		$$->wid = 0;
+		lex_end_expr(); 
 	    }
-|	WID expr
+|	WID  { lex_begin_expr(); } expr
             {
 		$$ = new frame;
-		$$->wid = $2;
+		$$->wid = $3;
 		$$->ht = 0;
+		lex_end_expr();
 	    }
 ;
 
@@ -617,14 +629,14 @@ frame_statement:
 ;
 
 shift:
-	UP expr
-            { $$ = new shiftdesc(top_side, $2);}
-|	DOWN expr
-            { $$ = new shiftdesc(bottom_side, $2);}
-|	LEFT expr
-            { $$ = new shiftdesc(left_side, $2);}
-|	RIGHT expr
-            { $$ = new shiftdesc(right_side, $2);}
+	UP { lex_begin_expr(); } expr
+            { $$ = new shiftdesc(top_side, $3); lex_end_expr(); }
+|	DOWN  { lex_begin_expr(); } expr
+            { $$ = new shiftdesc(bottom_side, $3); lex_end_expr(); }
+|	LEFT  { lex_begin_expr(); } expr
+            { $$ = new shiftdesc(left_side, $3); lex_end_expr(); }
+|	RIGHT  { lex_begin_expr(); } expr
+            { $$ = new shiftdesc(right_side, $3); lex_end_expr(); }
 ;
 
 tickdir:
@@ -636,34 +648,37 @@ tickdir:
 
 direction:
 	    { $$ = 0.125; }
-|	tickdir opt_expr
+|	tickdir { lex_begin_expr(); } opt_expr
 	    {
-		if ( $2 == 0 ) $$ = $1 * 0.125;
-		else $$ = $1 * $2;
+		if ( $3 == 0 ) $$ = $1 * 0.125;
+		else $$ = $1 * $3;
+		lex_end_expr();
 	    }
 ;
 
 ticklist:
 	expr opt_string
 	    { $$ = ticklist_elem($1, $2, 0); }
-|	ticklist COMMA expr opt_string
-	    { $$ = ticklist_elem($3, $4, $1); }
+|	ticklist COMMA {lex_begin_expr(); } expr {lex_end_expr(); } opt_string
+	    { $$ = ticklist_elem($4, $6, $1); }
 ;
 
 by_clause:
 	    { $$.op = PLUS; $$.expr = 1; }
-|	BY opt_expr
+/* used to be opt_expr */
+|	BY { lex_begin_expr(); } expr
 	    {
 		$$.op = PLUS;
-		if ( $2 != 0.0 ) $$.expr = $2;
+		if ( $3 != 0.0 ) $$.expr = $3;
 		else $$.expr = 1;
+		lex_end_expr();
 	    }
-|	BY PLUS expr
-	    { $$.op = PLUS; $$.expr = $3; }
-|	BY TIMES expr
-	    { $$.op = TIMES; $$.expr = $3; }
-|	BY DIV expr
-	    { $$.op = DIV; $$.expr = $3; }
+|	BY PLUS { lex_begin_expr(); } expr
+	    { $$.op = PLUS; $$.expr = $4; lex_end_expr(); }
+|	BY TIMES { lex_begin_expr(); } expr
+	    { $$.op = TIMES; $$.expr = $4; lex_end_expr(); }
+|	BY DIV { lex_begin_expr(); } expr
+	    { $$.op = DIV; $$.expr = $4; lex_end_expr(); }
 ;
 
 tickat:
@@ -676,8 +691,9 @@ tickat:
 ;
 
 tickfor:
-	from opt_coordname expr TO expr by_clause opt_string
-	    { $$ = tick_for($2, $3, $5, $6, $7); }
+	from opt_coordname { lex_begin_expr(); } expr
+	         TO expr {lex_end_expr(); } by_clause opt_string
+	    { $$ = tick_for($2, $4, $6, $8, $9); }
 ;
 tickdesc :
 	tickat
@@ -752,8 +768,8 @@ label_statement:
 ;
 radius_spec:
 	    { $$ = 0.025; }
-|	RADIUS expr
-	    { $$ = $2; }
+|	RADIUS { lex_begin_expr(); } expr
+	    { $$ = $3; lex_end_expr();  }
 ;
 
 circle_statement:
@@ -778,13 +794,13 @@ line_statement:
 
 x_axis_desc:
 	    { $$.which=none; }
-|	XDIM expr COMMA expr
-	    { $$ = axis_description(x_axis, $2, $4); }
+|	XDIM { lex_begin_expr(); } expr COMMA expr
+	    { $$ = axis_description(x_axis, $3, $5); lex_end_expr(); }
 ;
 y_axis_desc:
 	    { $$.which=none; }
-|	YDIM expr COMMA expr
-	    { $$ = axis_description(y_axis, $2, $4); }
+|	YDIM  { lex_begin_expr(); } expr COMMA expr
+	    { $$ = axis_description(y_axis, $3, $5); lex_end_expr(); }
 ;
 
 log_list:
@@ -810,14 +826,13 @@ ident_or_coord:
             { $$ = new coordid($1, (string *) 0); }
 
 coord_statement:
-	COORD { lex_begin_coord(); } ident_or_coord x_axis_desc y_axis_desc log_list SEP
+	COORD ident_or_coord x_axis_desc y_axis_desc log_list SEP
 	    {
-		lex_end_coord();
-		if ( $3->first ) 
-		    coord_statement($3->first, $4, $5, $6);
+		if ( $2->first ) 
+		    coord_statement($2->first, $3, $4, $5);
 		else
-		    coord_statement($3->second, $4, $5, $6);
-		delete $3;
+		    coord_statement($2->second, $3, $4, $5);
+		delete $2;
 	    }
 ;
 
@@ -979,20 +994,21 @@ else_clause:
 ;
 
 if_statement:
-	IF lexpr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
+	IF { lex_begin_expr(); } lexpr  { lex_end_expr(); } THEN { lex_begin_macro_text(); } TEXT else_clause SEP
 	    {
 		// force all if blocks to be terminated by a SEP
-		*$5 += ';';
-		if ( fabs($2) > EPSILON ) include_string($5,0,GINTERNAL);
-		else if ( $6 ) include_string($6,0,GINTERNAL);
-		delete $5;
-		if ( $6) delete $6;
+		*$7 += ';';
+		if ( fabs($3) > EPSILON ) include_string($7,0,GINTERNAL);
+		else if ( $8 ) include_string($8,0,GINTERNAL);
+		delete $7;
+		if ( $8) delete $8;
 	    }
 ;
 
 for_statement:
-	FOR IDENT from expr TO expr by_clause DO { lex_begin_macro_text(); } TEXT SEP
-	    { for_statement($2, $4, $6, $7, $10); }
+	FOR IDENT from { lex_begin_expr(); } expr TO expr {lex_end_expr(); }
+            by_clause DO { lex_begin_macro_text(); } TEXT SEP
+	    { for_statement($2, $5, $7, $9, $12); }
 ;
 
 graph_statement:
@@ -1014,14 +1030,18 @@ graph_statement:
 ;
 
 print_statement:
-	PRINT string SEP
+	PRINT { lex_begin_expr(); } print_param { lex_end_expr(); } SEP
+;
+
+print_param:
+	string 
 	    {
-		unquote($2);
-		cerr <<  *$2 << endl;
+		unquote($1);
+		cerr <<  *$1 << endl;
 	    }
-|	PRINT expr SEP
+|	expr 
 	    {
-		cerr << $2 << endl;
+		cerr << $1 << endl;
 	    }
 ;
 
@@ -1041,15 +1061,15 @@ bar_dir:
              { $$ = top_side; } 
 ;
 bar_base:
-	BASE expr
-            { $$ = $2; }
+	BASE { lex_begin_expr(); } expr
+            { $$ = $2; lex_end_expr(); }
 |
             { $$ = 0; }
 ;
 
 opt_wid:
-	WID expr
-            { $$ = $2; }
+	WID { lex_begin_expr(); } expr
+            { $$ = $2; lex_end_expr(); }
 |
             { $$ = 1; }
 ;
@@ -1062,7 +1082,10 @@ bar_statement:
 		the_graph->new_box($2, $4, $5);
 		delete $2; delete $4; delete $5;
 	    }
-|	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, $7, $8, $9); }
+|	BAR opt_coordname bar_dir
+            { lex_begin_expr(); } expr { lex_end_expr(); } HT
+	    { lex_begin_expr(); } expr { lex_end_expr(); }
+            opt_wid bar_base opt_linedesc SEP
+           { bar_statement($2, $3, $5, $9, $11, $12, $13); }
 ;
 %%

@@ -31,7 +31,8 @@ extern "C" {
 extern doubleDictionary vars;
 extern stringSequence path; 
 extern graph *the_graph;
-extern bool unaligned_default;	// Should strings be unaligned by default 
+extern bool unaligned_default;	// Should strings be unaligned by default
+extern bool print_lex_debug;
 
 extern line* defline;
 extern coord *defcoord;
@@ -49,7 +50,7 @@ extern int yyparse();
 extern int nlines;
 
 extern macroDictionary macros;
-const char *opts = "d:lDvuM:C";
+const char *opts = "d:lDvuM:CV";
 
 // Classes for various for_each calls
 
@@ -839,6 +840,9 @@ int main(int argc, char** argv) {
 	    case 'v':
 		cout << version << endl;
 		exit(0);
+	    case 'V':
+		print_lex_debug = true;
+		break;
 	    case 'u':
 		unaligned_default = 1;
 		break;
