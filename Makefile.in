@@ -25,7 +25,7 @@ MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch
 MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.21
+VERSION=1.21pre1
 DISTDIR=grap-${VERSION}
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
