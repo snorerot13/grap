@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(grap.h)
 ac_random_declared="no"
+have_random="no"
 AC_LANG_CPLUSPLUS
 
 dnl Checks for programs.
@@ -13,24 +14,6 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
-
-#solaris does not declare random in stdlib.h
-
-if test $ac_cv_header_stdc = yes; then
-	echo $ac_n "checking for declaration of random() in stdlib.h... "
-	AC_EGREP_HEADER(random,/usr/include/stdlib.h,echo "yes";
-AC_DEFINE(RANDOM_DECLARED)
-ac_random_declared="yes",echo "no")
-fi
-
-#If we have not found a declaration from random, check math.h
-
-if test $ac_random_declared = no; then
-	echo $ac_n "checking for declaration of random() in math.h... "
-	AC_EGREP_HEADER(random,/usr/include/math.h,echo "yes";
-AC_DEFINE(RANDOM_DECLARED)
-ac_random_declared="yes",echo "no")
-fi
 AC_CHECK_HEADERS(unistd.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -38,6 +21,55 @@ AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strdup)
-AC_CHECK_FUNCS(random)
 AC_CHECK_FUNCS(snprintf)
+AC_CHECK_FUNC(random,
+AC_DEFINE(HAVE_RANDOM)
+have_random="yes",
+)
+if test $have_random = "no"; then
+AC_CHECK_FUNC(rand,
+AC_DEFINE(HAVE_RAND)
+, 
+echo "no random or rand functions?  Something is badly misconfigured!"
+exit 1;)
+fi
+
+# once we're sure we have the function...
+
+if test $have_random = "yes" ; then
+	#solaris does not declare random in stdlib.h
+
+	if test $ac_cv_header_stdc = yes; then
+		echo $ac_n "checking for declaration of random() in stdlib.h... "
+		AC_EGREP_HEADER(random,/usr/include/stdlib.h,echo "yes";
+	AC_DEFINE(RANDOM_DECLARED)
+	ac_random_declared="yes",echo "no")
+	fi
+
+	#If we have not found a declaration from random, check math.h
+
+	if test $ac_random_declared = no; then
+		echo $ac_n "checking for declaration of random() in math.h... "
+		AC_EGREP_HEADER(random,/usr/include/math.h,echo "yes";
+	AC_DEFINE(RANDOM_DECLARED)
+	ac_random_declared="yes",echo "no")
+	fi
+else
+
+	if test $ac_cv_header_stdc = yes; then
+		echo $ac_n "checking for declaration of rand() in stdlib.h... "
+		AC_EGREP_HEADER(rand,/usr/include/stdlib.h,echo "yes";
+	AC_DEFINE(RAND_DECLARED)
+	ac_rand_declared="yes",echo "no")
+	fi
+
+	#If we have not found a declaration from random, check math.h
+
+	if test $ac_rand_declared = no; then
+		echo $ac_n "checking for declaration of rand() in math.h... "
+		AC_EGREP_HEADER(rand,/usr/include/math.h,echo "yes";
+	AC_DEFINE(RAND_DECLARED)
+	ac_rand_declared="yes",echo "no")
+	fi
+fi
 AC_OUTPUT(examples/Makefile Makefile)

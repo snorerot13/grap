@@ -3,9 +3,6 @@
 /* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
    COPYRIGHT file for the full copyright and limitations of
    liabilities. */
-#ifndef HAVE_RANDOM
-#define random rand
-#endif
 
 #include <stdio.h>
 #include <iostream.h>
@@ -21,14 +18,24 @@ extern "C" {
     extern int optind, opterr, optopt;
     int getopt(int, char * const [], const char *);
 }
-#endif 
+#endif
 
-#ifndef RANDOM_DECLARED
+#if !defined(HAVE_RANDOM) && defined(HAVE_RAND)
+#define random rand
+#endif
+
+#if (defined(HAVE_RANDOM) && !defined(RANDOM_DECLARED))
 extern "C" {
     long random();
 }
 #endif
 
+#if (defined(HAVE_RAND) && !defined(RAND_DECLARED))
+extern "C" {
+    long rand();
+}
+#endif
+ 
 #include "grap.h"
 
 #ifndef DEFINES
