@@ -41,6 +41,7 @@ all:	grap
 
 grap:	$(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
+	if test -f grap.exe ; then mv -f grap.exe grap; fi
 
 y.tab.h:	grap.y
 grap.cc:	grap.y

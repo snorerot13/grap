@@ -59,6 +59,9 @@ extern void lex_hunt_macro();
 extern int yyparse(void);	// To shut yacc (vs. bison) up.
 void draw_graph();
 void init_graph();
+extern char *pre_context(void);
+extern char *token_context(void);
+extern char *post_context(void);
     
 int nlines;
 int in_copy=0;
@@ -66,7 +69,7 @@ int in_copy=0;
 //  extern char *optarg;
 //  extern int optind;
 
-const char *opts = "d:Dvu";
+const char *opts = "d:lDvu";
 
 // Classes for various for_each calls
 
@@ -1079,7 +1082,7 @@ tickfor:
 		} else
 		    fmt = new String("%g");
 		
-		if ( $5 - $3 > 0 ) dir = 1;
+		if ( $5 - $3 >= 0 ) dir = 1;
 		else dir = -1;
 		
 		idx = $3;
@@ -1417,7 +1420,7 @@ copy_statement:
 	COPY string SEP
 	    {
 		unquote($2);
-		if (!include_file($2)) return 0;
+		if (!include_file($2, 0)) return 0;
 	    }
 |	COPY until_clause THRU { lex_hunt_macro(); } MACRO  until_clause SEP
 	    {
@@ -1425,7 +1428,7 @@ copy_statement:
 		if ( $2 && $6 ) {
 		    delete $2;
 		    delete $6;
-		    yyerror("Only specify 1 unilt or filename\n");
+		    yyerror("Only specify 1 until or filename\n");
 		}
 		else c = ($2) ? $2 : $6;
 		if ( c ) {
@@ -1435,7 +1438,7 @@ copy_statement:
 		    if ( c->t == copydesc::until ) lex_begin_copy(c->s);
 		    else {
 			lex_begin_copy(0);
-			include_file(c->s);
+			include_file(c->s, 0);
 			delete c->s;
 		    }
 		    delete c;
@@ -1684,23 +1687,25 @@ int yyerror(char *s) {
     while ( !lexstack.empty() ) {
 	g = lexstack.front();
 	lexstack.pop_front();
+	cerr << "grap: " << s << endl;
 	switch ( g->type) {
 	    case GFILE:
-		cerr << "At line " << g->line << " " ;
-		if ( g->name ) cerr << "in file " << *g->name << endl;
+		cerr << "Error near line " << g->line << ", " ;
+		if ( g->name ) cerr << "file \"" << *g->name << "\"";
 		break;
 	    case GMACRO:
-		cerr << "At line " << g->line << " " ;
-		cerr << "of macro"  << endl;
+		cerr << "Error near line " << g->line << " " ;
+		cerr << "of macro";
 		break;
 	    default:
 		break;
 	}
+        cerr << " context is:" << endl << "        " << pre_context();
+	cerr << " >>> " << token_context() << " <<< " << post_context() << endl;
 	delete g;
     }
-    cerr << s << endl;
-    cerr << "Bailing out" << endl;
-    abort();
+    //abort();
+    //exit (1);
     return 0;
 }
 
@@ -1766,6 +1771,7 @@ int main(int argc, char** argv) {
 		defines = optarg;
 		use_defines = 1;
 		break;
+	    case 'l':
 	    case 'D':
 		use_defines = 0;
 		break;

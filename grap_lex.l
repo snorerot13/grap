@@ -31,11 +31,15 @@ int in_str = 0;
 int braces = 0;
 int stack_init =0;
 int copystate =0;
+int continuation =0;
+unsigned int tokenpos =0;
 
 int lex_expand_macro =1;
 
 linelist *sl=0;
 String *copy_end, *copy_backstop;
+
+char linebuf[8192 /* large enough for a very long line; as large as YY_READ_BUF_SIZE*/];
 
 extern macroDictionary macros;
 extern graph *the_graph;
@@ -65,6 +69,9 @@ char *f1names[NF1] = {
 char *f2names[NF2] = {
 "atan2", "min", "max"
 };
+
+#define	ECHO	/* */
+
 %}
 %x GRAP
 %x MACROTEXT
@@ -73,111 +80,131 @@ char *f2names[NF2] = {
 %x RESTOFLINE
 %%
 <INITIAL>{
-^.G1([ \t].*)? 	{
+\n.*$	{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+	  tokenpos = 0;
+	  newline();
+	  if (yyleng > 1)
+		  yyless(1);
+	  DEBUG("<INITIAL>linebuf: %s\n", linebuf);
+	  tokenpos += yyleng;
+	  cout << yytext;
+	}
+.G1([ \t].*)? 	{
 
         if ( strlen(yytext) > 3)
 	    yylval.string = new String(yytext+3);
 	else
 	    yylval.string = 0;
-	
+	tokenpos += yyleng;
 	BEGIN(GRAP);
-	return START;
+	DEBUG("START\n",0); return START;
 	}
-.+	ECHO;
-\n	{
-           newline();
-           ECHO;
-        }
+.+	{
+		tokenpos += yyleng;
+		cout << yytext;
+	}
 }
 <GRAP>{
-\#[^\n]*
-[ \t]+
-\\\n                    { newline(); } 
-[;\n]			{
-                          if ( *yytext == '\n' ) newline();
+\n.*$			{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+			  tokenpos = 0;
+			  newline();
+			  if (yyleng > 1)
+				  yyless(1);
+			  if (continuation) {
+				DEBUG("<GRAP>linebuf: %s\n", linebuf);
+				continuation = 0;
+			  } else {
+				DEBUG("<GRAP>SEP linebuf: %s\n", linebuf);
+				return SEP; 
+			  }
+			}
+\#.*$
+[ \t]+			tokenpos += yyleng;
+;			{
+			  tokenpos += yyleng;
                           DEBUG("SEP\n",0);
 			  return SEP; 
                         }
-\(			DEBUG("LPAREN\n",0); return LPAREN;
-\)			DEBUG("RPAREN\n",0); return RPAREN;
-,			DEBUG("COMMA\n",0); return COMMA;
-copy			DEBUG("COPY\n",0); return COPY;
-\+			DEBUG("PLUS\n",0); return PLUS;
-\-			DEBUG("MINUS\n",0); return MINUS;
-\*			DEBUG("TIMES\n",0); return TIMES;
-\/			DEBUG("DIV\n",0); return DIV;
-\^			DEBUG("CARAT\n",0); return CARAT;
-\=			DEBUG("EQUALS\n",0); return EQUALS;
-\=\=			DEBUG("EQ\n",0); return EQ;
-\!\=			DEBUG("NEQ\n",0); return NEQ;
-\<			DEBUG("LT\n",0); return LT;
-\>			DEBUG("GT\n",0); return GT;
-\<\=			DEBUG("LTE\n",0); return LTE;
-\>\=			DEBUG("GTE\n",0); return GTE;
-\&\&			DEBUG("AND\n",0); return AND;
-\|\|			DEBUG("OR\n",0); return OR;
-\!			DEBUG("NOT\n",0); return NOT;
-next			DEBUG("NEXT\n",0); return NEXT;
-draw|new		DEBUG("DRAW\n",0); return DRAW;
-line			DEBUG("LINE\n",0); return LINE;
-define			DEBUG("DEFINE\n",0); return DEFINE;
-arrow			DEBUG("ARROW\n",0); return ARROW;
-circle			DEBUG("CIRCLE\n",0); return CIRCLE;
-radius|rad		DEBUG("RADIUS\n",0); return RADIUS;
-plot			DEBUG("PLOT\n",0); return PLOT;
-frame			DEBUG("FRAME\n",0); return FRAME;
-graph			DEBUG("GRAPH\n",0); return GRAPH;
-coord			DEBUG("COORD\n",0); return COORD;
-for			DEBUG("FOR\n",0); return FOR;
-from			DEBUG("FROM\n",0); return FROM;
-thru|through		DEBUG("THRU\n",0); return THRU;
-to			DEBUG("TO\n",0); return TO;
-at			DEBUG("AT\n",0); return AT;
-by			DEBUG("BY\n",0); return BY;
-until			DEBUG("UNTIL\n",0); return UNTIL;
-do			DEBUG("DO\n",0); return DO;
-if			DEBUG("IF\n",0); return IF;
-then			DEBUG("THEN\n",0); return THEN;
-else			DEBUG("ELSE\n",0); return ELSE;	
-print			DEBUG("PRINT\n",0); return PRINT;	
-sprintf			DEBUG("SPRINTF\n",0); return SPRINTF;	
-log[ \t]+x			DEBUG("LOG_X\n",0); return LOG_X;
-log[ \t]+y			DEBUG("LOG_Y\n",0); return LOG_Y;
-log[ \t]+log			DEBUG("LOG_LOG\n",0); return LOG_LOG;
-x			DEBUG("X\n",0); return X;
-y			DEBUG("Y\n",0); return Y;
-ticks|tick			DEBUG("TICKS\n",0); return TICKS;
-label			DEBUG("LABEL\n",0); return LABEL;
-grid			DEBUG("GRID\n",0); return GRID;
-pic			DEBUG("PIC\n",0); return PIC;
-top			DEBUG("TOP\n",0); return TOP;
-bottom|bot		DEBUG("BOTTOM\n",0); return BOTTOM;
-left			DEBUG("LEFT\n",0); return LEFT;
-right			DEBUG("RIGHT\n",0); return RIGHT;
-up			DEBUG("UP\n",0); return UP;
-down			DEBUG("DOWN\n",0); return DOWN;
-ljust			DEBUG("LJUST\n",0); return LJUST;
-rjust			DEBUG("RJUST\n",0); return RJUST;
-above			DEBUG("ABOVE\n",0); return ABOVE;
-below			DEBUG("BELOW\n",0); return BELOW;
-aligned			DEBUG("ALIGNED\n",0); return ALIGNED;
-unaligned		DEBUG("UNALIGNED\n",0); return UNALIGNED;
-size			DEBUG("SIZE\n",0); return SIZE;
-sh			DEBUG("SH\n",0); return SH;
-in			DEBUG("IN\n",0); return IN;
-out			DEBUG("OUT\n",0); return OUT;
-off			DEBUG("OFF\n",0); return OFF;
-bar			DEBUG("BAR\n",0); return BAR;
-fill			DEBUG("FILL\n",0); return FILL;
-base			DEBUG("BASE\n",0); return BASE;
-ht			DEBUG("HT\n",0); return HT;
-wid			DEBUG("WID\n",0); return WID;
-invis			DEBUG("INVIS\n",0); return INVIS;
-solid			DEBUG("SOLID\n",0); return SOLID;
-dotted			DEBUG("DOTTED\n",0); return DOTTED;
-dashed			DEBUG("DASHED\n",0); return DASHED;
-fillcolor			DEBUG("fillcolor\n",0); return FILLCOLOR;
-color			DEBUG("color\n",0); return COLOR;
+\(			tokenpos += yyleng; DEBUG("LPAREN\n",0); return LPAREN;
+\)			tokenpos += yyleng; DEBUG("RPAREN\n",0); return RPAREN;
+,			tokenpos += yyleng; DEBUG("COMMA\n",0); return COMMA;
+copy			tokenpos += yyleng; DEBUG("COPY\n",0); return COPY;
+\+			tokenpos += yyleng; DEBUG("PLUS\n",0); return PLUS;
+\-			tokenpos += yyleng; DEBUG("MINUS\n",0); return MINUS;
+\*			tokenpos += yyleng; DEBUG("TIMES\n",0); return TIMES;
+\/			tokenpos += yyleng; DEBUG("DIV\n",0); return DIV;
+\^			tokenpos += yyleng; DEBUG("CARAT\n",0); return CARAT;
+\=			tokenpos += yyleng; DEBUG("EQUALS\n",0); return EQUALS;
+\=\=			tokenpos += yyleng; DEBUG("EQ\n",0); return EQ;
+\!\=			tokenpos += yyleng; DEBUG("NEQ\n",0); return NEQ;
+\<			tokenpos += yyleng; DEBUG("LT\n",0); return LT;
+\>			tokenpos += yyleng; DEBUG("GT\n",0); return GT;
+\<\=			tokenpos += yyleng; DEBUG("LTE\n",0); return LTE;
+\>\=			tokenpos += yyleng; DEBUG("GTE\n",0); return GTE;
+\&\&			tokenpos += yyleng; DEBUG("AND\n",0); return AND;
+\|\|			tokenpos += yyleng; DEBUG("OR\n",0); return OR;
+\!			tokenpos += yyleng; DEBUG("NOT\n",0); return NOT;
+next			tokenpos += yyleng; DEBUG("NEXT\n",0); return NEXT;
+draw|new		tokenpos += yyleng; DEBUG("DRAW\n",0); return DRAW;
+line			tokenpos += yyleng; DEBUG("LINE\n",0); return LINE;
+define			tokenpos += yyleng; DEBUG("DEFINE\n",0); return DEFINE;
+arrow			tokenpos += yyleng; DEBUG("ARROW\n",0); return ARROW;
+circle			tokenpos += yyleng; DEBUG("CIRCLE\n",0); return CIRCLE;
+radius|rad		tokenpos += yyleng; DEBUG("RADIUS\n",0); return RADIUS;
+plot			tokenpos += yyleng; DEBUG("PLOT\n",0); return PLOT;
+frame			tokenpos += yyleng; DEBUG("FRAME\n",0); return FRAME;
+graph			tokenpos += yyleng; DEBUG("GRAPH\n",0); return GRAPH;
+coord			tokenpos += yyleng; DEBUG("COORD\n",0); return COORD;
+for			tokenpos += yyleng; DEBUG("FOR\n",0); return FOR;
+from			tokenpos += yyleng; DEBUG("FROM\n",0); return FROM;
+thru|through		tokenpos += yyleng; DEBUG("THRU\n",0); return THRU;
+to			tokenpos += yyleng; DEBUG("TO\n",0); return TO;
+at			tokenpos += yyleng; DEBUG("AT\n",0); return AT;
+by			tokenpos += yyleng; DEBUG("BY\n",0); return BY;
+until			tokenpos += yyleng; DEBUG("UNTIL\n",0); return UNTIL;
+do			tokenpos += yyleng; DEBUG("DO\n",0); return DO;
+if			tokenpos += yyleng; DEBUG("IF\n",0); return IF;
+then			tokenpos += yyleng; DEBUG("THEN\n",0); return THEN;
+else			tokenpos += yyleng; DEBUG("ELSE\n",0); return ELSE;	
+print			tokenpos += yyleng; DEBUG("PRINT\n",0); return PRINT;	
+sprintf			tokenpos += yyleng; DEBUG("SPRINTF\n",0); return SPRINTF;	
+log[ \t]+x			tokenpos += yyleng; DEBUG("LOG_X\n",0); return LOG_X;
+log[ \t]+y			tokenpos += yyleng; DEBUG("LOG_Y\n",0); return LOG_Y;
+log[ \t]+log			tokenpos += yyleng; DEBUG("LOG_LOG\n",0); return LOG_LOG;
+x			tokenpos += yyleng; DEBUG("X\n",0); return X;
+y			tokenpos += yyleng; DEBUG("Y\n",0); return Y;
+ticks|tick			tokenpos += yyleng; DEBUG("TICKS\n",0); return TICKS;
+label			tokenpos += yyleng; DEBUG("LABEL\n",0); return LABEL;
+grid			tokenpos += yyleng; DEBUG("GRID\n",0); return GRID;
+pic			tokenpos += yyleng; DEBUG("PIC\n",0); return PIC;
+top			tokenpos += yyleng; DEBUG("TOP\n",0); return TOP;
+bottom|bot		tokenpos += yyleng; DEBUG("BOTTOM\n",0); return BOTTOM;
+left			tokenpos += yyleng; DEBUG("LEFT\n",0); return LEFT;
+right			tokenpos += yyleng; DEBUG("RIGHT\n",0); return RIGHT;
+up			tokenpos += yyleng; DEBUG("UP\n",0); return UP;
+down			tokenpos += yyleng; DEBUG("DOWN\n",0); return DOWN;
+ljust			tokenpos += yyleng; DEBUG("LJUST\n",0); return LJUST;
+rjust			tokenpos += yyleng; DEBUG("RJUST\n",0); return RJUST;
+above			tokenpos += yyleng; DEBUG("ABOVE\n",0); return ABOVE;
+below			tokenpos += yyleng; DEBUG("BELOW\n",0); return BELOW;
+aligned			tokenpos += yyleng; DEBUG("ALIGNED\n",0); return ALIGNED;
+unaligned		tokenpos += yyleng; DEBUG("UNALIGNED\n",0); return UNALIGNED;
+size			tokenpos += yyleng; DEBUG("SIZE\n",0); return SIZE;
+sh			tokenpos += yyleng; DEBUG("SH\n",0); return SH;
+in			tokenpos += yyleng; DEBUG("IN\n",0); return IN;
+out			tokenpos += yyleng; DEBUG("OUT\n",0); return OUT;
+off			tokenpos += yyleng; DEBUG("OFF\n",0); return OFF;
+bar			tokenpos += yyleng; DEBUG("BAR\n",0); return BAR;
+fill			tokenpos += yyleng; DEBUG("FILL\n",0); return FILL;
+base			tokenpos += yyleng; DEBUG("BASE\n",0); return BASE;
+ht			tokenpos += yyleng; DEBUG("HT\n",0); return HT;
+wid			tokenpos += yyleng; DEBUG("WID\n",0); return WID;
+invis			tokenpos += yyleng; DEBUG("INVIS\n",0); return INVIS;
+solid			tokenpos += yyleng; DEBUG("SOLID\n",0); return SOLID;
+dotted			tokenpos += yyleng; DEBUG("DOTTED\n",0); return DOTTED;
+dashed			tokenpos += yyleng; DEBUG("DASHED\n",0); return DASHED;
+fillcolor			tokenpos += yyleng; DEBUG("fillcolor\n",0); return FILLCOLOR;
+color			tokenpos += yyleng; DEBUG("color\n",0); return COLOR;
 rand			{
 			int i;
 
@@ -185,6 +212,7 @@ rand			{
 			for ( i = 0 ; i < NF0; i++ ) 
 				if ( !strcmp(yytext,f0names[i]) )
 					yylval.val = i;
+			tokenpos += yyleng;
  			return FUNC0;
 			}
 log|exp|int|sin|cos|sqrt|rand|eexp	{
@@ -194,6 +222,7 @@ log|exp|int|sin|cos|sqrt|rand|eexp	{
 			for ( i = 0 ; i < NF1; i++ ) 
 				if ( !strcmp(yytext,f1names[i]) )
 					yylval.val = i;
+			tokenpos += yyleng;
  			return FUNC1;
 			}
 atan2|min|max		{
@@ -203,15 +232,17 @@ atan2|min|max		{
 			for ( i = 0 ; i < NF2; i++ ) 
 				if ( !strcmp(yytext,f2names[i]) )
 					yylval.val = i;
+			tokenpos += yyleng;
 			return FUNC2;
 			}
 ([0-9]*\.?[0-9]+)|([0-9]*\.?[0-9]+[eE](\+|\-)?[0-9]+)	{ 
 			DEBUG("Number: %s\n",yytext);
 			yylval.num = atof(yytext);
+			tokenpos += yyleng;
 			return NUMBER;
 			}
-^\.[^0-9].*$                  {
-                                DEBUG("Troff: %s\n",yytext);
+[.'][^0-9].*$                  {
+				tokenpos += yyleng;
 				if ( !strncmp(".G1", yytext, 3) ) {
 				    if ( lexstack.empty() ||
 					 lexstack.front()->report_start == 1 )
@@ -225,20 +256,32 @@ atan2|min|max		{
 				    if ( lexstack.empty() ||
 					 lexstack.front()->report_start == 1) {
 
-					yyinput(); // Gobble up the newline
-					newline();
-					DEBUG("End: %s\n",yytext);
+					DEBUG("<GRAP>End: %s\n",yytext);
 					BEGIN(INITIAL);
+					/* discard whitespace (including newline) */
+					{ int c;
+						while ((c=yyinput())) {
+							if (c == EOF)
+								break;
+							if (isspace(c))
+								continue;
+							/* not whitespace or EOF */
+							unput(c);
+							break;
+						}
+					}
 					return END;
 				    }
 				    else YY_BREAK;
 				}				
                                 yylval.string = new String(yytext);
+                                DEBUG("Troff: %s\n",yytext);
 				return TROFF;
                         }
 \"([^\"\n]|\\\")*\"	{ 
 			DEBUG("String: %s\n",yytext);
 			yylval.string = new String(yytext);
+			tokenpos += yyleng;
 			return STRING;
 			}
 [A-Za-z0-9_]*		{ 
@@ -261,8 +304,10 @@ atan2|min|max		{
 				id = m->invoke();
 				include_string(id);
 				delete id;
+			        tokenpos += yyleng;
 			}
 			else {
+			    tokenpos += yyleng;
 			    ci = the_graph->coords.find(*id);
 			    if ( ci != the_graph->coords.end()) {
 				c = (*ci).second;
@@ -274,20 +319,24 @@ atan2|min|max		{
 			    }
 			}
                         }
-.			DEBUG("unknown: %s\n",yytext); return 0;
+\\$			continuation = 1;
+.			tokenpos += yyleng; DEBUG("unknown: %s\n",yytext); return 0;
 }
 <MACROTEXT>{
 [ \t]+			{
 				slashcount = 0;
+			        tokenpos += yyleng;
 				if ( macro_end != 0)
 					*macrotext += yytext;
 			}
 \\			{ 
 				*macrotext += *yytext;
+			        tokenpos += yyleng;
 				slashcount ++;
 			}
 \"			{ 
 				*macrotext += *yytext;
+			        tokenpos += yyleng;
 				if ( in_str ) { 
 					if ( slashcount % 2 == 0) in_str=0;
 				} 
@@ -306,8 +355,10 @@ atan2|min|max		{
 					*macrotext += *yytext;
 					slashcount =0;
 				}
+			        tokenpos += yyleng;
 			}
 \}			{
+			        tokenpos += yyleng;
 				if ( macro_end == 0 ) return 0;
 				else {
 					if ( !in_str ) braces--;
@@ -332,8 +383,17 @@ atan2|min|max		{
 					}
 				}
 			}
-\n			{ newline(); *macrotext += *yytext; slashcount =0;}
+\n.*$			{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+			  *macrotext += *yytext;
+			  slashcount =0;
+			  tokenpos = 0;
+			  newline();
+			  yyless(1);
+			  DEBUG("<MACROTEXT>linebuf: %s\n", linebuf);
+			  // don't return SEP here
+			}
 .			{
+			        tokenpos += yyleng;
 				if ( macro_end == 0 ) macro_end = *yytext;
 				else {
 					if ( *yytext == macro_end ) {
@@ -356,7 +416,14 @@ atan2|min|max		{
 			}
 }
 <COPYSTATE>{
-\n      { newline(); }
+\n.*$	{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+	  tokenpos = 0;
+	  newline();
+	  if (yyleng > 1)
+		  yyless(1);
+	  DEBUG("<COPYSTATE>linebuf: %s\n", linebuf);
+	  // don't return SEP here
+	}
 .+ 	{
     String *s;
     
@@ -369,12 +436,13 @@ atan2|min|max		{
 	// If we're stopped by an END symbol, we have to put it back
 	
 	if ( !strncmp(".G2",yytext,3) ) {
-	    char *c = strdup(yytext);
-	    for ( int i = yyleng-1; i>=0; i-- ) 
-		unput(c[i]);
+	    DEBUG("<COPYSTATE>End: %s\n",yytext);
+	    yyless(0);
 	    unput('\n');
-	    free(c);
-	}
+	    lexstack.front()->line--;
+	    tokenpos = 0;
+	} else
+	    tokenpos += yyleng;
 	BEGIN(GRAP);
 	yylval.line_list = sl;
 	sl = 0;
@@ -385,7 +453,7 @@ atan2|min|max		{
     }
 }
 <HUNTMACRO>{
-[ \t]+
+[ \t]+	tokenpos += yyleng; 
 [A-Za-z0-9_]* 	{
     macro *m;
     macroDictionary::iterator mi;
@@ -394,6 +462,7 @@ atan2|min|max		{
     if ( ( mi = macros.find(*id)) != macros.end()) {
 	m = (*mi).second;
 	delete id;
+	tokenpos += yyleng;
 	BEGIN(GRAP);
 	yylval.macro_val = m;
 	return MACRO;
@@ -404,12 +473,13 @@ atan2|min|max		{
 	delete id;
 	lex_begin_macro_text();
 	return_macro =1;
-	for ( int i = yyleng-1; i>=0; i-- ) 
-	    unput(c[i]);
+	yyless(0);
 	free(c);
+	tokenpos += yyleng;
     }
 }
 . {
+    DEBUG("<HUNTMACRO> %s\n", yytext);
     unput(*yytext);
     lex_begin_macro_text();
     return_macro = 1;
@@ -418,6 +488,7 @@ atan2|min|max		{
 <RESTOFLINE>{
 .*$ 		{
     BEGIN(GRAP);
+    tokenpos += yyleng;
     DEBUG("REST:%s\n",yytext);
     if ( strcmp("\n",yytext) )
 	yylval.string = new String(yytext);
@@ -428,15 +499,17 @@ atan2|min|max		{
     }
 }
 <<EOF>> 	{
+    DEBUG("EOF\n",0);
     if ( copystate && !lexstack.empty()) {
 	copystate = 0;
+	tokenpos = 0;
 	BEGIN(GRAP);
 	yylval.line_list = sl;
 	sl = 0;
+	DEBUG("COPYTEXT(EOF)\n",0);
 	return COPYTEXT;
     } else yyterminate();
 }
-    
 %%
 bool include_file(String *s, int rs=0) {
     FILE *f;
@@ -444,6 +517,11 @@ bool include_file(String *s, int rs=0) {
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
 
     if ( s ) {
+	if ( !lexstack.empty()) {
+	    unput('\n');
+	    lexstack.front()->line--;
+	}
+	DEBUG("include_file(%s)\n",s->c_str());
 	if ( *s != "-" ) {
 	    strncpy(file, s->c_str(), MAXPATHLEN);
 	    if ( ( f = fopen(file,"r")) == 0 ) {
@@ -467,6 +545,7 @@ bool include_file(String *s, int rs=0) {
 	
 void lex_begin_macro_text() {
 	BEGIN(MACROTEXT);
+	DEBUG("<MACROTEXT> lex_begin_macro_text()\n",0);
 	lex_expand_macro = 1;
 	slashcount = 0;
 	macro_end = 0;
@@ -525,6 +604,7 @@ void macro_args(macro *m) {
 }
 
 void lex_begin_copy(String *s=0) {
+    DEBUG("COPYSTATE (lex_begin_copy)\n",0);
     BEGIN(COPYSTATE);
     copystate = 1;
     if ( !copy_backstop ) copy_backstop = new String(".G2");
@@ -547,6 +627,7 @@ void lex_begin_rest_of_line() {
 int yywrap() {
     struct grap_buffer_state *g;
 
+    DEBUG("(yywrap)\n",0);
     if ( lexstack.empty() ) yyterminate();
     else {
 	g = lexstack.front();
@@ -599,7 +680,7 @@ int yywrap() {
 	g = lexstack.front();
 	yy_switch_to_buffer(g->yy);
     }
-    
+
     return copystate ? 1 : 0;
 }
 
@@ -607,6 +688,20 @@ void newline() {
     if ( !lexstack.empty() ) {
 	grap_buffer_state *g = lexstack.front();
 	g->line++;
-
     }
+}
+
+char *pre_context(void) {
+    if (!tokenpos)
+	return ("");
+    linebuf[tokenpos-yyleng] = '\0';
+    return (linebuf);
+}
+
+char *token_context(void) {
+    return (yytext);
+}
+
+char *post_context(void) {
+    return (linebuf+tokenpos);
 }
