@@ -85,7 +85,7 @@ char *strdup(const char *);
 #endif 
 
 char *vf1names[NVF1] = { "srand" };
-char *f0names[NF0] = { "rand" };
+char *f0names[NF0] = { "rand", "getpid" };
 char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
 		       "eexp","ln" };
 char *f2names[NF2] = { "atan2", "min", "max" };
@@ -98,7 +98,6 @@ set<string> active;
 // Commonly used keyword sets
 extern vector<string> grap_keys;
 extern keywordDictionary keywords; 
-
 // There are a couple times when the possiblity of a COORD_NAME can be
 // ruled out.  If this is set, this is one of those times.
 bool no_coord=false;
@@ -428,7 +427,7 @@ srand			{
 			BEGIN(GRAP);
  			return VFUNC1;
 			}
-rand			{
+rand|getpid			{
 			debug("FUNC0");
 			for ( int i = 0 ; i < NF0; i++ ) 
 				if ( !strcmp(yytext,f0names[i]) )

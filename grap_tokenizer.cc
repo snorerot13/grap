@@ -40,7 +40,7 @@ string sk[] = {
 // Keywords recognized by ticks and graph
 string tk[] = {
     "left", "right", "up", "down", "bottom", "bot", "top", "in", "out",
-    "from", "to", "by", "at", "off", "on", "auto"
+    "from", "to", "by", "at", "off", "on", "auto", "sprintf"
 };
 
 
@@ -166,10 +166,12 @@ void init_line_starters() {
 
     temp = linedesc_keys;
     temp.push_back("at");
+    temp.push_back("sprintf");
     keywords["next"] = keyword(temp, empty, true, NEXT);
 
     temp = linedesc_keys;
     temp.insert(temp.end(), strmod_keys.begin(), strmod_keys.end());
+    temp.push_back("sprintf");
     keywords["draw"] = keywords["new"] = keyword(temp, empty, true, DRAW);
     
     temp = linedesc_keys;
@@ -230,6 +232,7 @@ void init_line_starters() {
     temp.push_back("bottom");
     temp.push_back("bot");
     temp.push_back("top");
+    temp.push_back("sprintf");
     keywords["label"] = keyword(temp, empty, true, LABEL);
 
     temp = linedesc_keys;

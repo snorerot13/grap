@@ -114,7 +114,7 @@ typedef list<shiftdesc *> shiftlist;
 // functions are in grap_lex.l and the implementations in the
 // jumptables in grap.y
 const int NVF1=1;
-const int NF0=1;
+const int NF0=2;
 const int NF1=8;
 const int NF2=3;
 

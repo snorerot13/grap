@@ -91,8 +91,9 @@ void init_dict();
 // adapters to return complex (complex-ish) functions
 void grap_srandom(double x) { srandom(static_cast<unsigned int>(x)); }
 double grap_random() {
-    return static_cast<double>(random()) / static_cast<double>(LONG_MAX);
+    return static_cast<double>(random())/(static_cast<double>(LONG_MAX)+1e-6);
 }
+double grap_getpid() { return static_cast<double>(getpid());} 
 double pow10(double x) { return pow(10,x); }
 double toint(double x) { return static_cast<double>(int(x)); }
 double grap_min(double a, double b) { return (a<b) ? a : b; } 
@@ -104,7 +105,7 @@ typedef double (*function1)(double);
 typedef double (*function2)(double, double);
 // jump tables for dispatching internal functions
 vfunction1 jtvf1[NVF1] = { grap_srandom };
-function0 jtf0[NF0] = { grap_random };
+function0 jtf0[NF0] = { grap_random, grap_getpid };
 function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
