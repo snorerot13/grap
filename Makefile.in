@@ -29,7 +29,7 @@ MKDEP= 	@MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.22pre2
+VERSION=1.22
 DISTDIR=grap-${VERSION}
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
@@ -102,7 +102,7 @@ install:	@INSTALL_DEPS@
 	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
 	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${EXAMPLEDIR}
 
-#BSD prots may not want these installed
+#BSD ports may not want these installed
 install-docs:
 	${INSTALL} -d ${DOCDIR} || true
 	${INSTALL_DATA} README CHANGES COPYRIGHT grap.man ${DOCDIR}
