@@ -16,6 +16,17 @@ While tinkering with those autoconf changes I found that grap didn't
 compile under g++ 2.7.2.1 any more.  Good thing that 0.97b wasn't
 really released.  All is well again.
 
+More fun from Bruce: he's given me patches to make cascding
+assignments work and to remove a bug with comments not acting as
+separators.
+
+I've also make the order of copy commands more flexible (the until can
+go before or after an inline macro, for example) and fixed a bug in
+the grammar that made it difficult to put general expressions in
+places like the frame size.  Expressions can go anywhere now, at the
+expense that string comparisons can only appear in if statements.
+Those bugs were also spotted by Bruce.
+
 0.97b: Finally have a copy of egcs, so grap will now compile under it
 using both the stl and the standard string class.  What do you know,
 compiling under egcs halves the run time.  This is roughly half due to
