@@ -190,4 +190,7 @@ class copydesc {
 	}
     }
 };
+
+// we use this to make yacc happier
+typedef pair<coord *, String *> coordid;
 #endif

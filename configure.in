@@ -10,6 +10,11 @@ AC_PROG_YACC
 AC_PROG_INSTALL
 AC_PATH_PROG(PERL,perl)
 
+# it's possible to get separate tables out of byacc.  It is confusing
+# because g++ optimizes away the const static tables that byacc
+# generates, and compiling those tables aren't the problem anyway.  So
+# don't try it again.
+
 AC_MSG_CHECKING(that $INSTALL supports -d)
 if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$; then 
 	AC_MSG_RESULT(yes)

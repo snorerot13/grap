@@ -12,72 +12,6 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
-
-// Lots of functors to output, convert aand delete list elements
-
-// Output a string (from a pointer)
-class string_out_f : public UnaryFunction<String*, int> {
-    ostream &f;
-public:
-    int operator()(String *s) { f << *s << endl; return 0;}
-    string_out_f(ostream& ff) : f(ff) {};
-};
-
-// Delete a string (from a pointer)
-class string_del_f : public UnaryFunction<String*, int> {
-public:
-    int operator()(String *s) { delete s; return 0;}
-};
-
-// Convert a line to a Picline
-class line_convert_f :
-    public UnaryFunction<lineDictionary::value_type,int> {
-	graph *g;
-public:
-	line_convert_f(graph *gg) : g(gg) { }
-	int operator()(lineDictionary::value_type li) {
-	    line *l = (li).second;
-	    g->add_line(*l);
-	    return 0;
-	}
-};
-		
-// convert a DisplayString to a PicdisplayString and print it
-class display_f : public UnaryFunction<DisplayString*, int> {
-public:
-    int operator() (DisplayString *str) {
-	PicDisplayString *p = new PicDisplayString(*str);
-	p->draw(0);
-	delete p;
-	return 0;
-    }
-};
-
-// draw ticks and grids.  We generate temporary Pic objects and plot them.
-class draw_tick_f : public UnaryFunction<tick *, int> {
-    frame *f;
-public:
-    draw_tick_f(frame *fr) : f(fr) {};
-    int operator()(tick* t) {
-	Pictick *pt = new Pictick(*t);
-	pt->draw(f);
-	free(pt);
-	return 0;
-    }
-};
-
-class draw_grid_f : public UnaryFunction<grid *, int> {
-    frame *f;
-public:
-    draw_grid_f(frame *fr) : f(fr) {};
-    int operator()(grid* t) {
-	Picgrid *pt = new Picgrid(*t);
-	pt->draw(f);
-	free(pt);
-	return 0;
-    }
-};
-
 void Picgraph::init(String *n=0, String* p=0) {
     // Start a new graph, but maybe not a new block.
     
@@ -89,7 +23,7 @@ void Picgraph::init(String *n=0, String* p=0) {
     if ( p ) pos = new String(*p);
 }
 	
-void Picgraph::draw(frame *) {
+void Picgraph::draw(frame *f) {
 // Do the work of drawing the current graph.  Convert non-drawable
 // lines to Piclines, and put them in the object list for this graph.
 // Do pic specific setup for the graph, and let the base class plot
@@ -98,14 +32,15 @@ void Picgraph::draw(frame *) {
 
     // Lots of functors to output, convert, draw and delete list elements
     
-    displayer_f displayer(pframe); 	// call draw on the object.  This is
+    print_string_f print_string(cout);	// Print a string.
+    free_string_f free_string;		// Delete a string.
+    displayer_f displayer(pframe); 	// Call draw on the object.  This is
                                         // an embedded class of graph.
-    string_out_f string_out(cout);	// output a string
-    string_del_f string_del;		// delete a string
-    line_convert_f line_convert(this);  // convert a generic line to
-	                                // a pic line
-		
-
+    line_convert_f line_convert(this); 	// Convert a generic line to
+                                        // a pic line.  This inserts
+                                        // the converted line into the
+                                        // graph.
+    
     // Hook the lines up
     if ( !lines.empty() ) 
 	for_each(lines.begin(), lines.end(), line_convert);
@@ -121,9 +56,7 @@ void Picgraph::draw(frame *) {
 	    cout << endl;
 	}
 	// Print any saved embedded troff
-	
-	if ( !troff.empty() ) 
-	    for_each(troff.begin(), troff.end(), string_out);
+	for_each(troff.begin(), troff.end(), print_string);
 
 	// if we have a name, use it
 	if ( name ) {
@@ -151,19 +84,15 @@ void Picgraph::draw(frame *) {
 	else cout << endl;
 
 	// Saved pic commands
-	if ( !pic.empty() ) 
-	    for_each(pic.begin(), pic.end(), string_out);
+	for_each(pic.begin(), pic.end(), print_string);
     }
 
     // Clear out any saved pic/troff commands
-    if ( !troff.empty() ) {
-	for_each(troff.begin(), troff.end(), string_del);
-	troff.erase(troff.begin(), troff.end());
-    }
-    if ( !pic.empty() ) {
-	for_each(pic.begin(), pic.end(), string_del);
-	pic.erase(pic.begin(), pic.end());
-    }
+    for_each(troff.begin(), troff.end(), free_string);
+    troff.erase(troff.begin(), troff.end());
+
+    for_each(pic.begin(), pic.end(), free_string);
+    pic.erase(pic.begin(), pic.end());
 	    
 }
 
@@ -255,7 +184,7 @@ void Picframe::label_line(sides s) {
 // is straightforward.
 
     // Functor to convert a DisplayString to a PicdisplayString and print it
-    display_f display;
+    Picgraph::draw_string_f draw_string(this);
     double dx, dy; // Used to place the alignment line relative to the axis
     shiftlist::const_iterator csi;
 
@@ -296,7 +225,8 @@ void Picframe::label_line(sides s) {
 	    
     cout << "line invis ";
 
-    for_each(label[s]->begin(), label[s]->end(), display);
+    // draw all the labels
+    for_each(label[s]->begin(), label[s]->end(), draw_string);
 
     switch (s) {
 	case left:
@@ -420,8 +350,8 @@ void Picframe::draw(frame *) {
     
     // functors to draw ticks and grids out of the lists.  
 
-    draw_tick_f draw_tick(this);
-    draw_grid_f draw_grid(this);
+    Picgraph::draw_tick_f draw_tick(this);
+    Picgraph::draw_grid_f draw_grid(this);
 
     cout << "Frame: [" << endl;
     cout << "Origin: " << endl;
@@ -778,11 +708,11 @@ void Picplot::draw(frame *f) {
     double x, y;  // To transform the point into device coordinates
 
     // To print a set of strings
-    class display_f display;
+    Picgraph::draw_string_f draw_string(f);
 
     if ( !strs || !loc ) return;
 
-    for_each(strs->begin(), strs->end(), display);
+    for_each(strs->begin(), strs->end(), draw_string);
 
     x = f->wid * loc->c->map(loc->x,x_axis);
     y = f->ht * loc->c->map(loc->y,y_axis);

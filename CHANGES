@@ -1,11 +1,35 @@
 Change log
 
+1.07: Cleaned up the automatic tick generation and fixed a bug in
+there, too.  Allow reassignmnet of coordinate system parameters, e.g.,
+
+.G1
+coord test
+copy "examples/cy_fatal.d"
+coord test x 1980,2000
+.G2
+
+Default line format now uses the bullet macro if it's defined.  The
+coord statement now will accept multiple log scale modifiers.  The
+statement
+
+coord x 1,1000 log x log y
+
+is now legal.  x and y are now legal variable names.  They used to be
+language tokens, and in fact still are, although their scope as tokens
+is now limited to coord statements.
+
+Tried to streamline the use of for_each and functors by removing
+trivial calls to for_each.  Still trying to move code out of grap.y to
+make it shorter to compile.
+
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.
 
 1.05: kromJx@crosswinds.net noticed that numbers like 1. weren't
 accepted.  They are now.  While I was fixing that I noticed that copy
-until commands without a macor weren't supported.  They are now.  Made a minor change to the examples to test the fixes.
+until commands without a macro weren't supported.  They are now.  Made
+a minor change to the examples to test the fixes.
 
 1.03: Added the -M path option to make groff handle grap better.  I
 also added the GRAP_DEFINES environment variable to change the defines

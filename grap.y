@@ -15,13 +15,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifndef HAVE_OPTARG
-extern "C" {
-    extern char *optarg;
-    extern int optind;
-    int getopt(int, char * const [], const char *);
-};
-#endif
 
 #ifndef RANDOM_DECLARED
 long random();
@@ -30,7 +23,6 @@ long random();
 #include "grap.h"
 #include "grap_data.h"
 #include "grap_draw.h"
-#include "grap_pic.h" 
 
 doubleDictionary vars;
 graph *the_graph =0;
@@ -38,17 +30,15 @@ lexStack lexstack;
 macroDictionary macros;
 stringSequence path; 
 int first_line;
-bool unaligned_default = 0;	// Should strings be unaligned by default 
+bool unaligned_default = false;	// Should strings be unaligned by default 
 
 extern int lex_expand_macro;
-extern char *version; 
 
 line* defline;
 coord *defcoord;
 String *graph_name;
 String *graph_pos;
 String *ps_param;
-bool compat_mode=false;			//  Compatibility mode
 
 // bison wants these defined....
 int yyerror(char*);
@@ -59,6 +49,8 @@ void init_dict();
 extern bool include_file(String *, int =0, bool=true);
 extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
+extern void lex_begin_coord();
+extern void lex_end_coord();
 extern void lex_begin_copy( String*s=0);
 extern int include_string(String *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
@@ -66,13 +58,11 @@ extern void lex_hunt_macro();
 extern int yyparse(void);	// To shut yacc (vs. bison) up.
 void draw_graph();
 void init_graph();
-extern String pre_context(void);
-extern char *token_context(void);
-extern String post_context(void);
 
 // Parsing utilities in grap_parse.cc.  Locating them there reduces
 // compilation time (this file was getting very large) and eliminates
 // some code redundancy.
+extern graph *initial_graph(); 
 extern linedesc* combine_linedesc(linedesc *, linedesc*);
 extern void draw_statement(String *, linedesc *, String *);
 void num_list(doublelist *);
@@ -88,6 +78,7 @@ void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
 void line_statement(int, linedesc *, point *, point *, linedesc *);
 axisdesc axis_description(axis, double, double );
 void coord_statement(String *, axisdesc&, axisdesc&, axis);
+void coord_statement(coord *, axisdesc&, axisdesc&, axis);
 void for_statement(String *, double, double, bydesc, String *);
 void process_frame(linedesc *, frame *, frame *);
 void init_dict(); 
@@ -95,41 +86,20 @@ void init_dict();
 int nlines;
 int in_copy=0;
 
-//  extern char *optarg;
-//  extern int optind;
-
-const char *opts = "d:lDvuM:C";
-
-// Classes for various for_each calls
-
-// print the next number in a sprintf
-class num_to_str_f : public UnaryFunction<double,int> {
-    grap_sprintf_String *s;
-public:
-    num_to_str_f(grap_sprintf_String *ss) : s(ss) {};
-    int operator()(double d) { s->next_number(d); return 0;}
-};
-
-
-// To assign the coordate system to all the ticks in
-// the queue
-class coord_to_tick : public UnaryFunction<coord *,int> {
-public:
-    coord *c;
-    coord_to_tick(coord *cc) : c(cc) {};
-    int operator() (tick *t) { t->c = c; return 0;}
-};
-
-
-// Align a list of strings
-class align_string :
-    public UnaryFunction<DisplayString *,int> {
-public:
-	int operator() (DisplayString *ds) {
-	    if ( ! (ds->j & unaligned) ) ds->j |= aligned;
-	    return 0;
-	}
-};
+// adapeters to return complex (complex-ish) functions
+double grap_random() {  return double(random()) / (pow(2,32)-1); }
+double pow10(double x) { return pow(10,x); }
+double toint(double x) { return (double) int(x); }
+double grap_min(double a, double b) { return min(a,b); } 
+double grap_max(double a, double b) { return max(a,b); } 
+ 
+typedef double (*function0)();
+typedef double (*function1)(double);
+typedef double (*function2)(double, double);
+// jump tables for dispatching internal functions
+function0 jtf0[NF0] = { grap_random };
+function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp };
+function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
 %token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
@@ -139,7 +109,7 @@ public:
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE
+%token BASE ON
 %start graphs
 %union {
     int val;
@@ -163,6 +133,7 @@ public:
     axis axisname;
     strmod stringmod;
     copydesc *copyd;
+    coordid *coordident;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
 %type <num> opt_wid assignment_statement if_expr
@@ -183,10 +154,11 @@ public:
 %type <shift> shift 
 %type <by> by_clause
 %type <axistype> x_axis_desc y_axis_desc
-%type <axisname> log_desc
+%type <axisname> log_list log_desc
 %type <line_list> COPYTEXT
 %type <macro_val> MACRO
 %type <copyd> until_clause
+%type <coordident> ident_or_coord
 %left OR AND
 %right NOT
 %left EQ NEQ LT GT LTE GTE
@@ -201,7 +173,8 @@ graphs:
 
 graph :
 	    START {
-                if ( !the_graph) the_graph = new Picgraph;
+                if ( !the_graph)
+		    the_graph = initial_graph();
 		the_graph->init();
 		init_dict();
 		first_line = 1;
@@ -293,9 +266,10 @@ string:
 |       SPRINTF LPAREN STRING COMMA expr_list RPAREN
              {
 		 grap_sprintf_String *s = new grap_sprintf_String($3);
-		 num_to_str_f num_to_str(s);    
+		 doublelist::iterator d;
 
-		 for_each($5->begin(), $5->end(), num_to_str);
+		 for ( d = $5->begin(); d != $5->end(); d++)
+		     s->next_number(*d);
 		 s->finish_fmt();
 		 delete $5;
 		 delete $3;
@@ -431,73 +405,19 @@ expr:
 |	NOT expr %prec PLUS
             { $$ = ! ( (int) $2); }
 |	FUNC0 LPAREN RPAREN
-	    {
-		switch ($1) {
-		    case RAND:
-			$$ = double(random()) / (pow(2,32)-1);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
+	    { $$ = ( $1 >=0 && $1 < NF0 ) ? jtf0[$1]() : 0; }
 |	FUNC1 LPAREN expr RPAREN
- 	    {
-		switch ($1) {
-		    case LOGFCN:
-			$$ = log10($3);
-			break;
-		    case EXP:
-			$$ = pow(10,$3);
-			break;
-		    case EEXP:
-			$$ = exp($3);
-			break;
-		    case INT:
-			$$ = int($3);
-			break;
-		    case SIN:
-			$$ = sin($3);
-			break;
-		    case COS:
-			$$ = cos($3);
-			break;
-		    case SQRT:
-			$$ = sqrt($3);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
+ 	    { $$ = ( $1 >=0 && $1 < NF1 ) ? jtf1[$1]($3) : 0; }
 |	FUNC2 LPAREN expr COMMA expr RPAREN
-	    {
-
-		switch ($1) {
-		    case MAXFUNC:
-			$$ = ($3 > $5 ) ? $3 : $5;
-			break;
-		    case MINFUNC:
-			$$ = ($3 < $5 ) ? $3 : $5;
-			break;
-		    case ATAN2:
-			$$ = atan2($3,$5);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
+	    { $$ = ( $1 >=0 && $1 < NF2 ) ? jtf2[$1]($3, $5) : 0; }
 |	LPAREN expr RPAREN
  	    { $$ = $2; }
 |	IDENT
  	    {
-		double *d;
 		doubleDictionary::iterator di;
 		
 		if ( (di = vars.find(*$1)) != vars.end()) {
-		    d = (*di).second;
-		    $$ = *d;
+		    $$ = *(*di).second;
 		}
 		else {
 		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
@@ -542,73 +462,19 @@ if_expr:
 |	NOT if_expr %prec PLUS
             { $$ = ! ( (int) $2); }
 |	FUNC0 LPAREN RPAREN
-	    {
-		switch ($1) {
-		    case RAND:
-			$$ = double(random()) / (pow(2,32)-1);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
-|	FUNC1 LPAREN if_expr RPAREN
- 	    {
-		switch ($1) {
-		    case LOGFCN:
-			$$ = log10($3);
-			break;
-		    case EXP:
-			$$ = pow(10,$3);
-			break;
-		    case EEXP:
-			$$ = exp($3);
-			break;
-		    case INT:
-			$$ = int($3);
-			break;
-		    case SIN:
-			$$ = sin($3);
-			break;
-		    case COS:
-			$$ = cos($3);
-			break;
-		    case SQRT:
-			$$ = sqrt($3);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
-|	FUNC2 LPAREN if_expr COMMA if_expr RPAREN
-	    {
-
-		switch ($1) {
-		    case MAXFUNC:
-			$$ = ($3 > $5 ) ? $3 : $5;
-			break;
-		    case MINFUNC:
-			$$ = ($3 < $5 ) ? $3 : $5;
-			break;
-		    case ATAN2:
-			$$ = atan2($3,$5);
-			break;
-		    default:
-			$$ = 0;
-			break;
-		}
-	    }
+	    { $$ = ( $1 >=0 && $1 < NF0 ) ? jtf0[$1]() : 0; }
+|	FUNC1 LPAREN expr RPAREN
+ 	    { $$ = ( $1 >=0 && $1 < NF1 ) ? jtf1[$1]($3) : 0; }
+|	FUNC2 LPAREN expr COMMA expr RPAREN
+	    { $$ = ( $1 >=0 && $1 < NF2 ) ? jtf2[$1]($3, $5) : 0; }
 |	LPAREN if_expr RPAREN
  	    { $$ = $2; }
 |	IDENT
  	    {
-		double *d;
 		doubleDictionary::iterator di;
 		
 		if ( (di = vars.find(*$1)) != vars.end()) {
-		    d = (*di).second;
-		    $$ = *d;
+		    $$ = *(*di).second;
 		}
 		else {
 		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
@@ -710,9 +576,7 @@ size_elem:
 
 size:
 	size_elem
-            {
-		$$ = $1;
-	    }
+            { $$ = $1; }
 |	size size_elem
 	    {
 		$$ = $1;
@@ -844,7 +708,8 @@ tickat:
 	AT opt_coordname ticklist
 	    {
 		$$ = $3;
-		for_each($3->begin(), $3->end(), coord_to_tick($2));
+		for (ticklist::iterator t= $3->begin(); t != $3->end(); t++)
+		    (*t)->c = $2;
 	    }
 ;
 
@@ -854,6 +719,8 @@ tickfor:
 ;
 tickdesc :
 	    { $$ = 0;}
+|	ON
+            { $$ = 0;}
 |	tickat
 	    { $$ = $1;}
 |	tickfor
@@ -886,10 +753,10 @@ grid_statement:
 label_statement:
 	LABEL side strlist opt_shift SEP
 	    {
-		align_string a;
 		shiftdesc *sd;
-			      
-		for_each($3->begin(),  $3->end(), a);
+
+		for (stringlist::iterator s = $3->begin(); s != $3->end(); s++)
+		    if ( ! ((*s)->j & unaligned) ) (*s)->j |= aligned;
 		
 		the_graph->base->label[$2] = $3;
 
@@ -940,9 +807,45 @@ y_axis_desc:
 	    { $$ = axis_description(y_axis, $2, $4); }
 ;
 
+log_list:
+        log_list log_desc
+            {
+		switch ($1) {
+		    case none:
+			$$ = $2;
+			break;
+		    case x_axis:
+			switch ($2) {
+			    case x_axis:
+			    case none:
+				$$ = x_axis;
+			    case y_axis:
+			    case both:
+			    default:
+				$$ = both;
+			}
+			break;
+		    case y_axis:
+			switch ($2) {
+			    case y_axis:
+			    case none:
+				$$ = y_axis;
+			    case x_axis:
+			    case both:
+			    default:
+				$$ = both;
+			}
+			break;
+		    case both:
+			$$ = both;
+			break;
+		}
+	    }
+|
+            { $$ = none; }
+
 log_desc:
-	    { $$ = none; }
-|	LOG_X
+	LOG_X
 	    { $$ = x_axis; }
 |	LOG_Y
 	    { $$ = y_axis; }
@@ -950,9 +853,23 @@ log_desc:
 	    { $$ = both; }
 ;
 
+ident_or_coord:
+            { $$ = new coordid(0,0); }
+|       IDENT
+            { $$ = new coordid(0,$1); }
+|       COORD_NAME
+            { $$ = new coordid($1,0); }
+
 coord_statement:
-	COORD opt_ident x_axis_desc y_axis_desc log_desc SEP
-	    { coord_statement($2, $3, $4, $5); }
+	COORD { lex_begin_coord(); } ident_or_coord x_axis_desc y_axis_desc log_list SEP
+	    {
+		lex_end_coord();
+		if ( $3->first ) 
+		    coord_statement($3->first, $4, $5, $6);
+		else
+		    coord_statement($3->second, $4, $5, $6);
+		delete $3;
+	    }
 ;
 
 until_clause:
@@ -1240,110 +1157,3 @@ bar_statement:
 	    }
 ;
 %%
-
-int yyerror(char *s) {
-    grap_buffer_state *g = 0;
-    int tp= 0;
-
-    cerr << "grap: " << s << endl;
-    while ( !lexstack.empty() ) {
-	g = lexstack.front();
-	lexstack.pop_front();
-	switch ( g->type) {
-	    case GFILE:
-		cerr << "Error near line " << g->line << ", " ;
-		if ( g->name ) cerr << "file \"" << *g->name << "\"" << endl;
-		break;
-	    case GMACRO:
-		cerr << "Error near line " << g->line << " " ;
-		cerr << "of macro" << endl;
-		break;
-	    default:
-		break;
-	}
-	tp = g->tokenpos;
-	delete g;
-    }
-    cerr << " context is:" << endl << "        " << pre_context();
-    cerr << " >>> " << token_context() << " <<< " << post_context() << endl;
-    //abort();
-    //exit (1);
-    return 0;
-}
-
-int main(int argc, char** argv) {
-    String defines=DEFINES;
-    String fname;
-    String pathstring;
-    int use_defines = 1;
-    char c;
-
-    if (getenv("GRAP_DEFINES"))
-	defines = getenv("GRAP_DEFINES");
-    
-    while ( ( c = getopt(argc,argv,opts)) != -1)
-	switch (c) {
-	    case 'd':
-		defines = optarg;
-		use_defines = 1;
-		break;
-	    case 'l':
-	    case 'D':
-		use_defines = 0;
-		break;
-	    case 'v':
-		cout << version << endl;
-		exit(0);
-	    case 'u':
-		unaligned_default = 1;
-		break;
-	    case 'M':
-		pathstring = (pathstring + ":") + optarg;
-		break;
-	    case 'C':
-		compat_mode = true;
-		break;
-	    case '?':
-		exit(20);
-	}
-    pathstring += (pathstring.length() > 0) ? ":." : ".";
-
-    // Convert the colon separated file path into a sequence
-    while (pathstring.length()) {
-	String::size_type p = pathstring.find(':');
-	String *s;
-
-	if ( pathstring[p] == ':' ) {
-	    if ( p != 0 ) {
-		s = new String(pathstring.substr(0,p));
-		pathstring.erase(0,p+1);
-	    }
-	    else {
-		pathstring.erase(0,1);
-		continue;
-	    }
-	}
-	else {
-	    s = new String(pathstring);
-	    pathstring.erase(0,String::npos);
-	}
-	path.push_back(s);
-    }
-
-    if ( argc == optind ) {
-	fname = "-";
-	include_file(&fname, 1, false);
-    }
-    else {
-	for ( int i = argc-1; i >= optind; i-- ) {
-	    fname = argv[i];
-	    include_file(&fname, 1, false);
-	}
-    }
-    if ( use_defines) include_file(&defines,1);
-    yyparse();
-    for (stringSequence::iterator i = path.begin(); i != path.end(); i++)
-	delete (*i);
-    path.erase(path.begin(),path.end());
-    
-}

@@ -57,28 +57,15 @@ void newline();
 char *strdup(const char *);
 #endif 
 
-#define NF0 1
-
-char *f0names[NF0] = {
-"rand"
-};
-
-#define NF1 7
-
-char *f1names[NF1] = {
-"log", "exp", "int", "sin", "cos", "sqrt","eexp"
-};
-
-#define NF2 3
-
-char *f2names[NF2] = {
-"atan2", "min", "max"
-};
+char *f0names[NF0] = { "rand" };
+char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt","eexp" };
+char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
 
 %}
 %x GRAP
+%x COORD_STATE
 %x MACROTEXT
 %x COPYSTATE
 %x HUNTMACRO
@@ -120,7 +107,11 @@ char *f2names[NF2] = {
 		cout << yytext;
 	}
 }
-<GRAP>{
+<COORD_STATE>{
+x			tokenpos += yyleng; DEBUG("XDIM\n",0); return XDIM;
+y			tokenpos += yyleng; DEBUG("YDIM\n",0); return YDIM;
+}
+<GRAP,COORD_STATE>{
 ^.*$			{
                           linebuf = yytext;
 			  tokenpos = 0;
@@ -186,8 +177,6 @@ sprintf			tokenpos += yyleng; DEBUG("SPRINTF\n",0); return SPRINTF;
 log[ \t]+x			tokenpos += yyleng; DEBUG("LOG_X\n",0); return LOG_X;
 log[ \t]+y			tokenpos += yyleng; DEBUG("LOG_Y\n",0); return LOG_Y;
 log[ \t]+log			tokenpos += yyleng; DEBUG("LOG_LOG\n",0); return LOG_LOG;
-x			tokenpos += yyleng; DEBUG("XDIM\n",0); return XDIM;
-y			tokenpos += yyleng; DEBUG("YDIM\n",0); return YDIM;
 ticks|tick			tokenpos += yyleng; DEBUG("TICKS\n",0); return TICKS;
 label			tokenpos += yyleng; DEBUG("LABEL\n",0); return LABEL;
 grid			tokenpos += yyleng; DEBUG("GRID\n",0); return GRID;
@@ -209,6 +198,7 @@ sh			tokenpos += yyleng; DEBUG("SH\n",0); return SH;
 in			tokenpos += yyleng; DEBUG("IN\n",0); return IN;
 out			tokenpos += yyleng; DEBUG("OUT\n",0); return OUT;
 off			tokenpos += yyleng; DEBUG("OFF\n",0); return OFF;
+on|auto			tokenpos += yyleng; DEBUG("ON\n",0); return ON;
 bar			tokenpos += yyleng; DEBUG("BAR\n",0); return BAR;
 fill			tokenpos += yyleng; DEBUG("FILL\n",0); return FILL;
 base			tokenpos += yyleng; DEBUG("BASE\n",0); return BASE;
@@ -218,7 +208,7 @@ invis			tokenpos += yyleng; DEBUG("INVIS\n",0); return INVIS;
 solid			tokenpos += yyleng; DEBUG("SOLID\n",0); return SOLID;
 dotted			tokenpos += yyleng; DEBUG("DOTTED\n",0); return DOTTED;
 dashed			tokenpos += yyleng; DEBUG("DASHED\n",0); return DASHED;
-fillcolor			tokenpos += yyleng; DEBUG("fillcolor\n",0); return FILLCOLOR;
+fillcolor		tokenpos += yyleng; DEBUG("fillcolor\n",0); return FILLCOLOR;
 color			tokenpos += yyleng; DEBUG("color\n",0); return COLOR;
 rand			{
 			int i;
@@ -330,6 +320,7 @@ atan2|min|max		{
                         }
 .			tokenpos += yyleng; DEBUG("unknown: %s\n",yytext); return 0;
 }
+
 <MACROTEXT>{
 ^.*$			{
                           linebuf = yytext;
@@ -574,6 +565,16 @@ void lex_begin_macro_text() {
 	macrotext = new String;
 	in_str = 0;
 	braces = 0;
+}
+
+void lex_begin_coord() {
+	BEGIN(COORD_STATE);
+	DEBUG("<COORD> lex_begin_coord_param\n",0);
+}
+
+void lex_end_coord() {
+	BEGIN(GRAP);
+	DEBUG("<COORD> lex_end_coord_param\n",0);
 }
 
 int include_string(String *s, struct for_descriptor *f=0,

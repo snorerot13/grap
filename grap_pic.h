@@ -113,13 +113,70 @@ class Picgraph : public graph {
     int graphs;			// the number of graphs drawn this block
     Picframe *pframe;		// The pic frame for deallocation
 
-    // To delete strings
-    class sfree_f : UnaryFunction<String *, int> {
-    public:
-	int operator()(String *s) { delete s; return 0;}
-    };
-    
 public:
+    // Lots of functors to output and convert objects
+
+    // Convert lines to Piclines and add them to the given graph
+    class line_convert_f :
+	public UnaryFunction<lineDictionary::value_type,int> {
+	graph *g;
+    public:
+	line_convert_f(graph *gg) : g(gg) { }
+	int operator()(lineDictionary::value_type li) {
+	    line *l = (li).second;
+	    g->add_line(*l);
+	    return 0;
+	}
+    };
+
+    // Convert the abstract types to Pictypes and draw them.  These
+    // are called from for_each.
+    template <class FROM, class TO>
+    class draw_f :
+	public UnaryFunction<FROM *, int> {
+	frame *f;
+    public:
+	draw_f(frame *fr) : f(fr) { }
+	int operator()(FROM *ds) {
+	    TO p(*ds);
+	    p.draw(f);
+	    return 0;
+	}
+    };
+
+    // Simpler declarations
+    typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
+    typedef draw_f<tick, Pictick> draw_tick_f;
+    typedef draw_f<grid, Picgrid> draw_grid_f;
+
+    // Print strings to the given ostream.  These two are not strictly
+    // beautiful things, but those above are, and mixing for_each and
+    // direct iterator manipulation in Picgraph::draw is ugly.  This
+    // avoids that ugliness at low cost.
+
+    class print_string_f :
+	public UnaryFunction<String *, int> {
+	ostream &f;
+    public:
+	print_string_f(ostream& s) : f(s) { }
+	int operator()(String *s) {
+	    f << *s << endl;
+	    return 0;
+	}
+    };
+
+    // Free a string.  See above for justification.
+    class free_string_f :
+	public UnaryFunction<String *, int> {
+    public:
+	free_string_f() { }
+	int operator()(String *s) {
+	    delete s;
+	    return 0;
+	}
+    };
+   
+    // regular member functions 
     Picgraph() :
 	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0),
 	pframe(0)
@@ -127,10 +184,10 @@ public:
     
     
     ~Picgraph() {
-	sfree_f sfree;
+	free_string_f free_string;	// We've defined this for use
+	                                // elsewhere, so we'll use it here.
 
 	// pframe should always be a copy of base, so don't delete it
-
 	if ( ps_param ) {
 	    delete ps_param;
 	    ps_param = 0;
@@ -143,14 +200,11 @@ public:
 	    delete pos;
 	    pos = 0;
 	}
-	if ( !troff.empty() ) {
-	    for_each(troff.begin(), troff.end(), sfree);
-	    troff.erase(troff.begin(), troff.end());
-	}
-	if ( !pic.empty() ) {
-	    for_each(pic.begin(), pic.end(), sfree);
-	    pic.erase(pic.begin(), pic.end());
-	}
+	for_each(troff.begin(), troff.end(), free_string);
+	troff.erase(troff.begin(), troff.end());
+
+	for_each(pic.begin(), pic.end(), free_string);
+	pic.erase(pic.begin(), pic.end());
     }
 
     // overload the virtual functions in graph

@@ -351,28 +351,6 @@ class frame {
     // The frame is the physical description of the graph axes.  It's
     // height and width are used by all drawable classes.
     
-protected:
-    // functors to clear internal lists
-    class free_tick_f : public UnaryFunction<tick *, int> {
-    public:
-	int operator() (tick *t) { delete t; return 0;}
-    } free_tick;
-
-    class free_grid_f : public UnaryFunction<grid *, int> {
-    public:
-	int operator() (grid *g) { delete g; return 0;}
-    } free_grid;
-
-    class free_ds_f : public UnaryFunction<DisplayString *, int> {
-    public:
-	int operator() (DisplayString *ds) { delete ds; return 0;}
-    } free_ds;
-
-    class free_sd_f : public UnaryFunction<shiftdesc *, int> {
-    public:
-	int operator() (shiftdesc *sd) { delete sd; return 0;}
-    } free_sd;
-    
 public:
     double ht;			// height of the graph
     double wid;			// width
@@ -404,13 +382,19 @@ public:
     virtual ~frame() {
 	for ( int i = 0; i < 4; i++ ) {
 	    if ( label[i] ) {
-		for_each(label[i]->begin(), label[i]->end(), free_ds);
+		stringlist::iterator s;
+
+		for (s = label[i]->begin(); s != label[i]->end(); s++)
+		    delete (*s);
 		label[i]->erase(label[i]->begin(), label[i]->end());
 		delete label[i];
 		label[i] =0;
 	    }
 	    if ( lshift[i] ) {
-		for_each(lshift[i]->begin(), lshift[i]->end(), free_sd);
+		shiftlist::iterator s;
+		
+		for (s = lshift[i]->begin(); s != lshift[i]->end(); s++)
+		    delete (*s);
 		lshift[i]->erase(lshift[i]->begin(), lshift[i]->end());
 		delete lshift[i];
 		lshift[i] =0;
@@ -418,11 +402,18 @@ public:
 	}
 	    
 	if ( !tks.empty() ) {
-	    for_each(tks.begin(), tks.end(), free_tick);
+	    ticklist::iterator t;
+
+	    for (t = tks.begin(); t != tks.end(); t++)
+		delete (*t);
 	    tks.erase(tks.begin(), tks.end());
 	}
+
 	if ( !gds.empty() ) {
-	    for_each(gds.begin(), gds.end(), free_grid);
+	    gridlist::iterator g;
+
+	    for (g = gds.begin(); g != gds.end(); g++)
+		delete (*g);
 	    gds.erase(gds.begin(), gds.end());
 	}
     }
@@ -647,19 +638,24 @@ public:
 
     // This clears graph parameters
     virtual void init(String * =0, String* =0 ) {
+	objlist::iterator o;
+	coordinateDictionary::iterator c;
+	lineDictionary::iterator l;
+	
 	visible = 0;
-	if ( !objs.empty() ) {
-	    for_each(objs.begin(), objs.end(), obj_freer);
-	    objs.erase(objs.begin(), objs.end());
-	}
-	if ( !coords.empty() ) {
-	    for_each(coords.begin(), coords.end(), coord_freer);
-	    coords.erase(coords.begin(), coords.end());
-	}
-	if ( !lines.empty() ) {
-	    for_each(lines.begin(), lines.end(), line_freer);
-	    lines.erase(lines.begin(), lines.end());
-	}
+
+	for (o = objs.begin(); o != objs.end(); o++)
+	    delete (*o);
+	objs.erase(objs.begin(), objs.end());
+	    
+	for (c = coords.begin(); c != coords.end(); c++)
+	    delete (*c).second;
+	coords.erase(coords.begin(), coords.end());
+
+	for (l = lines.begin(); l != lines.end(); l++)
+	    delete (*l).second;
+	lines.erase(lines.begin(), lines.end());
+	
 	if ( base ) {
 	    delete base;
 	    base =0;
@@ -673,7 +669,7 @@ public:
     // Called when a .G2 is encountered
     virtual void end_block() { }
 
-    // Called when pic ot troff strings are found
+    // Called when pic or troff strings are found
 
     virtual void pic_string(String *) { }
     virtual void troff_string(String *) { }

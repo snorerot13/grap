@@ -11,6 +11,16 @@
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifndef HAVE_OPTARG
+extern "C" {
+    extern char *optarg;
+    extern int optind;
+    int getopt(int, char * const [], const char *);
+};
+#endif
 
 #include "grap.h"
 #include "grap_data.h"
@@ -19,16 +29,27 @@
 #include "y.tab.h"
 
 extern doubleDictionary vars;
+extern stringSequence path; 
 extern graph *the_graph;
 extern bool unaligned_default;	// Should strings be unaligned by default 
 
 extern line* defline;
 extern coord *defcoord;
+extern char *version; 
+bool compat_mode=false;			//  Compatibility mode
 
 // defined in grap_lex.l
 extern int include_string(String *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
+extern String pre_context(void);
+extern char *token_context(void);
+extern String post_context(void);
+extern bool include_file(String *, int =0, bool=true);
+extern int yyparse();
 extern int nlines;
+
+extern macroDictionary macros;
+const char *opts = "d:lDvuM:C";
 
 // Classes for various for_each calls
 
@@ -78,30 +99,38 @@ public:
     }
 };
 
+// Allocate a new graph (at this point always a Picgraph.  This is
+// here so we don't have to include grap_pic in grap.y.
+graph *initial_graph() { return (graph *) new Picgraph; }
 
+// Combine a pair of line descriptions.  Non-defaults in elem override
+// those features in desc.  The function returns desc and frees elem,
+// so the programmer can treat it as freeing its parameters and
+// returning a new linedesc.  (desc and elem should have been
+// allocated by new).
 linedesc* combine_linedesc(linedesc *desc, linedesc* elem) {
-		if ( elem->ld != def ) {
-		    desc->ld = elem->ld;
-		    desc->param = elem->param;
-		}
-		if ( elem->fill ) desc->fill = elem->fill;
-		if ( elem->color ) {
-		    if ( desc->color ) delete desc->color;
-		    desc->color = elem->color;
-		    // Don't let the destructor delete the color in desc.
-		    elem->color = 0;
-		}
-		if ( elem->fillcolor ) {
-		    if ( desc->fillcolor ) delete desc->fillcolor;
-		    desc->fillcolor = elem->fillcolor;
-		    // Don't let the destructor delete the fillcolor
-		    // in desc.
-		    elem->fillcolor = 0;
-		}
-		delete elem;
-		return desc;
-	    }
-;
+    if ( elem->ld != def ) {
+	desc->ld = elem->ld;
+	desc->param = elem->param;
+    }
+    if ( elem->fill ) desc->fill = elem->fill;
+    if ( elem->color ) {
+	if ( desc->color ) delete desc->color;
+	desc->color = elem->color;
+	// Don't let the destructor delete the color in desc.
+	elem->color = 0;
+    }
+    if ( elem->fillcolor ) {
+	if ( desc->fillcolor ) delete desc->fillcolor;
+	desc->fillcolor = elem->fillcolor;
+	// Don't let the destructor delete the fillcolor
+	// in desc.
+	elem->fillcolor = 0;
+    }
+    delete elem;
+    return desc;
+}
+
 
 // Process a draw statement.  Create a new line description if this is
 // a new name, assign the line description to it, and a plot string if
@@ -110,18 +139,30 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
     line *l;
     lineDictionary::iterator li;
     linedesc defld(invis,0,0);
-    String s = "\"\\(bu\"";
 
     if ( ident ) {
 	li = the_graph->lines.find(*ident);
 	if ( li == the_graph->lines.end() ) {
-	    l = new line(&defld,&s);
+	    macroDictionary::iterator md;
+	    macro *m;
+	    String *s;
+	
+	    // We need to create a new line with default perameters.
+	    // Initialize the line to be invisible with a bullet
+	    // plotting string.
+	    if ( ( md = macros.find("bullet")) != macros.end()) {
+		m = (*md).second;
+		s = m->invoke();
+	    }
+	    else s = new String("\"\\(bu\"");
+
+	    l = new line(&defld, s);
 	    the_graph->lines[*ident] = l;
+	    delete s;
 	}
 	else {
 	    l = (*li).second;
 	}
-	// Forgot to delete ident??
 	delete ident;
     } else l = defline;
 
@@ -254,13 +295,25 @@ void plot_statement(double val, String *fmt, point *pt) {
 void next_statement(String *ident, point *p, linedesc* ld) {
     line *l;
     lineDictionary::iterator li;
-    String s = "\"\\(bu\"";
 
     if ( ident) {
 	li = the_graph->lines.find(*ident);
 	if ( li == the_graph->lines.end() ) {
-	    l = new line((linedesc *)0, &s );
+	    macroDictionary::iterator md;
+	    macro *m;
+	    String *s;
+	
+	    // We need to create a new line with default perameters.
+	    // Initialize the line to be invisible with a bullet
+	    // plotting string.
+	    if ( ( md = macros.find("bullet")) != macros.end()) {
+		m = (*md).second;
+		s = m->invoke();
+	    }
+	    else s = new String("\"\\(bu\"");
+	    l = new line((linedesc *)0, s );
 	    the_graph->lines[*ident] = l;
+	    delete s;
 	}
 	else { l = (*li).second; }
     } else l = defline;
@@ -359,7 +412,7 @@ void ticks_statement(sides side, double dir, shiftlist *sl, ticklist *tl ) {
 
     for_each(sl->begin(), sl->end(), sc);
 
-    if ( tl && tl->empty() )
+    if ( !tl || tl->empty() )
 	the_graph->base->tickdef[side].size = dir;
     else
 	the_graph->base->tickdef[side].size = 0;
@@ -518,24 +571,18 @@ axisdesc axis_description(axis which, double d1, double d2) {
     return a;
 }
 
-// Create or assign to an old coordinate object.  Assign the mins and
-// maxes to the axes and tell which if any are logarithmic.
+// Create a coordinate object.  Assign the mins and maxes to the axes
+// and tell which if any are logarithmic.
 void coord_statement(String *ident, axisdesc& xa, axisdesc& ya, axis log) {
     coord *c;
-    coordinateDictionary::iterator ci;
 
     if (ident) {
-	ci = the_graph->coords.find(*ident);
-		    
-	if (  ci == the_graph->coords.end()) {
-	    c = new coord;
-	    the_graph->coords[*ident] = c;
-	}
-	else { c = (*ci).second; }
+	c = new coord;
+	the_graph->coords[*ident] = c;
 	delete ident;
-    } else {
+    } else 
 	c = defcoord;
-    }
+
     if ( xa.which != none ) {
 	c->xmin = xa.min;
 	c->xmax = xa.max;
@@ -547,6 +594,27 @@ void coord_statement(String *ident, axisdesc& xa, axisdesc& ya, axis log) {
 	c->yautoscale = 0;
     }
     c->logscale = log;
+}
+
+// Assign to an old coordinate object.  Assign the mins and maxes to
+// the axes and tell which if any are logarithmic.
+void coord_statement(coord *co, axisdesc& xa, axisdesc& ya, axis log) {
+    coord *c;
+    
+    if (co) c = co;
+    else c = defcoord;
+    
+    if ( xa.which != none ) {
+	c->xmin = xa.min;
+	c->xmax = xa.max;
+	c->xautoscale = 0;
+    }
+    if ( ya.which != none ) {
+	c->ymin = ya.min;
+	c->ymax = ya.max;
+	c->yautoscale = 0;
+    }
+    if ( log != none ) c->logscale = log;
 }
 
 // Initiate a for statement by generating a for descriptor and
@@ -621,9 +689,21 @@ void process_frame(linedesc* d, frame *f, frame *s) {
     }
 }
 
+// Perhaps a misnomer.  Initialize the current frame default lines and
+// coordinate systems.  The default line is initialized to be
+// invisible and have a plotting string defined by the bullet macro,
+// if it is defined or a bullet character if not.
 void init_dict() {
-    linedesc defld(invis,0,0);
-    String s = "\"\\(bu\"";
+    linedesc defld(invis,0,0);		// The default line descriptor
+    macroDictionary::iterator md;	// An iterator to search for bullet
+    macro *m;				// The bullet macro
+    String *s;				// The plot string for the default line
+
+    if ( ( md = macros.find("bullet")) != macros.end()) {
+	m = (*md).second;
+	s = m->invoke();
+    }
+    else s = new String("\"\\(bu\"");
     
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
@@ -631,7 +711,114 @@ void init_dict() {
 	the_graph->base->tickdef[i].c = defcoord;
 	the_graph->base->griddef[i].c = defcoord;
     }
-    defline = new line(&defld,&s);
+    defline = new line(&defld,s);
     the_graph->lines["grap.internal.default"] = defline;
     nlines = 0;
+    delete s;
+}
+
+
+int yyerror(char *s) {
+    grap_buffer_state *g = 0;
+    int tp= 0;
+
+    cerr << "grap: " << s << endl;
+    while ( !lexstack.empty() ) {
+	g = lexstack.front();
+	lexstack.pop_front();
+	switch ( g->type) {
+	    case GFILE:
+		cerr << "Error near line " << g->line << ", " ;
+		if ( g->name ) cerr << "file \"" << *g->name << "\"" << endl;
+		break;
+	    case GMACRO:
+		cerr << "Error near line " << g->line << " " ;
+		cerr << "of macro" << endl;
+		break;
+	    default:
+		break;
+	}
+	tp = g->tokenpos;
+	delete g;
+    }
+    cerr << " context is:" << endl << "        " << pre_context();
+    cerr << " >>> " << token_context() << " <<< " << post_context() << endl;
+    return 0;
+}
+
+int main(int argc, char** argv) {
+    String defines=DEFINES;
+    String fname;
+    String pathstring;
+    int use_defines = 1;
+    char c;
+
+    if (getenv("GRAP_DEFINES"))
+	defines = getenv("GRAP_DEFINES");
+    
+    while ( ( c = getopt(argc,argv,opts)) != -1)
+	switch (c) {
+	    case 'd':
+		defines = optarg;
+		use_defines = 1;
+		break;
+	    case 'l':
+	    case 'D':
+		use_defines = 0;
+		break;
+	    case 'v':
+		cout << version << endl;
+		exit(0);
+	    case 'u':
+		unaligned_default = 1;
+		break;
+	    case 'M':
+		pathstring = (pathstring + ":") + optarg;
+		break;
+	    case 'C':
+		compat_mode = true;
+		break;
+	    case '?':
+		exit(20);
+	}
+    pathstring += (pathstring.length() > 0) ? ":." : ".";
+
+    // Convert the colon separated file path into a sequence
+    while (pathstring.length()) {
+	String::size_type p = pathstring.find(':');
+	String *s;
+
+	if ( pathstring[p] == ':' ) {
+	    if ( p != 0 ) {
+		s = new String(pathstring.substr(0,p));
+		pathstring.erase(0,p+1);
+	    }
+	    else {
+		pathstring.erase(0,1);
+		continue;
+	    }
+	}
+	else {
+	    s = new String(pathstring);
+	    pathstring.erase(0,String::npos);
+	}
+	path.push_back(s);
+    }
+
+    if ( argc == optind ) {
+	fname = "-";
+	include_file(&fname, 1, false);
+    }
+    else {
+	for ( int i = argc-1; i >= optind; i-- ) {
+	    fname = argv[i];
+	    include_file(&fname, 1, false);
+	}
+    }
+    if ( use_defines) include_file(&defines,1);
+    yyparse();
+    for (stringSequence::iterator i = path.begin(); i != path.end(); i++)
+	delete (*i);
+    path.erase(path.begin(),path.end());
+    
 }

@@ -109,19 +109,12 @@ typedef list<struct grap_buffer_state*> lexStack;
 typedef list<DisplayString *> stringlist;
 typedef list<shiftdesc *> shiftlist;
 
-#define RAND 0
-
-#define LOGFCN 0
-#define EXP 1
-#define INT 2
-#define SIN 3
-#define COS 4
-#define SQRT 5
-#define EEXP 6
-
-#define ATAN2 0
-#define MINFUNC 1
-#define MAXFUNC 2
+// number of functions taking 0,1,2 args.  The names of those
+// functions are in grap_lex.l and the implementations in the
+// jumptables in grap.y
+const int NF0=1;
+const int NF1=7;
+const int NF2=3;
 
 enum size { ht = 0, wid};
 

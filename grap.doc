@@ -220,10 +220,8 @@ is given, that coordinate system is defined, if not the default system
 is modified.
 .Pp
 This command also determines if a scale is plotted logarithmically.
-Unlike K&B 
-.Nm grap ,
-this program accepts exactly one of the three logarithm
-specifications.
+.Pp
+It is acceptable to change the attributes of a coordinate system.
 .Ed
 .Pp
 .Ic draw
@@ -347,6 +345,25 @@ experssion (See
 .Pp
 .Ic ticks
 .Sm off
+.Oo
+.Cm left Xo No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom
+.Oc
+.Xc
+.Cm on \(or auto
+.Sm on
+.Pp
+.Ic ticks
+.Sm off
+.Oo
+.Cm left Xo No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom
+.Oc
+.Xc
+.Sm on
+.Pp
+.Ic ticks
+.Sm off
 .No Xo ( Cm left No \(or Cm right 
 .No \(or Cm top No \(or Cm bottom )
 .Xc
@@ -426,15 +443,16 @@ experssion (See
 .Oc
 .Xc
 .Sm on
-.Li off
+.Cm off
 .Bd -filled -offset indent
 This command controls the placement of ticks on the frame.  By
 default, ticks are automatically generated on the left and bottom
 sides of the frame.
 .Pp
 The simplest version of this command turns on the automatic tick
-generation for a given side.  The tick direction is controlled by
-specifying
+generation for a given side.  The top 2 commands, e.g ticks bottom on,
+turn on automatic tick generation.  For more control over tick sizes,
+the third command specifys
 .Cm in
 or
 .Cm out ,
