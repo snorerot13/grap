@@ -55,6 +55,7 @@ extern "C" {
 
 using namespace std;
 
+#include <vector>
 #include <string>
 #include <list>
 #include <algorithm>
