@@ -1006,7 +1006,7 @@ be replaced in the macro with the elements of the list.  A $ not
 followed by a digit is left unchanged.  This parsing
 is very rudimentary, no nesting or parentheses or escaping of commas
 is allowed.  Also, there is no way to say argument 1 followed by a
-digit (${1}0 in sh(1)).
+digit (${1}0 in sh(1)).  A macro can have at most 32 arguments.
 .Pp
 The following will draw a line with slope 1.
 .Bd -literal -offset indent-two

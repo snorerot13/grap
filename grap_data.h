@@ -369,7 +369,7 @@ public:
 */
 class macro {
 public:
-    static const int numargs = 9;	// maximum number of arguments
+    static const int numargs = 32;	// maximum number of arguments
     int next_arg;			// the index into the next argument
     String *text;			// the text of the macro
     String *arg[numargs];		// the current argument values
