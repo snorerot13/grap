@@ -19,6 +19,8 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
+MKDEP=@MKDEP@
+MKDEPFLAGS=@MKDEPFLAGS@
 
 DISTDIR=grap-1.20pre4
 SOURCES=grap.cc grap_lex.cc *.cc
@@ -33,6 +35,7 @@ SUPPRESS_OPT=@SUPPRESS_OPT@
 NO_UNDEF=@NO_UNDEF@
 
 EXE=@EXEEXT@
+CKSUM_PROG=@CKSUM_PROG@
 
 # solaris make uses these as defaults:
 
@@ -42,12 +45,13 @@ CCFLAGS=$(CXXFLAGS)
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
 	version.o $(LIBOBJS)
 
+
 all:	grap
 
 .l.cc:
 	$(LEX) -o$@ $<
 
-grap:	depend $(OBJS)
+grap:	.depend $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
 	@EXE_CORRECT@
 
@@ -89,8 +93,9 @@ grap.1:	grap.doc
 	perl -pe "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
 
 dist:	
+	${MAKE} makesum
+	${MAKE} clean
 	cd examples && ${MAKE} clean
-	${MAKE} veryclean
 	${MAKE} grap.man
 	${MAKE} grap.ps
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
@@ -110,14 +115,18 @@ clean:
 	${RM} grap $(OBJS) *.o grap.1 grap.man grap.ps \
 		${DISTDIR}.tar.gz *core* y.output
 
+cleanconfig:
+	${RM} config.log config.status config.cache 
+
 veryclean:
 	${MAKE} clean
-	${RM} config.log config.status config.cache config.h version.cc *.tgz
-	${RM} depend grap_lex.cc grap.cc y.tab.h 
+	${RM} grap_lex.cc grap.cc y.tab.h version.cc *.tgz 
 
 spotless:
 	${MAKE} veryclean
-	${RM} configure Makefile
+	${MAKE} cleanconfig
+	${RM} .depend configure Makefile config.h cksum.*
+
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
@@ -144,12 +153,46 @@ deinstall:
 	$(RMDIR) $(DEFINESDIR)
 
 cleandepend:
-	${PERL} -i -ne 'print if 1 .. /^\# End of Makefile/;' Makefile
+	${RM} .depend
 
-depend:	grap.cc grap_lex.cc
-	${MAKE} cleandepend
-	@MAKEDEP@
-	touch depend
+depend:	.depend
+
+.depend:
+	grep "^#" grap.y > grap.cc
+	grep "^#" grap_lex.l > grap_lex.cc
+	touch y.tab.h
+	${MKDEP} ${MKDEPFLAGS}
+	${RM} grap.cc grap_lex.cc y.tab.h
+
+examples/test.grap:	grap
+	cd examples && ${RM} test.grap  && \
+		../grap -d ../grap.defines example.ms > test.grap
+
+makesum:	cksum.md5 cksum.sum cksum.echo
+	${RM} examples/test.grap
+
+cksum.md5:	examples/test.grap
+	md5 examples/test.grap > cksum.md5 
+
+cksum.sum:	examples/test.grap
+	sum examples/test.grap > cksum.sum 
+
+cksum.echo:	examples/test.grap
+	echo examples/test.grap > cksum.echo
+
+
+check:	grap examples/test.grap 
+	${CKSUM_PROG} examples/test.grap > /tmp/grap_check
+	${RM} examples/test.grap
+	if diff /tmp/grap_check ./cksum.${CKSUM_PROG} ; then \
+		${RM} /tmp/grap_check; \
+		echo "pass";\
+		exit 0; \
+	else \
+		${RM} /tmp/grap_check \
+		echo "fail"; \
+		exit 1; \
+	fi
 
 # Some of the standard GNU targets to make some people's lives easier
 
@@ -157,6 +200,7 @@ mostlyclean:	clean
 distclean:	veryclean
 	rm Makefile
 maintainer-clean:	veryclean
-check:
 
-# End of Makefile
+@GMAKE_INCLUDE_DEPS@
+
+

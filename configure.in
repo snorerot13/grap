@@ -8,14 +8,15 @@ AC_PROG_CXX
 AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_INSTALL
-AC_PATH_PROG(PERL,perl)
+AC_CHECK_PROGS(MKDEP,mkdep g++, cp)
+AC_CHECK_PROGS(CKSUM_PROG,md5 sum, echo)
 
 # Note to self: it's possible to get separate tables out of byacc.  It
 # is confusing because g++ optimizes away the const static tables that
 # byacc generates, and compiling those tables aren't the problem
 # anyway.  So don't try it again.
 
-AC_MSG_CHECKING(that $INSTALL supports -d)
+AC_MSG_CHECKING(whether $INSTALL supports -d)
 if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$; then 
 	AC_MSG_RESULT(yes)
 else
@@ -24,20 +25,50 @@ else
 fi
 rm -rf /tmp/test$$
 
+AC_CACHE_CHECK(whether make is GNU make, grap_cv_prog_gmake,
+	if  make -n -v 2>/dev/null | grep GNU > /dev/null; then
+		grap_cv_prog_gmake="yes"
+	else
+		grap_cv_prog_gmake="no"
+	fi
+)
+
+# If we're using GNU make, include a line in the makefile including
+# the dependencies
+if test "$grap_cv_prog_gmake" = "yes" ; then
+	GMAKE_INCLUDE_DEPS='include .depend'
+else
+	GMAKE_INCLUDE_DEPS=''
+fi
+AC_SUBST(GMAKE_INCLUDE_DEPS)
+
 # Only use -Wall if we are using g++ (which understands it) 
 # Also use g++ for generating dependencies if available
 if test "$GXX" = "yes" ; then
 	GXXFLAGS="-Wall"
 	NO_UNDEF="-Wno-unused"
-	MAKEDEP='${CXX} -MM ${CXXFLAGS} ${SOURCES} >> Makefile'
 else
 	GXXFLAGS=""
 	NO_UNDEF=""
-	MAKEDEP='cat default_depend >> Makefile'
 fi
 AC_SUBST(GXXFLAGS)
 AC_SUBST(MAKEDEP)
 AC_SUBST(NO_UNDEF)
+
+# depending on which mkdep method has been found, the args are
+# slightly different
+case $MKDEP in 
+	mkdep)
+		MKDEPFLAGS='-MM ${CXXFLAGS} ${SOURCES}'
+	;;
+	g++)
+		MKDEPFLAGS='-MM ${CXXFLAGS} ${SOURCES} >> .depend'
+	;;
+	cp)
+		MKDEPFLAGS='default_depend .depend'
+	;;
+esac
+AC_SUBST(MKDEPFLAGS)
 
 dnl Checks for libraries.
 
@@ -167,5 +198,10 @@ else
 	EXE_CORRECT=""
 fi
 AC_SUBST(EXE_CORRECT)
+
+
+if test "$CKSUM_PROG" = "echo"; then
+	AC_MSG_RESULT(no checksumming program - make check always succeeds)
+fi
 
 AC_OUTPUT(examples/Makefile Makefile)
