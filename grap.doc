@@ -1,5 +1,5 @@
 .Dd August 19, 1998
-.Os
+.Os FreeBSD 2.2.7
 .Dt GRAP 1
 .Sh NAME
 .Nm grap 
@@ -89,138 +89,317 @@ The
 .Nm
 commands are sketched below.  Refer to Kernighan and Bentley's paper
 for the details.
-.Sh COMMANDS
-.HP
-.B frame 
-.RI [ line_description ]
-.RB [ ht 
-.I height
-|
-.B wid 
-.IR width ]
-.RB [ top | bottom | left | right 
-.IR line_description ]
+.Ss Commands
+.Ic frame 
+.Op Ar line_description 
+.Oo
+.Bk -word
+.Cm ht Ar height No \(or Cm wid Ar width
+.Ek
+.Oc
+.Oo
+.Bk -word
+.Oo
+.Sm off
+.Cm ( top No \(or Cm bottom No \(or 
+.Cm left No \(or 
+.Sm on
+.Cm right )
+.Ar line_description 
+.Ek
+.Oc
 \&...
-.IP
+.Oc
+.Bd -filled -offset indent
 This describes how the axes for the graph are drawn. A
-.I line_description 
+.Ar line_description 
 is a pic line description, e.g., dashed 0.5, or the literal
-.BR solid .
+.Li solid .
 If the first 
-.I line_description 
+.Ar line_description 
 is given, the frame is drawn with that style.  The default is 
-.BR solid .
+.Li solid .
 The height and width of the frame can also be specified in inches.
 The default line style can be over-ridden for sides of the frame by
 specifying additional parameters to
-.BR frame .
-.HP
-.B draw
-.RI [ line_name ]
-.RI [ line_description ]
-.RI [ plot_string ]
-.IP
+.Ic frame .
+.Ed 
+.Pp
+.Ic draw
+.Op Ar line_name
+.Op Ar line_description
+.Op Ar plot_string 
+.Bd -filled -offset indent
 The
-.B draw
+.Ic draw
 command defines the style with which a given line will be plotted.  If
-.I line_name 
+.Ar line_name 
 is given, the style is associated with that name, otherwise the
 default style is set.  
-.I line_description
+.Ar line_description
 is a pic line description, and the optional
-.I plot_string
+.Ar plot_string
 is a string to be centered at each point.  The default line
 description is
-.BR invis ,
+.Li invis ,
 and the default plotting string is a centered bullet, so by default
 each point is a filled cricle, and they are unconnected.
 If points are being connected, each
-.B draw
+.Ic draw
 command ends any current line and begins a new one.
-.IP
-.B new
+.Pp
+.Ic new
 is a synonym for 
-.BR draw .
-.HP
-.B next
-.RI [ line_name ]
-.B at
-.RI [ coordinates_name ]
-.IR expr ", " expr
-.RI [ line_description ]
-.IP
+.Ic draw .
+.Ed 
+.Pp
+.Ic next
+.Op Ar line_name
+.Li at
+.Op Ar coordinates_name 
+.Ar expr ,  expr
+.Op Ar line_description 
+.Bd -filled -offset indent
 The 
-.B next
+.Ic next
 command plots the given point using the line style given by
-.IR line_name ,
+.Ar line_name ,
 or the default if none is given.  If
-.I line_name
+.Ar line_name
 is given, it should have been defined by an earlier
-.B draw
+.Ic draw
 command, if not a new line style with that name is created,
-initialized the same way as the default style.  The two expressions give the point's x and y values,
-relative to the optional coordinate system.  That system should have
-been defined by an earlier
-.B coord
+initialized the same way as the default style.  The two expressions
+give the point's x and y values, relative to the optional coordinate
+system.  That system should have been defined by an earlier
+.Ic coord
 command, if not, grap will exit.  If the optional
-.I line_description
+.Ar line_description
 is given, it overrides the style's default line description.  You
 cannot over-ride the plotting string.  To use a different plotting
 string use the 
-.B plot
+.Ic plot
 command.
-.IP
-The x and y values may optionally be enclosed in parentheses: 
-.RI ( x ", " y )
-.HP
-.IR quoted_string 
-.RI [ string_modifiers ]
-.RI "[, " quoted_string 
-.RI [ string_modifiers ]]...
-.B at
-.RI [ coordinates_name ]
-.IR expr ", " expr
-.HP
-.B plot 
-.I expr
-.RI [ format_string ]
-.B at
-.RI [ coordinates_name ]
-.IR expr ", " expr
-.IP
+.Pp
+The coordinates may optionally be enclosed in parentheses: 
+.Ar ( expr ,  expr )
+.Ed
+.Pp
+.Ar quoted_string 
+.Op Ar string_modifiers 
+.Oo
+.No , Ar quoted_string 
+.Oo 
+.Ar string_modifiers
+.Oc
+.Oc
+\&...
+.Li at
+.Op Ar coordinates_name 
+.Ar expr , expr
+.Pp
+.Ic plot 
+.Ar expr
+.Op Ar format_string 
+.Li at
+.Op Ar coordinates_name 
+.Ar expr , expr
+.Bd -filled -offset indent
 These commands both plot a string at the given point.  In the first
 case the literal strings are stacked above each other.  The string
-modifiers include the pic justification modifiers, and absolute and
+modifiers include the
+.Xr pic 
+justification modifiers, and absolute and
 relative
-.B size
+.Li size
 modifiers.
 .IP
-.B size
-.I expr
+.Li size
+.Ar expr
 sets the string size to 
-.I expr
+.Ar expr
 points.  If 
-.I expr
+.Ar expr
 is preceded by a + or -, the size is increased or decreased by that
 many points.
-.IP
+.Pp
 In the second version, the 
-.I expr
+.Ar expr
 is converted to a string and placed on the graph.  
-.I format_string 
-is a printf(3) format string.  Only formatting escapes for printing
+.Ar format_string 
+is a 
+.Xr printf 3
+format string.  Only formatting escapes for printing
 floating point numbers make sense.
-.IP
+.Pp
 points are specified the same way as for 
-.B next
+.Ic next
 commands, with the same consequences for undefined coordinate systems.
-.IP
+.Pp
 The second form of this command is completely unnecessary because the
 first form can be used with a 
-.B grap
-.B sprintf
-experssion.
-.SH FILES
-.SH SEE ALSO
-.SH DIAGNOSTICS
-.SH BUGS
+.Nm
+.Ic sprintf
+experssion (See
+.Sx Expressions ) .
+.Ed
+.Pp
+.Ic ticks
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.No Xo ( Cm in Ns No \(or 
+.Ns Cm out )
+.Xc
+.Op Ar expr
+.Pp
+.Ic ticks 
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.No Xo ( Cm in Ns No \(or 
+.Ns Cm out )
+.Xc
+.Op Ar expr
+.Oo
+.Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Li at
+.Op Ar coord_name
+.Ar expr
+.Op Ar format_string
+.Oo
+.Oo
+.No , Ar expr
+.Oo
+.Ar format_string
+.Oc
+.Oc
+.No ...
+.Oc
+.Pp
+.Ic ticks 
+.Sm off
+.No Xo ( Cm left No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom )
+.Xc
+.Sm on
+.No Xo ( Cm in Ns No \(or 
+.Ns Cm out )
+.Xc
+.Op Ar expr
+.Oo
+.No Cm up Ar expr No \(or
+.Cm down Ar expr No \(or
+.Cm left Ar expr No \(or
+.Cm right Ar expr
+.Oc
+.Li from
+.Op coord_name
+.Ar start_expr
+.Li to
+.Ar end_expr
+.Oo 
+.Li by 
+.Sm off
+.Oo
+.No + \(or - \(or * \(or /
+.Sm on
+.Oc
+.Ar by_expr
+.Oc
+.Op format_string
+.Pp
+.Ic ticks
+.Sm off
+.Oo
+.Cm left Xo No \(or Cm right 
+.No \(or Cm top No \(or Cm bottom
+.Oc
+.Xc
+.Sm on
+.Li off
+.Bd -filled -offset indent
+This command controls the placement of ticks on the frame.  By
+default, ticks are automatically generated on the left and bottom
+sides of the frame.
+.Pp
+The simplest version of this command turns on the automatic tick
+generation for a given side.  The tick direction is controlled by
+specifying
+.Cm in
+or
+.Cm out ,
+modified by an expression that gives the length of the ticks in
+inches.
+.Pp
+The second version of the
+.Ic ticks
+command over-rides the automatic placement of the ticks by specifying
+a list of coordinates at which to place the ticks.  If the ticks are
+not defined with respect to the default coordinate system, the
+.Ar coord_name
+parameter must be given.  For each tick a 
+.Xr printf 3
+style format string can be given.  The
+.Ar format_string
+defaults to
+.Qq %g .  
+To place ticks with no labels, specify 
+.Ar format_string 
+as
+.Qq \& .
+.Pp
+The third format of the 
+.Ic ticks
+command over-rides the default tick generation with a set of ticks ar
+regular intervals.  The syntax is reminiscent of programming
+language for loops.  Ticks are placed starting at
+.Ar start_expr
+ending at
+.Ar end_expr
+one unit apart.  If the
+.Li by
+clause is specified, ticks are
+.Ar by_expr
+units apart.  If an operator appears before
+.Ar by_expr
+each tick is operated on by that operator instead of +.  For example
+.Bd -literal -offset indent-two
+ticks left out from 2 to 32 by *2
+.Ed
+.Pp
+will put ticks at 2, 4, 8, 16, and 32.  If
+.Ar fromat_string
+is specified, all ticks are formatted using it.
+.Pp
+The second two forms of tick command may both be issued on the same
+side of a frame.  For example:
+.Bd -literal -offset indent-two
+ticks left out from 2 to 32 by *2
+ticks left in 3, 5, 7
+.Ed
+.Pp
+will put ticks on the left side of the frame pointing out at 2, 4, 8,
+16, and 32 and in at 3, 5, and 7.
+.Pp
+The final form of 
+.Ic ticks
+turns off ticks on a given side.  If no side is given the ticks for
+all sides are cancelled.
+.Pp
+.Ic tick
+is a synonym for 
+.Ic ticks .
+.Ed
+.Sh FILES
+.Sh SEE ALSO
+.Sh DIAGNOSTICS
+.Sh BUGS
