@@ -363,7 +363,6 @@ void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
     else dir = 1;
 
     lim = hi;
-    cerr << "ts " << ts << " lo " << lo << " hi " << hi << "idx " << idx << endl;
 }
 
 
