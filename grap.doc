@@ -15,6 +15,7 @@
 .Op Fl v
 .Op Fl u
 .Op Fl C
+.Op Fl h
 .Op Ar filename ...
 .Sh DESCRIPTION
 .Nm
@@ -81,6 +82,9 @@ environment variable. (See below).
 .Pp
 .Fl v
 prints the version information on the standard output and exits.
+.Fl -version
+is a synonym for 
+.Fl v .
 .Pp
 .Fl u
 makes labels unaligned by default.  This version of 
@@ -130,6 +134,13 @@ If
 .Fl C
 is given, any macro beginning with \&.G1 or \&.G2 is treated as a \&.G1 or
 \&.G2 macro, for compatibility with old versions of troff.
+.Pp
+The 
+.Fl h
+flag prints a brief help message and exist.  
+.Fl -help 
+is a synonym for
+.Fl h .
 .Pp
 The 
 .Nm

@@ -51,7 +51,7 @@ extern int yyparse();
 extern int nlines;
 
 extern macroDictionary macros;
-const char *opts = "d:lDvuM:CV";
+const char *opts = "d:lDvuM:CVh";
 
 // Classes for various for_each calls
 
@@ -810,30 +810,59 @@ int yyerror(char *s) {
     return 0;
 }
 
+void usage() {
+    cerr << "Usage: grap [-h] [-d defines] [-l] [-D] [-V] [-v] [-u] " << 
+	"[-M path] [-C] [files]" << endl;
+    cerr << "\t-h\tprint this list and exit (also --help)" << endl;
+    cerr << "\t-d\tuse given defines file" << endl;
+    cerr << "\t-D\tuse no defines file" << endl;
+    cerr << "\t-l\tuse no defines file" << endl;
+    cerr << "\t-v\tprint version and exit (also --version)" << endl;
+    cerr << "\t-V\tprint parse debugging information" << endl;
+    cerr << "\t-u\tforce graph labels to be unaligned by default" << endl;
+    cerr << "\t-M\tspecify search path for files" << endl;
+    cerr << "\t-C\tcompatibility mode" << endl;
+    cerr << "See the man page for more information." << endl;
+    exit(5);
+}
+
 int main(int argc, char** argv) {
     string defines=DEFINES;
     string fname;
     string pathstring;
-    int use_defines = 1;
+    bool use_defines = true;
     int c;
 
     if (getenv("GRAP_DEFINES"))
 	defines = getenv("GRAP_DEFINES");
-    
+
+    // Either of these long options are recognized to make the GNU folks
+    // happier.
+    for (int i = 1; i< argc; i++ ) {
+	string av(argv[i]);
+	
+	if ( av == "--version" ) {
+	    cout << "grap " << VERSION << " compiled under ";
+	    cout << OS_VERSION << endl;
+	    exit(5);
+	}
+	else if ( av == "--help" ) usage();
+    }
+
     while ( ( c = getopt(argc,argv,opts)) != -1)
 	switch (c) {
 	    case 'd':
 		defines = optarg;
-		use_defines = 1;
+		use_defines = true;
 		break;
 	    case 'l':
 	    case 'D':
-		use_defines = 0;
+		use_defines = false;
 		break;
 	    case 'v':
 		cout << "grap " << VERSION << " compiled under ";
 		cout << OS_VERSION << endl;
-		exit(0);
+		exit(5);
 	    case 'V':
 		print_lex_debug = true;
 		break;
@@ -846,8 +875,10 @@ int main(int argc, char** argv) {
 	    case 'C':
 		compat_mode = true;
 		break;
+	    case 'h':
 	    case '?':
-		exit(20);
+		usage();
+		break;
 	}
     pathstring += (pathstring.length() > 0) ? ":." : ".";
 

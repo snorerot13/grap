@@ -90,7 +90,7 @@ grap.1:	grap.doc
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
 install:	grap grap.defines grap.1
-	strip grap
+	strip grap || true
 	${INSTALL} -d ${BINDIR} || true
 	${INSTALL} -d ${MANDIR} || true
 	${INSTALL} -d ${DEFINESDIR}/examples || true
