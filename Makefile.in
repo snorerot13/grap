@@ -30,7 +30,7 @@ CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
 CCC=$(CXX)
 CCFLAGS=$(CXXFLAGS)
 
-OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o version.o $(LIBOBJS)
+OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
 
 all:	grap
 

@@ -54,8 +54,6 @@ int yyerror(char*);
 int yylex();
 void init_dict(); 
 
-void process_frame(linedesc *, frame *, frame *);
-
 // defined in grap_lex.l
 extern bool include_file(String *, int =0, bool=true);
 extern void lex_begin_macro_text();
@@ -70,7 +68,29 @@ void init_graph();
 extern String pre_context(void);
 extern char *token_context(void);
 extern String post_context(void);
-    
+
+// Parsing utilities in grap_parse.cc.  Locating them there reduces
+// compilation time (this file was getting very large) and eliminates
+// some code redundancy.
+extern linedesc* combine_linedesc(linedesc *, linedesc*);
+extern void draw_statement(String *, linedesc *, String *);
+void num_list(doublelist *);
+double assignment_statement(String *, double);
+point *new_point(coord *, double, double );
+stringlist *combine_strings(stringlist *, String *, strmod &);
+void plot_statement(double, String *, point *); 
+void next_statement(String *, point *, linedesc *);
+ticklist *ticklist_elem(double, String *, ticklist *);
+ticklist *tick_for(coord *, double, double, bydesc, String *);
+void ticks_statement(sides, double, shiftlist *, ticklist *);
+void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
+void line_statement(int, linedesc *, point *, point *, linedesc *);
+axisdesc axis_description(axis, double, double );
+void coord_statement(String *, axisdesc&, axisdesc&, axis);
+void for_statement(String *, double, double, bydesc, String *);
+void process_frame(linedesc *, frame *, frame *);
+void init_dict(); 
+
 int nlines;
 int in_copy=0;
 
@@ -89,22 +109,6 @@ public:
     int operator()(double d) { s->next_number(d); return 0;}
 };
 
-// This collects the modifiers for other strings in
-// a string list to construct the modifiers for the next string
-class modaccumulator :
-    public UnaryFunction <DisplayString *, int > {
-public:
-	int just;
-	double size;
-	int rel;
-	modaccumulator() : just(0), size(0), rel(0) {};
-	int operator()(DisplayString* s) {
-	    just = s->j;
-	    size = s->size;
-	    rel = s->relsz;
-	    return 0;
-	}
-};
 
 // To assign the coordate system to all the ticks in
 // the queue
@@ -113,34 +117,6 @@ public:
     coord *c;
     coord_to_tick(coord *cc) : c(cc) {};
     int operator() (tick *t) { t->c = c; return 0;}
-};
-
-// Add a tick to the graph
-class add_tick_f : public UnaryFunction<tick*, int> {
-    sides side;
-    double size;
-    shiftlist shift;
-public:
-    add_tick_f(sides sd, double sz, shiftlist *s) :
-	side(sd), size(sz), shift() {
-	shiftcpy sc(&shift);
-
-	for_each(s->begin(), s->end(), sc);
-    };
-    int operator()(tick *t) {
-	shiftcpy sc(&t->shift);
-	t->side = side;
-	t->size = size;
-
-	for_each(shift.begin(), shift.end(), sc);
-
-	the_graph->base->tks.push_back(t);
-	if ( t->side == top || t->side == bottom )
-	    t->c->newx(t->where);
-	else 
-	    t->c->newy(t->where);
-	return 0;
-    }
 };
 
 
@@ -383,106 +359,25 @@ linedesc:
 	 linedesc_elem
 	    { $$ = $1; }
 |	 linedesc linedesc_elem
-            {
-		$$ = $1;
-		if ( $2->ld != def ) {
-		    $$->ld = $2->ld;
-		    $$->param = $2->param;
-		}
-		if ( $2->fill ) $$->fill = $2->fill;
-		if ( $2->color ) {
-		    if ( $$->color ) delete $$->color;
-		    $$->color = $2->color;
-		    // Don't let the destructor delete the color in $$.
-		    $2->color = 0;
-		}
-		if ( $2->fillcolor ) {
-		    if ( $$->fillcolor ) delete $$->fillcolor;
-		    $$->fillcolor = $2->fillcolor;
-		    // Don't let the destructor delete the fillcolor
-		    // in $$.
-		    $2->fillcolor = 0;
-		}
-		delete $2;
-	    }
+            { $$ = combine_linedesc($1, $2); }
 ;
 
 draw_statement:
 	DRAW opt_ident linedesc opt_string SEP
-	    {
-		line *l;
-		lineDictionary::iterator li;
-		linedesc defld(invis,0,0);
-		String s = "\"\\(bu\"";
-
-		if ( $2 ) {
-		    li = the_graph->lines.find(*$2);
-		    if ( li == the_graph->lines.end() ) {
-			l = new line(&defld,&s);
-			the_graph->lines[*$2] = l;
-		    }
-		    else {
-			l = (*li).second;
-		    }
-		} else l = defline;
-
-		l->desc = *$3;
-
-		if ( $4 ) {
-		    if ( l->plotstr ) *l->plotstr = *$4;
-		    else l->plotstr = new String(*$4);
-		    delete $4;
-		}
-		else {
-		    if (l->plotstr) {
-			delete l->plotstr;
-			l->plotstr = 0;
-		    }
-		}
-		l->initial = 1;
-		delete $3;
-	    }
+	    { draw_statement($2, $3, $4); }
 ;
 
 num_list:
 	num_line SEP
-	    {
-		double x, y;
-
-		if ( $1->empty() )
-		    exit(20);
-		else {
-		    x = $1->front();
-		    $1->pop_front();
-		}
-		
-		if ( $1->empty() ) {
-		    defline->addpoint(nlines,x,defcoord);
-		    defcoord->newpt(nlines,x);
-		}
-		else {
-		    while ( !$1->empty() ) {
-			y = $1->front();
-			$1->pop_front();
-			defline->addpoint(x,y,defcoord);
-			defcoord->newpt(x,y);
-		    }
-		}
-		delete $1;
-		nlines++;
-	    }
+            { num_list($1); }
 ;
 
 num_line_elem:
 	NUMBER
-	    {
-		$$ = $1;
-	    }
+	    { $$ = $1; }
 |
 	MINUS NUMBER
-	    {
-		$$ = -$2;
-	    }
+	    { $$ = -$2; }
 ;
 
 num_line:
@@ -731,48 +626,16 @@ if_expr:
 
 assignment_statement:
 	IDENT EQUALS expr SEP
-	    {
-		double *d;
-		doubleDictionary::iterator di;
-		
-		if ( ( di = vars.find(*$1)) != vars.end() ) {
-		    d = (*di).second;
-		    *d = $3;
-		}
-		else {
-		    d = new double($3);
-		    vars[*$1] = d;
-		}
-		$$ = *d;
-	    }
+            { $$ = assignment_statement($1, $3); }
 |	IDENT EQUALS assignment_statement
- 	    {
- 		double *d;
- 		doubleDictionary::iterator di;
- 		
- 		if ( ( di = vars.find(*$1)) != vars.end() ) {
- 		    d = (*di).second;
- 		    *d = $3;
- 		}
- 		else {
- 		    d = new double($3);
- 		    vars[*$1] = d;
- 		}
- 		$$ = *d;
-  	    }
+            { $$ = assignment_statement($1, $3); }
 ;
 
 point:
 	opt_coordname expr COMMA expr
-	    {
-		$$ = new point($2,$4,$1);
-		$1->newpt($2,$4);
-	    }
+            { $$ = new_point($1, $2, $4); }
 |	opt_coordname LPAREN expr COMMA expr RPAREN
-	    {
-		$$ = new point($3,$5,$1);
-		$1->newpt($3,$5);
-	    }
+	    { $$ = new_point($1, $3, $5); }
 ;
 
 strmod:
@@ -810,30 +673,7 @@ strlist:
 		$$->push_back(s);
 	    }
 |	strlist string strmod
-	    {
-		// This collects the modifiers for other strings in
-		// the list to construct the modifiers for this string
-		modaccumulator last;
-		DisplayString *s;
-			
-		last = for_each($1->begin(), $1->end(), modaccumulator());
-
-		// If unaligned_default is set, then treat unaligned
-		// strings as unmodified strings
-		
-		if ( $3.just != (unaligned_default ? unaligned : 0) )
-		    last.just = $3.just;
-		
-		if ( $3.size != 0 ) {
-		    last.size = $3.size;
-		    last.rel = $3.rel;
-		}
-
-		s = new DisplayString(*$2,last.just,last.size,last.rel);
-		delete $2;
-		$$ = $1;
-		$$->push_back(s);
-	    }
+	    { $$ = combine_strings($1, $2, $3); }
 ;
 
 plot_statement:
@@ -844,51 +684,12 @@ plot_statement:
 		delete p;
 	    }
 |	PLOT expr opt_string AT point SEP
-	    {
-		stringlist *seq = new stringlist;
-		DisplayString *s;
-		plot *p;
-
-		if ( $3 ) {
-		    unquote($3);
-		    s = new DisplayString($2,$3);
-		    delete $3;
-		}
-		else s = new DisplayString($2);
-
-		quote(s);
-		seq->push_back(s);
-
-		p = new plot(seq,$5);
-		the_graph->add_plot(*p);
-		delete p;
-	    }
+	    { plot_statement($2, $3, $5); }
 ;
 
 next_statement:
 	NEXT opt_ident AT point opt_linedesc SEP
-	    {
-		line *l;
-		lineDictionary::iterator li;
-		String s = "\"\\(bu\"";
-
-		if ( $2 ) {
-		    li = the_graph->lines.find(*$2);
-		    if ( li == the_graph->lines.end() ) {
-			l = new line((linedesc *)0, &s );
-			the_graph->lines[*$2] = l;
-		    }
-		    else { l = (*li).second; }
-		} else l = defline;
-		
-		if ( $5->ld != def )
-		    l->addpoint($4->x,$4->y,$4->c,0,$5);
-		else 
-		    l->addpoint($4->x,$4->y,$4->c);
-		
-		delete $4;
-		delete $5;
-	    }
+	    { next_statement($2, $4, $5); }
 ;
 
 size_elem:
@@ -1017,40 +818,9 @@ direction:
 
 ticklist:
 	expr opt_string
-	    {
-		tick *t = new tick($1,0,top,0, (shiftlist *) 0, 0);
- 		String *s;
-
-		if ( $2 ) {
-		    unquote($2);
-		    s = dblString($1,$2);
-		}
-		else s = dblString($1);
-
-		t->prt = s;
-		delete $2;
-		
-		$$ = new ticklist;
-		$$->push_back(t);
-	    }
+	    { $$ = ticklist_elem($1, $2, 0); }
 |	ticklist COMMA expr opt_string
-	    {
-		tick *t = new tick($3,0,top,0,(shiftlist *) 0, 0);
- 		String *s;
-
-		if ( $4 ) {
-		    unquote($4);
-		    s = dblString($3,$4);
-		}
-		else s = dblString($3);
-
-		t->prt = s;
-		delete $4;
-		
-		$$ = $1;
-		$$->push_back(t);
-		
-	    }
+	    { $$ = ticklist_elem($3, $4, $1); }
 ;
 
 by_clause:
@@ -1072,7 +842,6 @@ by_clause:
 tickat:
 	AT opt_coordname ticklist
 	    {
-
 		$$ = $3;
 		for_each($3->begin(), $3->end(), coord_to_tick($2));
 	    }
@@ -1080,51 +849,7 @@ tickat:
 
 tickfor:
 	from opt_coordname expr TO expr by_clause opt_string
-	    {
-		tick *t;
- 		String *s;
-		String *fmt;
-		double idx;
-		int dir;
-
-		$$ = new ticklist;
-		if ( $7 ) {
-		    unquote($7);
-		    fmt = new String(*$7);
-		    delete $7;
-		} else
-		    fmt = new String("%g");
-		
-		if ( $5 - $3 >= 0 ) dir = 1;
-		else dir = -1;
-		
-		idx = $3;
-		while ( (idx - $5) *dir  < EPSILON ) {
-		    t = new tick(idx, 0, top, 0, (shiftlist *) 0, 0);
-		    t->c = $2;
-
-		    s = dblString(idx,fmt);
-		    t->prt = s;
-		    $$->push_back(t);
-
-		    switch ($6.op ) {
-			case PLUS:
-			    idx += $6.expr;
-			    break;
-			case MINUS:
-			    idx -= $6.expr;
-			    break;
-			case TIMES:
-			    idx *= $6.expr;
-			    break;
-			case DIV:
-			    idx /= $6.expr;
-			    break;
-		    }
-		}
-		delete fmt;
-		    
-	    }
+	    { $$ = tick_for($2, $3, $5, $6, $7); }
 ;
 tickdesc :
 	    { $$ = 0;}
@@ -1136,41 +861,14 @@ tickdesc :
 
 ticks_statement:
 	TICKS side direction opt_shift tickdesc SEP
-	    {
-		shiftdesc *sd;
-		shiftcpy sc(&the_graph->base->tickdef[$2].shift);
-		
-		add_tick_f add_tick($2,$3,$4);
-
-		the_graph->base->tickdef[$2].side = $2;
-
-		for_each($4->begin(), $4->end(), sc);
-
-		if ( $5 && $5->empty() )
-		    the_graph->base->tickdef[$2].size = $3;
-		else
-		    the_graph->base->tickdef[$2].size = 0;
-
-		if ( $5 ) {
-		    for_each($5->begin(), $5->end(), add_tick);
-		    delete $5;
-		}
-		while (!$4->empty()) {
-		    sd = $4->front();
-		    $4->pop_front();
-		    delete sd;
-		}
-		delete $4;
-	    }
+	    { ticks_statement($2, $3, $4, $5); }
 | 	TICKS OFF SEP
 	    {
 		for ( int i = 0; i< 4; i++ )
 		    the_graph->base->tickdef[i].size = 0;
 	    }
 | 	TICKS side OFF SEP
-	    {
-		    the_graph->base->tickdef[$2].size = 0;
-	    }
+	    { the_graph->base->tickdef[$2].size = 0; }
 ;
 
 opt_tick_off:
@@ -1181,86 +879,7 @@ opt_tick_off:
 
 grid_statement:
 	GRID side opt_tick_off opt_linedesc opt_shift tickdesc SEP
-	    {
-		tick *t;
-		grid *g;
-		linedesc defgrid(dotted, 0, 0);
-		shiftcpy *sc;
-		shiftdesc *sd;
-
-		// Turning on a grid turns off default ticks on that side
-		
-		the_graph->base->tickdef[$2].size = 0;
-		
-		if ( $4->ld != def ) 
-		    the_graph->base->griddef[$2].desc = *$4;
-		else {
-		    
-		    // This is some dirty sleight of hand.  $4->color
-		    // is only assigned to defgrid.color long enough
-		    // to make these copies. XXX
-		    
-		    defgrid.color = $4->color;
-		    the_graph->base->griddef[$2].desc = defgrid;
-		    defgrid.color = 0;
-		}
-
-		sc = new shiftcpy(&the_graph->base->griddef[$2].shift);
-		for_each($5->begin(), $5->end(), *sc);
-		delete sc;
-
-		if ( $3 ) {
-		    if ( the_graph->base->griddef[$2].prt )
-			delete the_graph->base->griddef[$2].prt;
-		    the_graph->base->griddef[$2].prt = 0;
-		}
-		if ( $6 ) {
-		    the_graph->base->griddef[$2].desc.ld = def;
-		    while (!$6->empty() ) {
-			t = $6->front();
-			$6->pop_front();
-			
-			g = new grid(t);
-			g->side = $2;
-			if ( $4->ld != def )
-			    g->desc = *$4;
-			else {
-
-			    // This is some dirty sleight of hand.
-			    // $4->color is only assigned to
-			    // defgrid.color long enough to make these
-			    // copies. XXX
-		    
-			    defgrid.color = $4->color;
-			    g->desc = defgrid;
-			    defgrid.color = 0;
-			}
-		    
-			sc = new shiftcpy(&g->shift);
-			for_each($5->begin(), $5->end(), *sc);
-			delete sc;
-
-			if ( $3 ) {
-			    if ( g->prt ) delete g->prt;
-			    g->prt = 0;
-			}
-			the_graph->base->gds.push_back(g);
-			if ( g->side == top || g->side == bottom )
-			    g->c->newx(g->where);
-			else 
-			    g->c->newy(g->where);
-			delete t;
-		    }
-		    delete $6;
-		}
-		while ( !$5->empty() ) {
-		    sd = $5->front();
-		    $5->pop_front();
-		    delete sd;
-		}
-		delete $5;
-		delete $4;
-	    }
+	    { grid_statement($2, $3, $4, $5, $6); }
 ;
 
 label_statement:
@@ -1306,67 +925,18 @@ line_token:
 
 line_statement:
 	line_token opt_linedesc FROM point TO point opt_linedesc SEP
-	    {
-		line *l;
-		lineDictionary::iterator li;
-		linedesc des;
-
-		li = the_graph->lines.find("grap.internal");
-		if ( li == the_graph->lines.end() ) {
-		    des.ld = solid;
-		    l = new line(&des);
-		    the_graph->lines["grap.internal"] = l;
-		}
-		else { l = (*li).second; } 
-
-		des = *$2;
-		if ( $7->ld != def ) {
-		    des.ld = $7->ld;
-		    des.param = $7->param;
-		}
-
-		if ( $7->color ) des.color = new String(*$7->color);
-		    
-		l->initial = 1;
-
-		if ( des.ld != def || des.color) {
-		    l->addpoint($4->x,$4->y,$4->c,0,&des);
-		    if ( $1 )
-			l->addpoint($6->x,$6->y,$6->c,0,&des);
-		    else
-			l->addarrow($6->x,$6->y,$6->c,0,&des);
-		} else {
-		    l->addpoint($4->x,$4->y,$4->c);
-		    if ($1) l->addpoint($6->x,$6->y,$6->c);
-		    else l->addarrow($6->x,$6->y,$6->c);
-		}
-		delete $2; delete $7;
-	    }
+	    { line_statement($1, $2, $4, $6, $7); }
 ;
 
 x_axis_desc:
 	    { $$.which=none; }
 |	XDIM expr COMMA expr
-	    {
-		$$.which = x_axis;
-		if ($2 < $4 ) {
-		    $$.min = $2; $$.max = $4;
-		} else {
-		    $$.min = $4; $$.max = $2;
-		}
-	    }
+	    { $$ = axis_description(x_axis, $2, $4); }
 ;
 y_axis_desc:
 	    { $$.which=none; }
 |	YDIM expr COMMA expr
-	    {
-		$$.which = y_axis;
-		if ($2 < $4 ) {
-		    $$.min = $2; $$.max = $4;
-		} else {
-		    $$.min = $4; $$.max = $2;
-		}
-	    }
+	    { $$ = axis_description(y_axis, $2, $4); }
 ;
 
 log_desc:
@@ -1381,34 +951,7 @@ log_desc:
 
 coord_statement:
 	COORD opt_ident x_axis_desc y_axis_desc log_desc SEP
-	    {
-		coord *c;
-		coordinateDictionary::iterator ci;
-
-		if ($2) {
-		    ci = the_graph->coords.find(*$2);
-		    
-		    if (  ci == the_graph->coords.end()) {
-			c = new coord;
-			the_graph->coords[*$2] = c;
-		    }
-		    else { c = (*ci).second; }
-		    delete $2;
-		} else {
-		    c = defcoord;
-		}
-		if ( $3.which != none ) {
-		    c->xmin = $3.min;
-		    c->xmax = $3.max;
-		    c->xautoscale = 0;
-		}
-		if ( $4.which != none ) {
-		    c->ymin = $4.min;
-		    c->ymax = $4.max;
-		    c->yautoscale = 0;
-		}
-		c->logscale = $5;
-	    }
+	    { coord_statement($2, $3, $4, $5); }
 ;
 
 until_clause:
@@ -1428,6 +971,11 @@ until_clause:
 		$$->s = $1;
 	    }
 ;
+
+// This is probably long enough to merit being removed to
+// grap_parse.cc, but because there are multiple actions in the same
+// rule, I want to leave them here where I can see how they
+// interrelate.
 
 copy_statement:
 	COPY string SEP
@@ -1570,33 +1118,7 @@ if_statement:
 
 for_statement:
 	FOR IDENT from expr TO expr by_clause DO { lex_begin_macro_text(); } TEXT SEP
-	    {
-		struct for_descriptor *f;
-		doubleDictionary::iterator di;
-		double *d;
-		
-		f = new for_descriptor;
-
-		if ( ( di = vars.find(*$2)) != vars.end() ) {
-		    d = (*di).second;
-		    *d = $4;
-		}
-		else {
-		    d = new double($4);
-		    vars[*$2] = d;
-		}
-		f->loop_var = d;
-		if ( $6 -$4 > 0 ) f->dir = 1;
-		else f->dir = -1;
-
-		f->limit = $6;
-		f->by = $7.expr;
-		f->by_op = $7.op;
-		// force "anything" to end with a sep
-		*$10 += ';';
-		f->anything = $10;
-		include_string($10,f,GINTERNAL);
-	    }
+	    { for_statement($2, $4, $6, $7, $10); }
 ;
 
 graph_statement:
@@ -1726,56 +1248,6 @@ int yyerror(char *s) {
     return 0;
 }
 
-void process_frame(linedesc* d, frame *f, frame *s) {
-    // it's inconvenient to write three forms of the frame statement
-    // as one yacc rule, so I wrote the three rules explicitly and
-    // extracted the action here.  The three arugments are the default
-    // frame linedesc (d), the size of the frame (f), and individual
-    // descriptions of the linedescs (s) of the sides.  Note that d,
-    // f, and s are freed by this routine.
-    
-    int i;	// Scratch
-
-    if ( d ) {
-	// a default linedesc is possible, but unlikely (only a fill,
-	// for example).
-	if ( d->ld != def ) {
-	    for ( i = 0 ; i < 4; i++ ) {
-		the_graph->base->desc[i] = *d;
-	    }
-	}
-	delete d;
-    }
-
-    if ( f ) {
-	the_graph->base->ht = f->ht;
-	the_graph->base->wid = f->wid;
-	delete f;
-    }
-		
-    if ( s ) {
-	for ( i = 0 ; i < 4; i++ ) {
-	    if ( s->desc[i].ld != def )
-		the_graph->base->desc[i] = (linedesc) s->desc[i];
-	}
-	delete s;
-    }
-}
-void init_dict() {
-    linedesc defld(invis,0,0);
-    String s = "\"\\(bu\"";
-    
-    defcoord = new coord;
-    the_graph->coords["grap.internal.default"] = defcoord;
-    for ( int i = 0 ; i < 4; i++) {
-	the_graph->base->tickdef[i].c = defcoord;
-	the_graph->base->griddef[i].c = defcoord;
-    }
-    defline = new line(&defld,&s);
-    the_graph->lines["grap.internal.default"] = defline;
-    nlines = 0;
-}
-
 int main(int argc, char** argv) {
     String defines=DEFINES;
     String fname;
@@ -1802,6 +1274,8 @@ int main(int argc, char** argv) {
 	    case 'M':
 		pathstring = (pathstring + ":") + optarg;
 		break;
+	    case '?':
+		exit(20);
 	}
     pathstring += (pathstring.length() > 0) ? ":." : ".";
 

@@ -8,6 +8,8 @@ static const int strchunk = 256;
 
 class String {
 public:
+    typedef size_t size_type;
+    static const size_type npos = ~0;
     String() : str(0), len(0) { }
 
     String(const char *c) : str(0), len(0) {
@@ -29,12 +31,14 @@ public:
 
     String(const String* x) : str(0), len(0) {
 	resize(x->len);
-	strcpy(str,x->str);
+	if ( len ) 
+	    strcpy(str,x->str);
     };
 
     String(const String& x) : str(0), len(0) {
 	resize(x.len);
-	strcpy(str,x.str);
+	if ( len) 
+	    strcpy(str,x.str);
     };
 
     ~String() {
@@ -55,14 +59,14 @@ public:
 
     String& operator=(const String &s) {
 	if ( len < s.len) resize(s.len);
-	strcpy(str,s.str);
+	if ( len )strcpy(str,s.str);
 	return *this;
     };
 
     String& operator+=(const String& s) {
 	int nlen = s.strlen() + strlen()+ 1;
 	if ( len < nlen ) resize(nlen);
-	strcat(str,s.str);
+	if ( len ) strcat(str,s.str);
 	return *this;
     }
 
@@ -70,7 +74,7 @@ public:
 	int nlen = ::strlen(s) + strlen() + 1;
 
 	if ( len < nlen ) resize(nlen);
-	strcat(str,s);
+	if ( len ) strcat(str,s);
 	return *this;
     }
 
@@ -83,6 +87,35 @@ public:
 	return *this;
     }
 
+    String operator+(const String& s) {
+	String rc = *this;
+	rc+= s;
+	return rc;
+    }
+
+    String operator+(const char *c) {
+	String rc = *this;
+	rc+= c;
+	return rc;
+    }
+
+    size_type find(char c) const {
+	size_type len = length();
+	for ( size_type i = 0; i < len; i++ )
+	    if ( str[i] == c ) return i;
+	return npos;
+    }
+
+    void erase(size_type start, size_type end) {
+	size_type lim = length();
+
+	if ( end == npos ) end = lim-1;
+	if ( len ) {
+	    strcpy(str+start,str+end);
+	    str[(lim-1)-end-start] = '\0';
+	}
+    }
+    
     int operator==(const String &s) const {
 	return !strcmp(str,s.str);
     }
@@ -136,7 +169,7 @@ public:
 	return ( (str) ? ::strlen(str) : 0 );
     }
     const char *c_str() const { return str;}
-    int length() { return strlen();}
+    int length() const { return strlen();}
 
     ostream& print(ostream& f) const {
 	return f << str;
