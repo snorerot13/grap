@@ -32,7 +32,7 @@ CCFLAGS=$(CXXFLAGS)
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
 
-all:	grap
+all:	depend grap
 
 
 .l.cc:
@@ -85,7 +85,7 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output depend
 
 veryclean:
 	${MAKE} clean
@@ -119,6 +119,14 @@ cleandepend:
 depend:	${SOURCES}
 	${MAKE} cleandepend
 	@MAKEDEP@
+	touch depend
 
+# Some of the standard GNU targets to make some people's lives easier
+
+mostlyclean:	clean
+distclean:	veryclean
+	rm Makefile
+maintainer-clean:	veryclean
+check:
 
 # End of Makefile

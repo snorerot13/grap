@@ -16,6 +16,8 @@ before the first plotted object or after the frame statement, if any.
 This change motivated much of the class changes and actually cleaned
 them up somewhat.  I'd still like to do a little cleaning in here yet.
 
+Added some GNU standard Makefile targets to the Makefile.
+
 Many additional compatibility changes suggested by Bruce Lilly.
 
 1.11: Strings are now clipped, thanks to John Heidemann for finding the error.
