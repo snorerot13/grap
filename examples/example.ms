@@ -1429,6 +1429,3 @@ square at 2,4
 delta at 2,5
 .G2
 .KE
-.G1
-sh { echo "HELLO" }
-.G2
