@@ -11,14 +11,14 @@
 class string_out_f : public UnaryFunction<String*, int> {
     ostream &f;
 public:
-    int operator()(String *s) { f << *s << endl; }
+    int operator()(String *s) { f << *s << endl; return 0;}
     string_out_f(ostream& ff) : f(ff) {};
 };
 
 // Delete a string (from a pointer)
 class string_del_f : public UnaryFunction<String*, int> {
 public:
-    int operator()(String *s) { delete s; }
+    int operator()(String *s) { delete s; return 0;}
 };
 
 // Convert a line to a Picline
@@ -31,6 +31,7 @@ public:
 	    line *l = (li).second;
 	    Picline *pl = new Picline(*l);
 	    g->objs.push_back(pl);
+	    return 0;
 	}
 };
 		
@@ -41,6 +42,7 @@ public:
 	PicDisplayString *p = new PicDisplayString(*str);
 	p->draw(0);
 	delete p;
+	return 0;
     }
 };
 
@@ -53,6 +55,7 @@ public:
 	Pictick *pt = new Pictick(*t);
 	pt->draw(f);
 	free(pt);
+	return 0;
     }
 };
 
@@ -64,6 +67,7 @@ public:
 	Picgrid *pt = new Picgrid(*t);
 	pt->draw(f);
 	free(pt);
+	return 0;
     }
 };
 
@@ -468,6 +472,7 @@ void Pictick::draw(frame *f) {
     char *just;	// placement of the label relative to the end of the tick
 	
     switch (side) {
+	default:
 	case left:
 	    a = 0;
 	    b = c->map(where,y_axis);
@@ -538,6 +543,7 @@ void Picgrid::draw(frame *f) {
     char *dir;
 	
     switch (side) {
+	default:
 	case left:
 	    a = 0;
 	    b = c->map(where,y_axis);

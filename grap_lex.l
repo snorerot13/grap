@@ -9,7 +9,7 @@
 
 //#define LEX_DEBUG
 #ifndef LEX_DEBUG
-#define DEBUG(a,b) (a,b)
+#define DEBUG(a,b) {}
 #else
 #define DEBUG(a,b) fprintf(stderr,a,b)
 #endif
@@ -36,6 +36,23 @@ void lex_begin_macro_text();
 void macro_args(macro*);
 void newline();
 
+#define NF0 1
+
+char *f0names[NF0] = {
+"rand"
+};
+
+#define NF1 7
+
+char *f1names[NF1] = {
+"log", "exp", "int", "sin", "cos", "sqrt","eexp"
+};
+
+#define NF2 3
+
+char *f2names[NF2] = {
+"atan2", "min", "max"
+};
 %}
 %x GRAP
 %x MACROTEXT
@@ -220,7 +237,6 @@ atan2|min|max		{
 			macroDictionary::iterator mi;
 			coordinateDictionary::iterator ci;
 			coord *c;
-			line *l;
 			String *id;
 			char ch;
 
@@ -409,7 +425,6 @@ atan2|min|max		{
 bool include_file(String *s, int rs=0) {
     FILE *f;
     char file[MAXPATHLEN];
-    YY_BUFFER_STATE buf;
     struct grap_buffer_state *g = new (struct grap_buffer_state);
 
     if ( *s != "-" ) {
@@ -450,7 +465,6 @@ int include_string(String *s, struct for_descriptor *f=0,
 		   grap_input it=GMACRO) {
 	char *cbuf;
 	int len;
-	YY_BUFFER_STATE buf;
 	grap_buffer_state *g;
 
 	g = new grap_buffer_state;
@@ -568,7 +582,9 @@ int yywrap() {
     if ( g->name ) delete g->name;
     delete g;
 
-    if ( lexstack.empty() ) return 1;
+    if ( lexstack.empty() ) {
+	return 1;
+    }
     else {
 	g = lexstack.front();
 	yy_switch_to_buffer(g->yy);
@@ -577,7 +593,9 @@ int yywrap() {
     if ( copystate ) {
 	return 1;
     }
-    else return 0;
+    else {
+	return 0;
+    }
 }
 
 void newline() {

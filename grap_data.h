@@ -9,15 +9,19 @@
 // These should be replaced by the standard string library, but under
 // g++ 2.7.2.1 that library is incompatible with the STL
 
-const static int strchunk = 256;
+static const int strchunk = 256;
 
 class String {
 protected:
     
 #ifdef NO_SNPRINTF
-    inline snprintf(char *s, int l, char *f, double d) { ::sprintf(s,f,d); }
+    inline void snprintf(char *s, int l, char *f, double d) {
+	::sprintf(s,f,d);
+    }
 #else 
-    inline snprintf(char *s, int l, char *f, double d) { ::snprintf(s,l,f,d); }
+    inline void snprintf(char *s, int l, char *f, double d) {
+	::snprintf(s,l,f,d);
+    }
 #endif
     
 public:
@@ -174,14 +178,14 @@ public:
     grap_sprintf_String(const char *f=0) : String(f) {}
     grap_sprintf_String(const String& f) : String(f) {}
     grap_sprintf_String(const String *f) : String(f) {}
-    next_number(double d) {
+    void next_number(double d) {
 	char *c = str;
 	char *fmt = new char[strlen() + strchunk];
 	char *f;
-	int first = 1;
+	unsigned first = 1;
 
 	f = fmt;
-	for(f=fmt; *f = *c; c++,f++ ) {
+	for(f=fmt; (*f = *c); c++,f++ ) {
 	    if (*c == '%' ) {
 		if ( first ) {
 		    if ( c[1] == '%' ) {
@@ -194,19 +198,19 @@ public:
 		} else { *++f = '%'; }
 	    }
 	}
-	if ( len < 2* ::strlen(fmt) ) resize(2*::strlen(fmt));
+	if ( len < (int) (2 * ::strlen(fmt)) ) resize(2*::strlen(fmt));
 	snprintf(str,len,fmt,d);
 	delete fmt;
     }
     
-    finish_fmt() {
+    void finish_fmt() {
         // next_number has to double %% throughout the string.  This
         // method removes those doubled % s
 	
 	char *n = new char[len];
 	char *a, *b;
 
-	for ( a = str, b = n; *b = *a; a++, b++) {
+	for ( a = str, b = n; (*b = *a); a++, b++) {
 	    if ( *a == '%' && a[1] == '%' ) a++;
 	}
 	delete str;
@@ -361,7 +365,7 @@ public:
 */
 class macro {
 public:
-    macro(String *t=0) : text(t), next_arg(0) {
+    macro(String *t=0) : next_arg(0), text(t) {
 	for ( int i = 0; i < numargs ; i++ )
 	    arg[i] = 0;
     }

@@ -64,7 +64,7 @@ class num_to_str_f : public UnaryFunction<double,int> {
     grap_sprintf_String *s;
 public:
     num_to_str_f(grap_sprintf_String *ss) : s(ss) {};
-    int operator()(double d) { s->next_number(d);}
+    int operator()(double d) { s->next_number(d); return 0;}
 };
 
 // This collects the modifiers for other strings in
@@ -80,6 +80,7 @@ public:
 	    just = s->j;
 	    size = s->size;
 	    rel = s->relsz;
+	    return 0;
 	}
 };
 
@@ -89,7 +90,7 @@ class coord_to_tick : public UnaryFunction<coord *,int> {
 public:
     coord *c;
     coord_to_tick(coord *cc) : c(cc) {};
-    int operator() (tick *t) { t->c = c; }
+    int operator() (tick *t) { t->c = c; return 0;}
 };
 
 // Add a tick to the graph
@@ -109,6 +110,7 @@ public:
 	    t->c->newx(t->where);
 	else 
 	    t->c->newy(t->where);
+	return 0;
     }
 };
 
@@ -119,6 +121,7 @@ class align_string :
 public:
 	int operator() (DisplayString *ds) {
 	    if ( ! (ds->j & unaligned) ) ds->j |= aligned;
+	    return 0;
 	}
 };
 %}
@@ -278,7 +281,6 @@ string:
              { $$ = $1; }
 |       SPRINTF LPAREN STRING COMMA expr_list RPAREN
              {
-		 double d;
 		 grap_sprintf_String *s = new grap_sprintf_String($3);
 		 num_to_str_f num_to_str(s);    
 
@@ -735,7 +737,6 @@ frame_statement:
 	FRAME opt_linedesc size sides SEP
 	    {
 		int i;
-		frame *f= $4;
 
 		if ( $2.ld != def ) {
 		    for ( i = 0 ; i < 4; i++ ) {
@@ -911,8 +912,6 @@ tickdesc :
 ticks_statement:
 	TICKS side direction opt_shift tickdesc SEP
 	    {
-		tick *t;
-		int gn;
 		add_tick_f add_tick($2,$3,$4);
 
 		the_graph->base->tickdef[$2].side = $2;
@@ -950,7 +949,6 @@ grid_statement:
 	    {
 		tick *t;
 		grid *g;
-		int gn;
 		linedescval defgrid = { dotted, 0,0 };
 
 		// Turning on a grid turns off default ticks on that side
@@ -1011,8 +1009,6 @@ grid_statement:
 label_statement:
 	LABEL side strlist opt_shift SEP
 	    {
-		int gn;
-		DisplayString *ds;
 		align_string a;
 			      
 		for_each($3->begin(),  $3->end(), a);
@@ -1039,7 +1035,7 @@ circle_statement:
 		circle *c = new circle($3,$4);
 		the_graph->add_circle(*c);
 		delete c;
-		delete $3;
+//		delete $3;
 //		circles.push_back(c);
 	    }
 ;
@@ -1191,7 +1187,6 @@ copy_statement:
 		String *s;
 		String *t;
 		String *expand;
-		int gn;
 
 		expand = new String;
 
@@ -1249,7 +1244,7 @@ sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
 
 		// String to char*
 		       
-		while (sys[i] = (*$3)[i])
+		while ((sys[i] = (*$3)[i]))
 		    i++;
 
 		delete $3;
@@ -1405,10 +1400,13 @@ bar_statement:
 		    case left:
 			updir = -1;
 		    case right:
+			p1 = new point($6, $4 + $5->wid/2, $2);
+			p2 = new point ( $6 + updir * $5->ht, $4 - $5->wid/2, $2);
 			break;
 		    case bottom:
 			updir = -1;
 		    case top:
+		    default:
 			p1 = new point($4 + $5->wid/2, $6, $2);
 			p2 = new point ($4 - $5->wid/2, $6 + updir * $5->ht, $2);
 			break;
@@ -1438,6 +1436,8 @@ int yyerror(char *s) {
 	    case GMACRO:
 		cerr << "At line " << g->line << " " ;
 		cerr << "of macro"  << endl;
+		break;
+	    default:
 		break;
 	}
 	if ( g->f ) delete g->f;

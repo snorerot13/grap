@@ -94,6 +94,7 @@ public:
 	if ( l.color ) color = new String(l.color);
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
 	if ( l.fillcolor ) fillcolor = new String(l.fillcolor);
+	return *this;
     }
     
 } ;
@@ -125,6 +126,7 @@ public:
     shiftclass & operator=( const shiftdesc sh ) {
 	dir = sh.dir;
 	param = sh.param;
+	return *this;
     }
 };
 
@@ -145,7 +147,7 @@ public:
 	void *p = (void *) ::new char [s];
 	return p;
     }
-    void operator delete(void *p, size_t s) {
+    void operator delete(void *p, size_t ) {
 	::delete [] (char *)p;
     }
 };
@@ -276,13 +278,13 @@ public:
 	    else prt =0;
     }
     // To allow ticks and grids to share parse rules
-    grid(tick *t) : where(t->where), side(t->side), shift(&t->shift),
-	    c(t->c), desc(dotted,0,0) {
+    grid(tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
+	    shift(&t->shift), c(t->c) {
 	if ( t->prt ) prt = new String(t->prt);
 	else prt =0;
     }
-    grid(grid& g) : where(g.where), side(g.side), shift(&g.shift),
-	    c(g.c), desc(g.desc) {
+    grid(grid& g) : where(g.where), desc(g.desc), side(g.side),
+		shift(&g.shift), c(g.c) {
 	if ( g.prt ) prt = new String(g.prt);
 	else prt =0;
     }
@@ -303,6 +305,7 @@ public:
 	if ( prt ) delete prt;
 	if ( g.prt ) prt = new String(g.prt);
 	else prt = 0;
+	return *this;
     }
 };
 
@@ -324,17 +327,17 @@ protected:
     // functors to clear internal lists
     class free_tick_f : public UnaryFunction<tick *, int> {
     public:
-	int operator() (tick *t) { delete t; }
+	int operator() (tick *t) { delete t; return 0;}
     } free_tick;
 
     class free_grid_f : public UnaryFunction<grid *, int> {
     public:
-	int operator() (grid *g) { delete g; }
+	int operator() (grid *g) { delete g; return 0;}
     } free_grid;
 
     class free_ds_f : public UnaryFunction<DisplayString *, int> {
     public:
-	int operator() (DisplayString *ds) { delete ds; }
+	int operator() (DisplayString *ds) { delete ds; return 0;}
     } free_ds;
     
 public:
@@ -392,14 +395,14 @@ protected:
 	int initial;		// true if this is the first point in a segment
 	int arrow;		// true if the connection ends with an arrow
 	
-	linepoint() : point(), desc(invis, 0.0, 0), initial(0), plotstr(0),
+	linepoint() : point(),  desc(invis, 0.0, 0),  plotstr(0), initial(0),
 	    arrow(0)  { } ;
 	linepoint(double xx, double yy, coord* cc, line *ll, String *s,
 		  linedescval *l, int a=0);
 	linepoint(linepoint& lp) :
 	    point(lp.x,lp.y,lp.c), desc(lp.desc), plotstr(0),
 	    initial(lp.initial), arrow(lp.arrow) {
-		if ( lp.plotstr ) plotstr = new String(lp.plotstr);
+	    if ( lp.plotstr ) plotstr = new String(lp.plotstr);
 	}
 
 	~linepoint() {
@@ -417,11 +420,11 @@ public:
 
     line() : plotstr(0), desc(), pts(),initial(1) {}
 
-    line(linedescval *l, String *s ) : desc(l), initial(1), pts() {
+    line(linedescval *l, String *s ) : desc(l), pts(), initial(1) {
 	plotstr = new String(s);
     }
     
-    line(linedescval *l) : desc(l),  initial(1), pts(), plotstr(0) { }
+    line(linedescval *l) :  plotstr(0), desc(l), pts(), initial(1) { }
     line(line& l) : desc(l.desc),  initial(l.initial) {
 	list<linepoint*>::iterator lpi;
 	
@@ -497,13 +500,15 @@ protected:
 	frame *base;
     public:
 	displayer_f(frame *f) : base(f) {} ;
-	int operator()(drawable *d) { d->draw(base); }
+	int operator()(drawable *d) { d->draw(base); return 0;}
     };
 
     class obj_freer_f : public UnaryFunction<drawable *, int> {
     public:
 	int operator()(drawable *d) {
-	    delete d; }
+	    delete d;
+	    return 0;
+	}
     } obj_freer;
     
     class coord_freer_f :
@@ -513,6 +518,7 @@ protected:
 	    coord *c = ci.second;
 	    
 	    delete c;
+	    return 0;
 	}
     } coord_freer;
 
@@ -523,6 +529,7 @@ protected:
 	    line *l = li.second;
 	    
 	    delete l;
+	    return 0;
 	}
     } line_freer;
     
@@ -532,6 +539,7 @@ protected:
 	    int operator() (coordinateDictionary::value_type cp) {
 		coord *c = cp.second;
 		c->addmargin(0.07);
+		return 0;
 	    }
     } addmargin;
     
@@ -543,8 +551,8 @@ public:
     drawable *the_frame;	// This is the same as base, but drawable
     bool visible;		// is this graph visible?
     
-    graph() : objs(), coords(), base(0), the_frame(0), visible(0) { }
-    ~graph() { init();}
+    graph() : objs(), coords(), lines(), base(0), the_frame(0), visible(0) { }
+    virtual ~graph() { init();}
 
     virtual void draw() {
 	displayer_f displayer(base);
@@ -577,7 +585,7 @@ public:
 
     // Called when a .G1 is encountered
     
-    virtual void begin_block(String *s) { }
+    virtual void begin_block(String *) { }
     
     // Called when a .G2 is encountered
     virtual void end_block() { }

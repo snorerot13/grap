@@ -50,23 +50,7 @@ typedef list<DisplayString *> stringlist;
 #define MAXFUNC 2
 
 enum size { ht = 0, wid};
-#define NF0 1
 
-static char *f0names[NF0] = {
-"rand"
-};
-
-#define NF1 7
-
-static char *f1names[NF1] = {
-"log", "exp", "int", "sin", "cos", "sqrt","eexp"
-};
-
-#define NF2 3
-
-static char *f2names[NF2] = {
-"atan2", "min", "max"
-};
 
 typedef struct {
     int op;

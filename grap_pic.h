@@ -77,12 +77,13 @@ class Picgraph : public graph {
     // To delete strings
     class sfree_f : UnaryFunction<String *, int> {
     public:
-	int operator()(String *s) { delete s; }
+	int operator()(String *s) { delete s; return 0;}
     };
     
 public:
     Picgraph() :
-	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0) {}
+	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0),
+	pframe(0) {}
     
     
     ~Picgraph() {
