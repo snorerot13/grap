@@ -928,7 +928,7 @@ copy "army.d" thru { "\s-3$1\s+3" at $5,$4; }
 One of my favorites.  The solution of a differential equation and the
 slope field it passes through.  It shows off nested 
 .CW for
-loops and 
+loops (one using = as a synonym for from) and 
 .I eqn
 labels.  The data is in the graph description.
 .EQ
@@ -952,7 +952,7 @@ delim off
 \&	}
 \&}
 \&draw solid
-\&for tx from 0 to 1 by .05 do {
+\&for tx = 0 to 1 by .05 do {
 \&	next at tx, sqrt((2*tx*tx*tx+1)/3)
 \&}
 \&.G2
@@ -977,7 +977,7 @@ for tx from .01 to .91 by .1 do {
 	}
 }
 draw solid
-for tx from 0 to 1 by .05 do {
+for tx = 0 to 1 by .05 do {
 	next at tx, sqrt((2*tx*tx*tx+1)/3)
 }
 .G2
@@ -2513,5 +2513,52 @@ copy until "END" thru {
 20 20 some
 30 30 pic/troff
 END
+.G2
+.KE
+.KS
+.PP
+.CW grap
+is now 
+.I much 
+more context sensitive in how it picks out keywords.  There are still
+some places where it will resolutely not allow variables with keyword
+names, but it's enormously better about it.  Here's a short somewhat
+pathological example.  I couldn't decide which for loop was less
+readable, so I used both.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&from=0
+\&to = 10
+\&ht =3
+\&wid = 5
+\&frame ht ht wid wid
+\&for i from from to to do {
+\&   delta at i, i
+\&}
+\&for j = from to to do {
+\&   bullet at to - j, j
+\&}
+.ft
+\&.G2
+.DE
+.EQ
+delim $$
+.EN
+.G1
+from=0
+to = 10
+ht =3
+wid = 5
+frame ht ht wid wid
+for i from from to to do {
+   delta at i, i
+}
+for j = from to to do {
+   bullet at to - j, j
+}
 .G2
 .KE

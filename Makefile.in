@@ -33,7 +33,7 @@ CCFLAGS=$(CXXFLAGS)
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
 
-all:	depend grap
+all:	grap
 
 .l.cc:
 	$(LEX) -o$@ $<

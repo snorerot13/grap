@@ -25,7 +25,7 @@ Kernighan, revised May 1991, which is the primary source for
 information on how to use
 .Nm grap .
 As of this writing, it is available electronically at 
-.Li http://www.kohala.com/start/troff/troff.html
+.Li http://www.kohala.com/start/troff/cstr114.ps
 .Pp
 This version is a black box implementation of 
 .Nm grap ,
