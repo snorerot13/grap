@@ -61,6 +61,9 @@ Added some GNU standard Makefile targets to the Makefile.
 
 Fixed some bugs in the manual page.
 
+Ran spell again on the examples.  Misspelling Brian Kernighan's name
+is bad.
+
 Many additional compatibility changes suggested by Bruce Lilly.
 
 1.11: Strings are now clipped, thanks to John Heidemann for finding the error.

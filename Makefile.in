@@ -55,7 +55,7 @@ include Makefile.common
 
 grap:	.depend $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
-	@EXE_CORRECT@
+
 .l.cc:
 	$(LEX) -o$@ $<
 

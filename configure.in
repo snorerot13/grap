@@ -10,8 +10,6 @@ dnl byacc generates, and compiling those tables aren't the problem
 dnl anyway.  So don't try it again.
 
 dnl Checks for programs.
-dnl need to check for C to use the right compiler for exe determination
-AC_PROG_CC
 AC_PROG_CXX
 
 dnl Set g++ specific compiler options 
@@ -92,18 +90,6 @@ AC_MSG_RESULT($ac_cv_grap_opt_tok)
 if test "$ac_cv_grap_opt_tok" = "yes" ; then 
 	SUPPRESS_OPT=""
 fi
-
-dnl AC_EXEEXT isn't working for C++
-AC_LANG_SAVE
-AC_LANG_C
-AC_EXEEXT
-AC_LANG_RESTORE
-if [ test "$ac_cv_exeext" != "no" ] ; then 
-	EXE_CORRECT="mv -f grap.$ac_cv_exeext grap"
-else
-	EXE_CORRECT=""
-fi
-AC_SUBST(EXE_CORRECT)
 
 TVF_CREATE_DOT_DEPEND
 AC_OUTPUT(examples/Makefile Makefile)
