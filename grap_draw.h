@@ -61,14 +61,8 @@ public:
     }
 
     ~linedesc() {
-	if ( color ) {
-	    delete color;
-	    color = 0;
-	}
-	if ( fillcolor ) {
-	    delete fillcolor;
-	    fillcolor = 0;
-	}
+	if ( color ) { delete color; color = 0; }
+	if ( fillcolor ) { delete fillcolor; fillcolor = 0; }
     }
 
     linedesc& operator=(const linedesc &l) {
@@ -80,7 +74,7 @@ public:
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
 	if ( l.fillcolor ) fillcolor = new String(l.fillcolor);
 	return *this;
-	}
+    }
     
 } ;
 
@@ -92,10 +86,8 @@ public:
     sides dir;		// Direction to shift this label
     double param;	// Amount to shift
 
-    shiftdesc(sides s=top, double p=0) {
-	dir= s;
-	param = p;
-    }
+    shiftdesc(sides s=top, double p=0) : dir(s), param(p) { }
+    
     shiftdesc(shiftdesc *sh ) {
 	if ( sh ) {
 	    dir = sh->dir;
@@ -204,12 +196,7 @@ public:
  	    if ( p ) prt = new String(p);
 	    else prt =0;
     }
-/*    tick(double w, double s, sides sd, String *p, shift *sh,
-	 coord *co) :
-	where(w), size(s), side(sd), shift(sh), c(co) {
- 	    if ( p ) prt = new String(p);
-	    else prt =0;
-	    } */
+
     ~tick() {
 	if ( prt) {
 	    delete prt;
@@ -242,12 +229,6 @@ public:
     coord *c;		// Coordinate system for this line
     
     grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(0), c(0) { }
-//      grid(double w, linedescval *l, sides sd, String *p, shiftdesc *sh,
-//  	 coord *co) :
-//  	where(w), desc(l), side(sd), shift(sh), c(co) {
-//  	    if ( p ) prt = new String(p);
-//  	    else prt =0;
-//      }
 
     grid(double w, linedesc *l, sides sd, String *p, shiftdesc *sh,
 	 coord *co) :
@@ -255,17 +236,20 @@ public:
 	    if ( p ) prt = new String(p);
 	    else prt =0;
     }
+
     // To allow ticks and grids to share parse rules
     grid(tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
 	    shift(&t->shift), c(t->c) {
 	if ( t->prt ) prt = new String(t->prt);
 	else prt =0;
     }
+
     grid(grid& g) : where(g.where), desc(g.desc), side(g.side),
 		shift(&g.shift), c(g.c) {
 	if ( g.prt ) prt = new String(g.prt);
 	else prt =0;
     }
+
     ~grid() {
 	if ( prt ) {
 	    delete prt;
@@ -321,7 +305,7 @@ protected:
 public:
     double ht;			// height of the graph
     double wid;			// width
-    linedesc desc[4];	// The line styles for the axes
+    linedesc desc[4];		// The line styles for the axes
     stringlist *label[4];	// labels for the axes.  These are
                                 // lists of DisplayStrings that must
                                 // be translated by the associated
@@ -368,7 +352,7 @@ protected:
     // can have a different plotting symbol or drawing style.
     class linepoint : public point {
     public:
-	linedesc desc;	// style for the connection to this point
+	linedesc desc;		// style for the connection to this point
 	String *plotstr;	// string to plot
 	int initial;		// true if this is the first point in a segment
 	int arrow;		// true if the connection ends with an arrow
