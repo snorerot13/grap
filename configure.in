@@ -170,11 +170,11 @@ AC_MSG_CHECKING(whether to optimize grap_tokenizer)
 AC_ARG_ENABLE(optimize-grap_tokenizer, 
 --enable-optimize-grap_tokenizer   do not prevent optimization of the 
                                    grap_tokenize.cc file, 
-ac_cv_grap_opt_tok="yes",
-AC_CACHE_VAL(ac_cv_grap_opt_tok, ac_cv_grap_opt_tok="no"))
-AC_MSG_RESULT($ac_cv_grap_opt_tok)
+grap_cv_grap_opt_tok="yes",
+AC_CACHE_VAL(grap_cv_grap_opt_tok, grap_cv_grap_opt_tok="no"))
+AC_MSG_RESULT($grap_cv_grap_opt_tok)
 
-if test "$ac_cv_grap_opt_tok" = "yes" ; then 
+if test "$grap_cv_grap_opt_tok" = "yes" ; then 
 	SUPPRESS_OPT=""
 fi
 
@@ -183,7 +183,7 @@ AC_LANG_C
 AC_EXEEXT
 AC_LANG_CPLUSPLUS
 if [ test "$ac_cv_exeext" != "no" ] ; then 
-	EXE_CORRECT="mv -f grap.$ac_cv_exeext grap"
+	EXE_CORRECT="mv -f grap$ac_cv_exeext grap"
 else
 	EXE_CORRECT=""
 fi

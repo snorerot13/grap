@@ -72,11 +72,10 @@ void Picgraph::draw(frame *) {
 	cout << "[" << endl;
 
 	for_each(coords.begin(), coords.end(), addmargin);
-//	if ( visible ) 
-	    for_each(objs.begin(), objs.end(), displayer);
+	for_each(objs.begin(), objs.end(), displayer);
 	cout << "]";
 
-	// Positioning info relative to another graph in this block
+	    // Positioning info relative to another graph in this block
 	if ( pos ) {
 	    cout << " " << *pos << endl;
 	    delete pos;

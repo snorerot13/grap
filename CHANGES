@@ -55,9 +55,7 @@ spending the time optimizing it.
 The autoconf and make stuff has been revamped to use GNU make's
 automatic makefile generation or BSD pmake's automatic .depend
 inclusion, as well as simplifying the distribution creation and
-caching all configuration values.  If you want to use GNU make, but
-it's not the default make on your system, you can force a gnu makefile
-creation with the --enable-force-gnu-make option to configure.
+caching all configuration values.
 
 Added some GNU standard Makefile targets to the Makefile.
 

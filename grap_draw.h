@@ -670,7 +670,7 @@ public:
     virtual void end_block() { }
 
     // Called when pic or troff strings are found
-    virtual void passthru_string(string& ) { }
+    virtual void passthru_string(const string& ) { }
 
     // Virtual functions to allocate the proper subclassed elements.
     // Each real function should allocate an element and place it on

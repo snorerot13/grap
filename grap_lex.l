@@ -339,6 +339,7 @@ log[ \t]+(x|y|log)	{
 {keyword}               {
                            if (active.count(yytext) ) {
 			       keywordDictionary::iterator ki;
+			       unsigned int i;
 
 			       if ( (ki = keywords.find(yytext))
 				    == keywords.end()) {
@@ -349,9 +350,9 @@ log[ \t]+(x|y|log)	{
 			       const keyword& k = (*ki).second;
 			       
 			       if ( k.clear ) active.clear();
-			       for ( int i = 0; i < (int) k.add.size(); i++ )
+			       for ( i = 0; i < k.add.size(); i++ )
 				   active.insert(k.add[i]);
-			       for ( int i = 0; i < (int) k.remove.size(); i++)
+			       for ( i = 0; i < k.remove.size(); i++)
 				   active.erase(k.remove[i]);
 
 			       debug(yytext);
@@ -443,6 +444,8 @@ atan2|min|max		{
 					BEGIN(INITIAL);
                                         // Eat the newline
                                         yyinput();
+					newline();
+					tokenpos = 0;
 					return END;
 				    }
 				    else YY_BREAK;
@@ -684,6 +687,16 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
+void linenum() {
+    if (lexstack.empty()) return;
+    struct grap_buffer_state *g = lexstack.front();
+
+    if ( g->type == GFILE) {
+	cout << ".lf " <<  g->line << " " << 
+	    ((g->name ) ? g->name->c_str() : "") << endl;;
+    }
+}
+
 
 bool include_file(string *s, int rs, bool usepath) {
     FILE *f=0;
@@ -867,24 +880,23 @@ int yywrap() {
     // If we get here, we need to switch to the previous buffer
 
     yy_delete_buffer(g->yy);
-    delete g;
 
     if ( lexstack.empty() ) {
 	// groff line marker
-	cout << ".lf " << g->line << endl;
+	delete g;
 	return 1;
     }
     else {
+	grap_input closed = g->type;
+	delete g;
 	g = lexstack.front();
         tokenpos = g->tokenpos;
 	yy_switch_to_buffer(g->yy);
-	// groff line marker
-	cout << ".lf " << g->line << " " <<
-	    ((g->name ) ? *g->name : "" ) << endl;
     }
 
     return copystate ? 1 : 0;
 }
+
 
 void newline() {
     if ( !lexstack.empty() ) {

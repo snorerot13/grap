@@ -118,7 +118,7 @@ public:
 
 class Picthrustring : public string, public drawable {
 public:
-    Picthrustring(string &s) : string(s) { }
+    Picthrustring(const string &s) : string(s) { }
     ~Picthrustring() { }
     void draw(frame *) {
 	cout << *this << endl;
@@ -158,7 +158,7 @@ public:
     void init(string * =0, string* =0);
     void begin_block(string *param) { graphs = 0; ps_param = param; }
     void end_block() { if ( graphs ) cout << ".PE" << endl; }
-    void passthru_string(string& s) {
+    void passthru_string(const string& s) {
 	Picthrustring *t = new Picthrustring(s);
 	if ( t ) objs.push_back(t);
     }

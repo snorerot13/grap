@@ -52,6 +52,7 @@ extern void lex_begin_rest_of_line();
 extern void lex_begin_coord();
 extern void lex_end_coord();
 extern void lex_begin_copy( string*s=0);
+extern void linenum(); 
 extern int include_string(string *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern void lex_hunt_macro();
@@ -182,11 +183,13 @@ graph :
 		the_graph->init();
 		init_dict();
 		first_line = true;
+		linenum();
 		the_graph->begin_block($1);
 	    } prog END
             {
 		the_graph->draw(0);
 		the_graph->end_block();
+		linenum();
 	    }
 ;
 prog :
@@ -224,7 +227,7 @@ statement:
 |	line_statement
 	    { first_line = false; the_graph->is_visible(true);}
 |	coord_statement
-	    { first_line = false; the_graph->is_visible(true);}
+	    { first_line = false;}
 |	copy_statement
 	    { first_line = false;}
 |	define_statement
