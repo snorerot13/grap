@@ -2639,3 +2639,64 @@ bar up 5 ht 3
 .G2
 .DE
 .KE
+.KS
+.PP
+Bruce Lilly tells me that DWB 
+.CW grap
+defines some macros to make embedding pic code easier.  The macros are
+named
+.CW x_
+.I coordname ,
+.CW y_
+.I coordname ,
+and
+.CW xy_
+.I coordname .
+The first 2 return a pic location corresponding to that x or y
+coordinate in the given name space.  The third generates a pair of
+coordinates in the given coordinate space.  The default coordinate
+space is given by
+.CW x_gg ,
+.CW y_gg ,
+and
+.CW xy_gg .
+If you define a coordinate space named gg, the macros will map one or
+the other, but I don't know which.
+.PP
+DWB 
+.CW grap
+may use these as part of their implementation.  They're an extra
+feature for compatibility here.
+.PP
+Here's a simple example of using these.  Note that the fors loop are 
+pic for loops.  You don't have access to grap variables from pic.
+.DS
+.ft CW
+\&.G1
+\&coord test x 0, 10 y 0, 10
+\&coord x 0, 20 y 0, 20
+\&frame
+\&ticks bot on test
+\&ticks left on test 
+\&pic for i = 0 to 9 do {
+\&pic "x" at xy_test(i,i)
+\&pic }
+\&pic for i = 0 to 9 do {
+\&pic "o" at xy_gg(1,i)
+\&pic }
+\&.G2
+.G1
+coord test x 0, 10 y 0, 10
+coord x 0, 20 y 0, 20
+frame
+ticks bot on test
+ticks left on test 
+pic for i = 0 to 9 do {
+pic "x" at xy_test(i,i)
+pic }
+pic for i = 0 to 9 do {
+pic "o" at xy_gg(1,i)
+pic }
+.G2
+.DE
+.KE

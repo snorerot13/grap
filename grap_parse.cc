@@ -256,14 +256,7 @@ double assignment_statement(string *ident, double val) {
     delete ident;
     return *d;
 }
-/*
-// Create an new point and return it.  Also note the new point with
-// its coordinate system so that automatic coordinates work right.
-point *new_point(coord *c, double x, double y) {
-    c->newpt(x, y);
-    return new point(x, y, c);
-}
-*/
+
 // This collects the modifiers for other strings in the list to
 // construct the modifiers for the current string.
 stringlist *combine_strings(stringlist *sl, string *st, strmod &sm)  {
@@ -575,7 +568,7 @@ void coord_statement(string *ident, axisdesc& xa, axisdesc& ya, axis log) {
     coord *c;
 
     if (ident) {
-	c = new coord;
+	c = new coord(*ident);
 	the_graph->coords[*ident] = c;
 	delete ident;
     } else 

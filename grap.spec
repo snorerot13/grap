@@ -1,6 +1,6 @@
 Summary: grap, typesets graphs for groff
 Name: grap
-Version: 1.20
+Version: 1.21
 Release: 1
 Copyright: BSD
 Group: Applications/Publishing

@@ -203,4 +203,21 @@ public:
 
     void draw(frame *);
 };
+
+class Piccoord: public coord, public drawable {
+public:
+    Piccoord(const coord& c) : coord(c) { }
+    ~Piccoord() { }
+    void draw(frame *f) {
+	const string& nm = (name != "") ? name : "gg";
+	
+	cout << "define x_"<< nm << "{ Frame.Origin.x + ( ( $1 - " << xmin
+	     << ") / " << xmax-xmin << ") * " << f->wid << "}" << endl;
+	cout << "define y_"<< nm << "{ Frame.Origin.y + ( ( $1 - " << ymin
+	     << ") / " << ymax-ymin << ") * " << f->ht << "}" << endl;
+	cout << "define xy_" << nm << "{ x_" << nm << "($1), "
+	     << "y_"<< nm << "($2) }" << endl; 
+    }
+};
+
 #endif

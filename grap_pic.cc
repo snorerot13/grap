@@ -72,6 +72,13 @@ void Picgraph::draw(frame *) {
 	cout << "[" << endl;
 
 	for_each(coords.begin(), coords.end(), addmargin);
+	// put out the xy_gg mpic macros
+	for (coordinateDictionary::iterator ci = coords.begin();
+	     ci != coords.end();
+	     ci++) {
+	    Piccoord pc(*(*ci).second);
+	    displayer(&pc);
+	}
 	for_each(objs.begin(), objs.end(), displayer);
 	cout << "]";
 

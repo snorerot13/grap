@@ -46,9 +46,5 @@ strdup.cc
 default_depend
 grap.tex.defines
 grap_tokenizer.cc
-cksum.md5
-cksum.sum
-cksum.echo
-cksum.cksum
 Makefile.common
 aclocal.m4

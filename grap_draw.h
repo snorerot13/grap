@@ -188,19 +188,34 @@ class coord {
 public:
     coord() :
 	xmin(0), xmax(0),ymin(0), ymax(0), logscale(none),
-	xautoscale(1), yautoscale(1) { }
+	xautoscale(1), yautoscale(1), name() { }
+    coord(const string& s) :
+	xmin(0), xmax(0),ymin(0), ymax(0), logscale(none),
+	xautoscale(1), yautoscale(1), name(s) { }
     coord(axis ls) :
 	xmin(0), xmax(0),ymin(0), ymax(0), logscale(ls),
-	xautoscale(1), yautoscale(1) { }
+	xautoscale(1), yautoscale(1), name() { }
+    coord(axis ls, const string& s) :
+	xmin(0), xmax(0),ymin(0), ymax(0), logscale(ls),
+	xautoscale(1), yautoscale(1), name(s) { }
     coord(double xi, double xa, double yi, double ya, axis ls) :
 	xmin(xi), xmax(xa),ymin(yi), ymax(ya),logscale(ls),
-	xautoscale(0), yautoscale(0) { }
+	xautoscale(0), yautoscale(0), name() { }
+    coord(double xi, double xa, double yi, double ya, axis ls,
+	  const string& s) :
+	xmin(xi), xmax(xa),ymin(yi), ymax(ya),logscale(ls),
+	xautoscale(0), yautoscale(0), name(s) { }
+    coord(const coord& c) :
+	xmin(c.xmin), xmax(c.xmax), ymin(c.ymin), ymax(c.ymax),
+	logscale(c.logscale), xautoscale(c.xautoscale),
+	yautoscale(c.yautoscale), name(c.name) { }
     
     double xmin, xmax;	// x range
     double ymin, ymax;	// y range
     axis logscale;	// The axes that are logarithmic
     int xautoscale;	// True if the user has not given an explicit x range
     int yautoscale;	// True if the user has not given an explicit y range
+    string name;	// Name of the coordinate system, if any
 
     void coord::newpt(double x, double y) {
 	newx(x); newy(y);

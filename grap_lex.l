@@ -320,7 +320,7 @@ log[ \t]+(x|y|log)	{
 			       yylval.coordptr = c;
 			   }
 			   else {
-			       yylval.coordptr = new coord;
+			       yylval.coordptr = new coord(first);
 			       the_graph->coords[first] = yylval.coordptr;
 			   }
 			   yyless(first.length());
@@ -345,7 +345,7 @@ log[ \t]+(x|y|log)	{
 			       yylval.coordptr = c;
 			   }
 			   else {
-			       yylval.coordptr = new coord;
+			       yylval.coordptr = new coord(yytext);
 			       the_graph->coords[yytext] = yylval.coordptr;
 			   }
 			   tokenpos += yyleng;

@@ -3,6 +3,8 @@ Change log
 1.21: Allow redefinition of keywords as macros.  In the process, I
 added an undefine keyword to do the obvious: remove a macro.
 
+Added xy_gg macros, too.
+
 1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially
 revamped, and the code brought into better conformance with the

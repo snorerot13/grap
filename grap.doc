@@ -1191,6 +1191,28 @@ is:
 copy "./data"
 .G2
 .Ed
+.Ss Pic Macros
+.Pp
+.Nm
+defines pic macros that can be used in embedded pic code to place
+elements in the graph.  The macros are
+.Ic x_gg ,
+.Ic y_gg ,
+and
+.Ic xy_gg .
+The first 2 return pic locations at the given point on the x or y axis
+of the graph.  The final one returns a comma separated pair of both x
+and y coordinates.  Other coordinate spaces can be used by replacing 
+.Ic gg
+with the name of the coordinate space.  A coordinate space named
+.Ic gg
+cannot be reliably accessed by these macros.
+.Pp
+DWB
+.Nm
+may use these as part of its implemenation.  This
+.Nm
+provides them only for compatibility.
 .Sh ENVIRONMENT VARIABLES
 .Pp
 If the environment variable 

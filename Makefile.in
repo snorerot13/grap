@@ -39,8 +39,8 @@ NO_UNDEF=@NO_UNDEF@
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
 	${LIBOBJS}
 CLEANFILES=y.output
-VERYCLEANFILES=grap.cc grap_lex.cc
-SPOTLESSFILES=
+VERYCLEANFILES=grap.cc grap_lex.cc y.tab.h
+SPOTLESSFILES=grap.1 grap.ps grap.man
 
 include Makefile.common
 
