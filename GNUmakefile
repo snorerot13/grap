@@ -5,7 +5,9 @@ INSTALL=install
 RM=rm
 RMDIR=rmdir
 MKDIR=mkdir
+LEX=flex
 
+.y.cc:
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
 
@@ -16,9 +18,6 @@ CXXFLAGS += -DNO_SNPRINTF
 CXXFLAGS += -DNO_RANDOM
 #CXXFLAGS =+ -DNO_GETOPT
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
-
-#Solaris
-LEX=flex
 
 .y.cc:
 	$(YACC) -d $<

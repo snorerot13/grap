@@ -7,6 +7,7 @@ INSTALL=install
 RM=rm
 RMDIR=rmdir
 MKDIR=mkdir
+LEX=flex
 
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
