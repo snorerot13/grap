@@ -1,3 +1,4 @@
+// -*-c++-*-
 #ifndef GRAP_PIC_H
 #define GRAP_PIC_H
 #include <iostream.h>
@@ -49,6 +50,18 @@ public:
 class Piccircle: public circle, public drawable {
 public:
     Piccircle(circle& c) : circle(c) { }
+    void draw(frame *);
+};
+
+class Picbox: public box, public drawable {
+protected:
+    void swap(double &a, double &b) {
+	double h = a;
+	a =b ;
+	b =h;
+    }
+public:
+    Picbox(box& b) : box(b) { }
     void draw(frame *);
 };
 
@@ -112,6 +125,10 @@ public:
     void add_circle(circle &c) {
 	Piccircle *pc = new Piccircle(c);
 	objs.push_back(pc);
+    }
+    void add_box(box &b) {
+	Picbox *pb = new Picbox(b);
+	objs.push_back(pb);
     }
     void draw();
 };

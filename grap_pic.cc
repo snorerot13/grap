@@ -644,6 +644,70 @@ void Piccircle::draw(frame *f) {
     cout << " rad " << rad << endl;
 }
 
+void Picbox::draw(frame *f) {
+    // Plot the box.  If there is a fill color, plot it twice so that
+    // the box and edge can be different colors
+    double x1,y1, x2,y2;	// The box edges in device coords.
+    double ht, wid;		// height and width in device units (inches)
+
+    x1 = p1.c->map(p1.x,x_axis) * f->wid;
+    y1 = p1.c->map(p1.y,y_axis) * f->ht;
+    x2 = p2.c->map(p2.x,x_axis) * f->wid;
+    y2 = p2.c->map(p2.y,y_axis) * f->ht;
+
+    // make (x1,y1) upper right and (x2,y2) lower left
+    if ( x1 < x2 ) swap(x1,x2);
+    if ( y1 < y2) swap(y1,y2);
+
+    wid = fabs(x1-x2);
+    ht = fabs(y1-y2);
+
+    if ( ld.fillcolor ) {
+	// fillcolor takes precedence over fill - if fillcolor is not
+	// null, we draw one box filled with that color, and then a
+	// second unfilled one in color (black is none specified)
+
+	ld.fill = 0;
+	ld.fillcolor->unquote();
+	cout << ".grap_color " << *ld.fillcolor << endl;
+	cout << "box ht " << ht << " wid " << wid ;
+	cout << " with .ne at Frame.Origin + (" << x1 << ", " << y1 << ")";
+	cout << " invis fill 10" << endl;
+	cout << ".grap_color prev" << endl;
+    }	
+
+    if ( ld.color ) {
+	ld.color->unquote();
+	cout << ".grap_color " << *ld.color << endl;
+    }
+    cout << "box ht " << ht << " wid " << wid ;
+    cout << " with .ne at Frame.Origin + (" << x1 << ", " << y1 << ")";
+    
+    switch (ld.ld) {
+	case invis:
+	    cout << " invis ";
+	    break;
+	case solid:
+	default:
+	    break;
+	case dotted:
+	    cout << " dotted ";
+	    if ( ld.param )
+		cout << ld.param << " ";
+	    break;
+	case dashed:
+	    cout << " dashed ";
+	    if ( ld.param )
+		cout << ld.param << " ";
+	    break;
+    }
+
+    if ( ld.fill ) cout << " fill " << ld.fill;
+    cout << endl;
+    if ( ld.color )
+	cout << ".grap_color prev" << endl;
+}
+
 void Picplot::draw(frame *f) {
 // Slightly trickier than the circle because we have to output a list
 // of strings instead of one.  A functor to convert the DisplayStrings

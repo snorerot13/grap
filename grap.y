@@ -1,3 +1,4 @@
+/* -*-c++-*- */
 %{
 /* This code is (c) 1998 Ted Faber (faber@lunabase.org) */
 #include <stdio.h>
@@ -128,7 +129,8 @@ public:
 %token PLUS MINUS TIMES DIV CARAT EQUALS SIZE UNALIGNED LABEL RADIUS CIRCLE
 %token ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
-%token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH
+%token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
+%token BASE
 %start graphs
 %union {
     int val;
@@ -151,15 +153,15 @@ public:
     axis axisname;
     strmod stringmod;
 }
-%type <num> NUMBER expr opt_expr direction radius_spec
+%type <num> NUMBER expr opt_expr direction radius_spec bar_base
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <string> until_clause START string
 %type <val>  FRAMESIZE FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME
-%type <side>  side
-%type <frameptr> sides size
+%type <side>  side  bar_dir
+%type <frameptr> sides size bar_size
 %type <linedesc> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
 %type <double_list> num_line expr_list
@@ -221,6 +223,8 @@ statement:
 |	label_statement
 	    { first_line = 0; the_graph->visible = 1;}
 |	circle_statement
+	    { first_line = 0; the_graph->visible = 1;}
+|	bar_statement
 	    { first_line = 0; the_graph->visible = 1;}
 |	line_statement
 	    { first_line = 0; the_graph->visible = 1;}
@@ -329,7 +333,11 @@ linedesc_elem:
 |	 DASHED opt_expr
 	    { $$.ld = dashed; $$.param = $2; $$.color = 0;}
 |	 COLOR string
-	    { $$.ld = def; $$.color = $2; }
+	    { $$.ld = def; $$.color = $2; $$.fillcolor = 0;}
+|	 FILLCOLOR string
+	    { $$.ld = def; $$.fillcolor = $2; $$.color = 0;}
+|	 FILL opt_expr
+            { $$.ld = def; $$.fill = $2; $$.color = $$.fillcolor = 0; }
 ;
 
 linedesc:
@@ -345,6 +353,10 @@ linedesc:
 		if ( $2.color ) {
 		    if ( $$.color ) delete $$.color;
 		    $$.color = $2.color;
+		}
+		if ( $2.fillcolor ) {
+		    if ( $$.fillcolor ) delete $$.fillcolor;
+		    $$.fillcolor = $2.fillcolor;
 		}
 	    }
 ;
@@ -1027,6 +1039,7 @@ circle_statement:
 		circle *c = new circle($3,$4);
 		the_graph->add_circle(*c);
 		delete c;
+		delete $3;
 //		circles.push_back(c);
 	    }
 ;
@@ -1328,6 +1341,86 @@ pic_statement:
 troff_line:
 	TROFF SEP
 	    { the_graph->troff_string($1); delete $1;}
+;
+bar_size:
+	    { $$ = 0;}
+|	bar_size FRAMESIZE expr
+	    {
+		if ( !$1 ) {
+		    $$ = new frame;
+		    $$->ht = $$->wid = 0;
+		}
+		else 
+		    $$ = $1;
+		
+		switch ($2) {
+		    case ht:
+			$$->ht = $3;
+			break;
+		    case wid:
+			$$->wid = $3;
+			break;
+		}
+	    }
+;
+
+bar_dir:
+        LEFT
+            { $$ = left; } 
+|       RIGHT
+            { $$ = right; } 
+|       UP
+            { $$ = top; } 
+|       DOWN
+            { $$ = bottom; } 
+/*|       
+            { $$ = top; } */
+;
+bar_base:
+	BASE expr
+            { $$ = $2; }
+|
+            { $$ = 0; }
+;
+	
+bar_statement:
+        BAR point COMMA point opt_linedesc SEP
+            {
+		// The point parsing has already autoscaled the
+		// coordinate system to include those points.
+		box *b = new box($2, $4, &$5);
+		the_graph->add_box(*b);
+		delete $2; delete $4;
+		delete b;
+	    }
+|	BAR opt_coordname bar_dir expr bar_size bar_base opt_linedesc SEP
+            {
+		double updir = 1;	// Which way is up?
+		point *p1, *p2;		// The defining points of the box
+		box *b;			// The new box
+
+		if ( $5->wid < EPSILON ) $5->wid = 1;
+
+		switch ($3) {
+		    case left:
+			updir = -1;
+		    case right:
+			break;
+		    case bottom:
+			updir = -1;
+		    case top:
+			p1 = new point($4 + $5->wid/2, $6, $2);
+			p2 = new point ($4 - $5->wid/2, $6 + updir * $5->ht, $2);
+			break;
+		}
+		cerr << "p1 " << p1->x << ", " << p1->y << endl;
+		cerr << "p2 " << p2->x << ", " << p2->y << endl;
+		b = new box(p1, p2, &$7);
+		the_graph->add_box(*b);
+		delete p1; delete p2;
+		delete $5;
+		delete b;
+	    }
 ;
 %%
 

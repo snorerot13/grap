@@ -1,3 +1,4 @@
+/* -*-c++-*- */
 %{
 /* This code is (c) 1998 Ted Faber */
 #include <stdlib.h>
@@ -137,6 +138,9 @@ sh			DEBUG("SH\n",0); return SH;
 in			DEBUG("IN\n",0); return IN;
 out			DEBUG("OUT\n",0); return OUT;
 off			DEBUG("OFF\n",0); return OFF;
+bar			DEBUG("BAR\n",0); return BAR;
+fill			DEBUG("FILL\n",0); return FILL;
+base			DEBUG("BASE\n",0); return BASE;
 ht|wid			{
 			DEBUG("FRAMESIZE\n",0);
 			if ( !strcmp(yytext,"ht") ) yylval.val = ht;
@@ -147,6 +151,7 @@ invis			DEBUG("INVIS\n",0); return INVIS;
 solid			DEBUG("SOLID\n",0); return SOLID;
 dotted			DEBUG("DOTTED\n",0); return DOTTED;
 dashed			DEBUG("DASHED\n",0); return DASHED;
+fillcolor			DEBUG("fillcolor\n",0); return FILLCOLOR;
 color			DEBUG("color\n",0); return COLOR;
 rand			{
 			int i;

@@ -1,3 +1,4 @@
+// -*-c++-*-
 #ifndef GRAP_DRAW_H
 #define GRAP_DRAW_H
 // This file is (c) 1998 Ted Faber (faber@lunabase.org)
@@ -22,40 +23,56 @@ typedef enum { ljust = 1, rjust = 2, above = 4, below = 8, aligned = 16,
 
 typedef  struct {
     linedesc ld;	// The basic style
-    double param;	// Some styles hava parameters e.g., dotted 0.3
+    double param;	// Some styles have parameters e.g., dotted 0.3
+    double fill;	// Used for drawing solids, e.g. box
     String *color;	// The name of a color for the line
+    String *fillcolor ;	// The color to fill a solid
 } linedescval;		// Description of the style a line is drawn in
 
 class linedescclass : public linedescval {
     // Basic class features for line descriptions: constructors,
     // destructor, and assignment
 public:
-    linedescclass(linedesc l=def, double p=0, String *c=0) {
+    linedescclass(linedesc l=def, double p=0, String *c=0, double f=0,
+		  String *fc=0) {
+	// C++ won't let me use initialize members of the base class
+	// as base class initializers, although old g++ (2.7.2) would
 	    ld = l;
 	    param = p;
+	    fill = f;
 	    if ( c ) color = new String(c);
 	    else color = 0;
+	    if ( fc ) fillcolor = new String(fc);
+	    else fillcolor = 0;
     }
     
     linedescclass(linedescval *l) {
 	if ( l) {
 	    ld = l->ld;
 	    param = l->param;
+	    fill = l->fill;
 	    if ( l->color ) color = new String(l->color);
 	    else color = 0;
+	    if ( l->fillcolor ) fillcolor = new String(l->fillcolor);
+	    else fillcolor = 0;
 	}
 	else {
 	    ld = def;
 	    param = 0;
 	    color = 0;
+	    fillcolor = 0;
+	    fill = 0;
 	}
     }
     
-    linedescclass(linedescclass& ldc) {
+    linedescclass(const linedescclass& ldc) {
 	    ld = ldc.ld;
 	    param = ldc.param;
+	    fill = ldc.fill;
 	    if ( ldc.color ) color = new String(ldc.color);
 	    else color = 0;
+	    if ( ldc.fillcolor ) fillcolor = new String(ldc.fillcolor);
+	    else fillcolor = 0;
     }
 
     ~linedescclass() {
@@ -63,13 +80,20 @@ public:
 	    delete color;
 	    color = 0;
 	}
+	if ( fillcolor ) {
+	    delete fillcolor;
+	    fillcolor = 0;
+	}
     }
 
     linedescclass& operator=(const linedescval &l) {
 	ld = l.ld;
 	param= l.param;
+	fill = l.param;
 	if ( color ) { delete color; color = 0;}
 	if ( l.color ) color = new String(l.color);
+	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
+	if ( l.fillcolor ) fillcolor = new String(l.fillcolor);
     }
     
 } ;
@@ -122,7 +146,7 @@ public:
 	return p;
     }
     void operator delete(void *p, size_t s) {
-	::delete (char *)p;
+	::delete [] (char *)p;
     }
 };
 
@@ -451,6 +475,17 @@ public:
     circle(circle& c) : center(&c.center), rad(c.rad) { }
 };
 
+class box {
+public:
+    point p1;		// upper left and 
+    point p2;		// lower right points
+    linedescclass ld;	// Line style for the box
+    box() : p1(), p2(), ld() { }
+    box(point *pp1, point *pp2, linedescval *l) :
+	p1(pp1), p2(pp2), ld(l) { }
+    box(const box &b) : p1(b.p1), p2(b.p2), ld(b.ld) { }
+};
+
 class graph {
     // Catchall data structure for each graph in progress.  It will be
     // the base class for various subclasses for specific output
@@ -559,6 +594,7 @@ public:
     virtual void add_line(line&) = 0;
     virtual void add_plot(plot&) = 0;
     virtual void add_circle(circle&) = 0;
+    virtual void add_box(box&) = 0;
 
 };
 
