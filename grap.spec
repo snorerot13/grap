@@ -1,10 +1,10 @@
 Summary: grap, a grapher for groff
 Name: grap
-Version: 0.8a
+Version: 0.91a
 Release: 0
-Copyright: BSD with no commercial reproduction
+Copyright: BSD
 Group: Applications/Publishing
-Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.8a.tar.gz
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.91a.tar.gz
 Patch1: grap-redhat-linux.patch
 
 %description
@@ -15,17 +15,22 @@ version of grap, so I built one.
 
 %prep
 %setup
-%patch1
 
 %build
-make -f GNUmakefile
+./configure --prefix=/usr
 
 %install
 make install
 
+
 %files
 %doc README
+%doc COPYRIGHT
+%doc CHANGES
 /usr/bin/grap
-/usr/local/man/man1/grap.1
+/usr/man/man1/grap.1
 /usr/share/grap/examples
 /usr/share/grap/grap.defines
+/usr/share/grap/README
+/usr/share/grap/COPYRIGHT
+/usr/share/grap/CHANGES
