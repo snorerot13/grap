@@ -25,7 +25,7 @@ LEX=@LEX@
 YACC=@YACC@
 CXX=@CXX@
 
-DISTDIR=grap-1.0
+DISTDIR=grap-0.95b
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
