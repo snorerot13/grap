@@ -53,7 +53,7 @@ if test $ac_cv_func_random = "yes" ; then
 #include <stdlib.h>
 #include <math.h>
 ,grap_cv_decl_random="yes",grap_cv_decl_random="no"))
-	if test $grap_cv_decl_random="yes"; then
+	if test $grap_cv_decl_random = "yes"; then
 		AC_DEFINE(RANDOM_DECLARED)
 	fi
 else
@@ -62,7 +62,7 @@ else
 #include <stdlib.h>
 #include <math.h>
 ,grap_cv_decl_rand="yes",grap_cv_decl_rand="no"))
-	if test $grap_cv_decl_rand="yes"; then
+	if test $grap_cv_decl_rand = "yes"; then
 		AC_DEFINE(RAND_DECLARED)
 	fi
 fi
