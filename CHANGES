@@ -1,7 +1,10 @@
 Change log
 
 1.30: Made the undocumented color commands support GNU pic color commands.  In
-other words added color to grap.
+other words added color to grap.  Probably the easiest place to see teh syntax
+is the new example added to the examples file.  The changes are on the manual
+page, too, but the example sets basically everything that can be set, so it's a
+good example.
 
 1.27: A couple compilation bugs reported under later g++ versions by a couple
 people have been fixed.  Brian Mays caught a clipping bug, and Bruce Lilly also
