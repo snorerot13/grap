@@ -127,7 +127,7 @@ public:
 %}
 %token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
-%token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN FRAMESIZE
+%token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN HT WID
 %token IN OUT TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
 %token PLUS MINUS TIMES DIV CARAT EQUALS SIZE UNALIGNED LABEL RADIUS CIRCLE
 %token ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
@@ -156,15 +156,15 @@ public:
     axis axisname;
     strmod stringmod;
 }
-%type <num> NUMBER expr opt_expr direction radius_spec bar_base
+%type <num> NUMBER expr opt_expr direction radius_spec bar_base opt_wid
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <string> until_clause START string
-%type <val>  FRAMESIZE FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
+%type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME
 %type <side>  side  bar_dir
-%type <frameptr> sides size bar_size
+%type <frameptr> sides size 
 %type <linedesc> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
 %type <double_list> num_line expr_list
@@ -693,21 +693,23 @@ next_statement:
 
 size:
 	    { $$ = 0;}
-|	size FRAMESIZE expr
+|	size HT expr
 	    {
 		if ( !$1 ) 
 		    $$ = new frame;
 		else 
 		    $$ = $1;
 		
-		switch ($2) {
-		    case ht:
-			$$->ht = $3;
-			break;
-		    case wid:
-			$$->wid = $3;
-			break;
-		}
+		$$->ht = $3;
+	    }
+|	size WID expr
+	    {
+		if ( !$1 ) 
+		    $$ = new frame;
+		else 
+		    $$ = $1;
+		
+		$$->wid = $3;
 	    }
 ;
 side:
@@ -1337,45 +1339,25 @@ troff_line:
 	TROFF SEP
 	    { the_graph->troff_string($1); delete $1;}
 ;
-bar_size:
-	    { $$ = 0;}
-|	bar_size FRAMESIZE expr
-	    {
-		if ( !$1 ) {
-		    $$ = new frame;
-		    $$->ht = $$->wid = 0;
-		}
-		else 
-		    $$ = $1;
-		
-		switch ($2) {
-		    case ht:
-			$$->ht = $3;
-			break;
-		    case wid:
-			$$->wid = $3;
-			break;
-		}
-	    }
-;
 
 bar_dir:
-        LEFT
-            { $$ = left; } 
-|       RIGHT
+        RIGHT
             { $$ = right; } 
 |       UP
-            { $$ = top; } 
-|       DOWN
-            { $$ = bottom; } 
-/*|       
-            { $$ = top; } */
+             { $$ = top; } 
 ;
 bar_base:
 	BASE expr
             { $$ = $2; }
 |
             { $$ = 0; }
+;
+
+opt_wid:
+	WID expr
+            { $$=$2; }
+|
+            { $$ = 1; }
 ;
 	
 bar_statement:
@@ -1388,35 +1370,29 @@ bar_statement:
 		delete $2; delete $4;
 		delete b;
 	    }
-|	BAR opt_coordname bar_dir expr bar_size bar_base opt_linedesc SEP
+|	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base opt_linedesc SEP
             {
-		double updir = 1;	// Which way is up?
 		point *p1, *p2;		// The defining points of the box
 		box *b;			// The new box
 
-		if ( $5->wid < EPSILON ) $5->wid = 1;
-
 		switch ($3) {
-		    case left:
-			updir = -1;
 		    case right:
-			p1 = new point($6, $4 + $5->wid/2, $2);
-			p2 = new point ( $6 + updir * $5->ht, $4 - $5->wid/2, $2);
+			p1 = new point($8, $4 + $7/2, $2);
+			p2 = new point($8 + $6, $4 - $7/2, $2);
 			break;
-		    case bottom:
-			updir = -1;
 		    case top:
 		    default:
-			p1 = new point($4 + $5->wid/2, $6, $2);
-			p2 = new point ($4 - $5->wid/2, $6 + updir * $5->ht, $2);
+			p1 = new point($4 + $7/2, $8, $2);
+			p2 = new point($4 - $7/2, $8 + $6, $2);
 			break;
 		}
-		cerr << "p1 " << p1->x << ", " << p1->y << endl;
-		cerr << "p2 " << p2->x << ", " << p2->y << endl;
-		b = new box(p1, p2, &$7);
+		
+		$2->newpt(p1->x,p1->y);
+		$2->newpt(p2->x,p2->y);
+		
+		b = new box(p1, p2, &$9);
 		the_graph->add_box(*b);
 		delete p1; delete p2;
-		delete $5;
 		delete b;
 	    }
 ;

@@ -158,12 +158,8 @@ off			DEBUG("OFF\n",0); return OFF;
 bar			DEBUG("BAR\n",0); return BAR;
 fill			DEBUG("FILL\n",0); return FILL;
 base			DEBUG("BASE\n",0); return BASE;
-ht|wid			{
-			DEBUG("FRAMESIZE\n",0);
-			if ( !strcmp(yytext,"ht") ) yylval.val = ht;
-			else yylval.val =wid;
-			return FRAMESIZE;
-			}
+ht			DEBUG("HT\n",0); return HT;
+wid			DEBUG("WID\n",0); return WID;
 invis			DEBUG("INVIS\n",0); return INVIS;
 solid			DEBUG("SOLID\n",0); return SOLID;
 dotted			DEBUG("DOTTED\n",0); return DOTTED;
