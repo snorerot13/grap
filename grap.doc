@@ -1053,6 +1053,11 @@ copy "./data"
 .Sh AUTHOR
 This implementation was done by
 .An Ted Faber Ao faber@lunabase.org Ac .
+.An Bruce Lilley Ao blilly@erols.com Ac
+contributed many bug fixes, including a considerable revamp of the
+error reporting code.  If you can actually find an error in your  
+.Nm
+code, you can probably thank him.
 .Nm
 was designed and specified by 
 .An Brian Kernighan
