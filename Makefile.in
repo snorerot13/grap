@@ -20,7 +20,7 @@ CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
 
-DISTDIR=grap-1.02
+DISTDIR=grap-1.03
 SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 

@@ -1055,6 +1055,23 @@ is:
 copy "./data"
 .G2
 .Ed
+.Sh ENVIRONMENT VARIABLES
+.Pp
+If the environment variable 
+.Ev GRAP_DEFINES
+is defined, 
+.Nm
+will look for its defines file there.  If that value is a reative path
+name the path specified in the
+.Fl M
+option will be searched for it.
+.Ev GRAP_DEFINES
+overrides the compiled in location of the defines file, but may be
+overridden by the
+.Dl d
+or
+.FL D
+flags.
 .Sh FILES
 .Pa DEFINES
 .Sh SEE ALSO

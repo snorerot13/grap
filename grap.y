@@ -1255,6 +1255,9 @@ int main(int argc, char** argv) {
     int use_defines = 1;
     char c;
 
+    if (getenv("GRAP_DEFINES"))
+	defines = getenv("GRAP_DEFINES");
+    
     while ( ( c = getopt(argc,argv,opts)) != -1)
 	switch (c) {
 	    case 'd':
