@@ -1026,8 +1026,15 @@ graph_statement:
 	GRAPH { lex_no_coord(); } IDENT { lex_begin_rest_of_line(); } REST SEP
 	    {
 		if ( !first_line ) {
-		    the_graph->draw(0);
-		    the_graph->init($3, $5);
+		    // Only draw the graph and clear its internals if
+		    // it is visible.  This allows a user to declare
+		    // things like coordinate spaces before the graph
+		    // itself is named.  This is a compatibility
+		    // feature for DWB grap.
+		    if ( the_graph->visible ) {
+			the_graph->draw(0);
+			the_graph->init($3, $5);
+		    }
 		    init_dict();
 		}
 		else {
