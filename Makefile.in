@@ -34,9 +34,6 @@ OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
 
 all:	grap
 
-.y.cc:
-	$(YACC) -d $<
-	mv y.tab.c $@
 
 .l.cc:
 	$(LEX) -o$@ $<
@@ -45,8 +42,10 @@ grap:	$(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
 	if test -f grap.exe ; then mv -f grap.exe grap; fi
 
-y.tab.h:	grap.y
-grap.cc:	grap.y
+y.tab.h grap.cc:	grap.y
+	$(YACC) -dr grap.y
+	mv y.tab.c grap.cc
+
 grap_lex.cc:	grap_lex.l y.tab.h
 
 

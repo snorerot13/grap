@@ -52,8 +52,8 @@ String *ps_param;
 // bison wants these defined....
 int yyerror(char*);
 int yylex();
-void init_dict(); 
-
+void init_dict();
+ 
 // defined in grap_lex.l
 extern bool include_file(String *, int =0, bool=true);
 extern void lex_begin_macro_text();
