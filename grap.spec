@@ -33,8 +33,4 @@ make install
 
 /usr/local/bin/grap
 /usr/local/man/man1/grap.1
-/usr/local/share/grap/examples
-/usr/local/share/grap/grap.defines
-/usr/local/share/grap/README
-/usr/local/share/grap/COPYRIGHT
-/usr/local/share/grap/CHANGES
+/usr/local/share/grap/
