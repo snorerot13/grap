@@ -31,6 +31,7 @@ typedef list<struct grap_buffer_state*> lexStack;
 typedef list<DisplayString *> stringlist;
 
 #include "grap_draw.h"
+#include "grap_pic.h"
 
 
 

@@ -12,7 +12,7 @@ LDLIBS=-ll -ly
 CXXFLAGS=-g
 #CXXFLAGS += -DLEX_DEBUG
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" -DHAVE_SNPRINTF
-OBJS=grap.o grap_lex.o grap_draw.o
+OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
 
 .o.out:
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(.ALLSRC) $(LDLIBS) -o $(.TARGET)
@@ -29,11 +29,13 @@ y.tab.h:	grap.cc
 
 grap_lex.o:	grap_lex.cc grap.h y.tab.h grap_data.h grap_draw.h
 
-grap.cc grap_lex.cc:	grap.y grap.h grap_data.h grap_draw.h
+grap.cc grap_lex.cc:	grap.y grap.h grap_data.h grap_draw.h  grap_pic.h
 grap.cc:	grap.y
 grap_lex.cc:	grap_lex.l
 
 grap_draw.o: grap_draw.cc grap.h grap_data.h grap_draw.h
+
+grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
 
 pic.h:	pic.macros
 	perl ./pic2c.pl < pic.macros > $@

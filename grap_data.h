@@ -80,6 +80,7 @@ public:
 
     String& operator+=(const char *s) {
 	int nlen = ::strlen(s) + strlen() + 1;
+
 	if ( len < nlen ) resize(nlen);
 	strcat(str,s);
 	return *this;

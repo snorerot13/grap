@@ -12,16 +12,19 @@
 doubleDictionary vars;
 coordinateDictionary coordinates;
 lineDictionary lines;
-plotSequence plots;
-circleSequence circles;
-stringSequence pic;
-stringSequence troff;
-frame the_frame;
+
+graph *the_graph =0;
+
+// plotSequence plots;
+// circleSequence circles;
+// stringSequence pic;
+// stringSequence troff;
+// frame the_frame;
 lexStack lexstack;
 macroDictionary macros;
-int visible;
+// int visible;
 int first_line;
-int graphs;
+//int graphs;
 
 extern int lex_expand_macro;
 
@@ -41,7 +44,7 @@ extern int include_string(String *,struct for_descriptor *f=0,
 extern void lex_hunt_macro();
 void draw_graph();
 void init_graph();
-
+    
 int nlines;
 int in_copy=0;
 
@@ -118,19 +121,25 @@ graphs:
 
 graph :
 	    START {
-                init_graph();
+                if ( !the_graph) the_graph = new Picgraph;
+		the_graph->init();
+		init_dict();
+		//init_graph();
 		first_line = 1;
-		graphs = 0;
-		if ( $1 ) ps_param = $1;
-		else ps_param = 0;
+//		graphs = 0;
+// 		if ( $1 ) ps_param = $1;
+// 		else ps_param = 0;
+		the_graph->begin_block($1);
 	    } prog END
             {
-		draw_graph();
-		if ( graphs ) cout << ".PE" << endl;
-		if ( ps_param ) {
-		    delete ps_param;
-		    ps_param = 0;
-		}
+		the_graph->draw();
+		the_graph->end_block();
+//		draw_graph();
+// 		if ( graphs ) cout << ".PE" << endl;
+// 		if ( ps_param ) {
+// 		    delete ps_param;
+// 		    ps_param = 0;
+// 		}
 	    }
 ;
 prog :
@@ -142,27 +151,27 @@ statement:
 	assignment_statement
 	    { first_line = 0;}
 |	num_list
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	frame_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	draw_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	next_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	plot_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	ticks_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	grid_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	label_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	circle_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	line_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	coord_statement
-	    { first_line = 0; visible = 1;}
+	    { first_line = 0; the_graph->visible = 1;}
 |	copy_statement
 	    { first_line = 0;}
 |	define_statement
@@ -302,9 +311,10 @@ draw_statement:
 		linedescval defld = { invis,0,0 };
 
 		if ( $2 ) {
-		    if ( ( li = lines.find($2)) == lines.end() ) {
+		    li = the_graph->lines.find($2);
+		    if ( li == the_graph->lines.end() ) {
 			l = new line(&defld,&String("\"\\(bu\""));
-			lines[$2] = l;
+			the_graph->lines[$2] = l;
 		    }
 		    else {
 			l = (*li).second;
@@ -582,7 +592,9 @@ plot_statement:
 	strlist AT point SEP
 	    {
 		plot *p = new plot($1,$3);
-		plots.push_back(p);
+		the_graph->add_plot(*p);
+		delete p;
+//		plots.push_back(p);
 	    }
 |	PLOT expr opt_string AT point SEP
 	    {
@@ -601,7 +613,9 @@ plot_statement:
 		seq->push_back(s);
 
 		p = new plot(seq,$5);
-		plots.push_back(p);
+		the_graph->add_plot(*p);
+		delete p;
+//		plots.push_back(p);
 		    
 	    }
 ;
@@ -613,9 +627,10 @@ next_statement:
 		lineDictionary::iterator li;
 
 		if ( $2 ) {
-		    if ( ( li = lines.find($2)) == lines.end() ) {
+		    li = the_graph->lines.find($2);
+		    if ( li == the_graph->lines.end() ) {
 			l = new line((linedescval *)0, &String("\"\\(bu\"") );
-			lines[$2] = l;
+			the_graph->lines[$2] = l;
 		    }
 		    else { l = (*li).second; }
 		} else l = defline;
@@ -675,23 +690,25 @@ frame_statement:
 	FRAME opt_linedesc size sides SEP
 	    {
 		int i;
+		frame *f= $4;
 
 		if ( $2.ld != def ) {
 		    for ( i = 0 ; i < 4; i++ ) {
-			the_frame.desc[i] = $2;
+			the_graph->base->desc[i] = $2;
 		    }
 		}
 		
 		if ( $3 ) {
-		    the_frame.ht = $3->ht;
-		    the_frame.wid = $3->wid;
+		    the_graph->base->ht = $3->ht;
+		    the_graph->base->wid = $3->wid;
 		    delete $3;
 		}
 		
 		if ( $4 ) {
 		    for ( i = 0 ; i < 4; i++ ) {
 			if ( $4->desc[i].ld != def )
-			    the_frame.desc[i] = (linedescval) $4->desc[i];
+			    the_graph->base->desc[i] =
+				(linedescval) $4->desc[i];
 		    }
 		    delete $4;
 		}
@@ -728,7 +745,7 @@ direction:
 ticklist:
 	expr opt_string
 	    {
-		tick *t = new tick($1,0,top,0, 0, 0);
+		tick *t = new tick($1,0,top,0, (shiftdesc *) 0, 0);
  		String *s;
 
 		if ( $2 ) {
@@ -745,7 +762,7 @@ ticklist:
 	    }
 |	ticklist COMMA expr opt_string
 	    {
-		tick *t = new tick($3,0,top,0,0, 0);
+		tick *t = new tick($3,0,top,0,(shiftdesc *) 0, 0);
  		String *s;
 
 		if ( $4 ) {
@@ -820,7 +837,7 @@ tickfor:
 		
 		idx = $3;
 		while ( (idx - $5) *dir  < EPSILON ) {
-		    t = new tick(idx,0,top,0,0, 0);
+		    t = new tick(idx, 0, top, 0, (shiftdesc *) 0, 0);
 		    t->c = $2;
 
 		    s = new String(idx,fmt);
@@ -870,7 +887,7 @@ ticks_statement:
 			t->side = $2;
 			t->size = $3;
 			t->shift = $4;
-			the_frame.tks.push_back(t);
+			the_graph->base->tks.push_back(t);
 			if ( t->side == top || t->side == bottom )
 			    t->c->newx(t->where);
 			else 
@@ -878,11 +895,13 @@ ticks_statement:
 		    }
 		} add_tick($2,$3,$4);
 
-		the_frame.tickdef[$2].side = $2;
-		the_frame.tickdef[$2].shift = $4;
+		the_graph->base->tickdef[$2].side = $2;
+		the_graph->base->tickdef[$2].shift = $4;
 
-		if ( $5 && $5->empty() ) the_frame.tickdef[$2].size = $3;
-		else the_frame.tickdef[$2].size = 0;
+		if ( $5 && $5->empty() )
+		    the_graph->base->tickdef[$2].size = $3;
+		else
+		    the_graph->base->tickdef[$2].size = 0;
 
 		if ( $5 ) {
 		    for_each($5->begin(), $5->end(), add_tick);
@@ -892,11 +911,11 @@ ticks_statement:
 | 	TICKS OFF SEP
 	    {
 		for ( int i = 0; i< 4; i++ )
-		    the_frame.tickdef[i].size = 0;
+		    the_graph->base->tickdef[i].size = 0;
 	    }
 | 	TICKS side OFF SEP
 	    {
-		    the_frame.tickdef[$2].size = 0;
+		    the_graph->base->tickdef[$2].size = 0;
 	    }
 ;
 
@@ -916,26 +935,26 @@ grid_statement:
 
 		// Turning on a grid turns off default ticks on that side
 		
-		the_frame.tickdef[$2].size = 0;
+		the_graph->base->tickdef[$2].size = 0;
 		
 		if ( $4.ld != def ) 
-		    the_frame.griddef[$2].desc = $4;
+		    the_graph->base->griddef[$2].desc = $4;
 		else {
 		    defgrid.color = $4.color;
-		    the_frame.griddef[$2].desc = defgrid;
+		    the_graph->base->griddef[$2].desc = defgrid;
 		    defgrid.color = 0;
 		}
 
 
-		the_frame.griddef[$2].shift = $5;
+		the_graph->base->griddef[$2].shift = $5;
 
 		if ( $3 ) {
-		    if ( the_frame.griddef[$2].prt )
-			delete the_frame.griddef[$2].prt;
-		    the_frame.griddef[$2].prt = 0;
+		    if ( the_graph->base->griddef[$2].prt )
+			delete the_graph->base->griddef[$2].prt;
+		    the_graph->base->griddef[$2].prt = 0;
 		}
 		if ( $6 ) {
-		    the_frame.griddef[$2].desc.ld = def;
+		    the_graph->base->griddef[$2].desc.ld = def;
 		    while (!$6->empty() ) {
 			t = $6->front();
 			$6->pop_front();
@@ -956,7 +975,7 @@ grid_statement:
 			    if ( g->prt ) delete g->prt;
 			    g->prt = 0;
 			}
-			the_frame.gds.push_back(g);
+			the_graph->base->gds.push_back(g);
 			if ( g->side == top || g->side == bottom )
 			    g->c->newx(g->where);
 			else 
@@ -984,13 +1003,13 @@ label_statement:
 			      
 		for_each($3->begin(),  $3->end(), a);
 		
-		the_frame.label[$2] = $3;
+		the_graph->base->label[$2] = $3;
 		if ( $4.param != 0 ) {
-		    the_frame.lshift[$2] = $4;
+		    the_graph->base->lshift[$2] = $4;
 		}
 		else {
-		    the_frame.lshift[$2].dir = $2;
-		    the_frame.lshift[$2].param = 0.4;
+		    the_graph->base->lshift[$2].dir = $2;
+		    the_graph->base->lshift[$2].param = 0.4;
 		}
 	    }
 ;
@@ -1004,7 +1023,9 @@ circle_statement:
 	CIRCLE AT point radius_spec SEP
 	    {
 		circle *c = new circle($3,$4);
-		circles.push_back(c);
+		the_graph->add_circle(*c);
+		delete c;
+//		circles.push_back(c);
 	    }
 ;
 
@@ -1022,12 +1043,13 @@ line_statement:
 		lineDictionary::iterator li;
 		linedescval des;
 
-		if ( ( li = lines.find("grap.internal")) == lines.end() ) {
+		li = the_graph->lines.find("grap.internal");
+		if ( li == the_graph->lines.end() ) {
 		    des.ld = solid;
 		    des.param = 0;
 		    des.color = 0;
 		    l = new line(&des);
-		    lines["grap.internal"] = l;
+		    the_graph->lines["grap.internal"] = l;
 		}
 		else { l = (*li).second; } 
 
@@ -1269,14 +1291,21 @@ graph_statement:
 	GRAPH IDENT { lex_begin_rest_of_line(); } REST SEP
 	    {
 		if ( !first_line ) {
-		    draw_graph();
-		    init_graph();
+		    the_graph->draw();
+		    the_graph->init($2, $4);
+		    init_dict();
+// 		    draw_graph();
+// 		    init_graph();
 		}
-
-		graph_name = new String($2);
-		if ( $4 ) graph_pos = new String($4);
-		delete $2;
-		delete $4;
+		else {
+		    the_graph->init($2, $4);
+		    init_dict();
+		}
+		    
+// 		graph_name = new String($2);
+// 		if ( $4 ) graph_pos = new String($4);
+		if ( $2 ) delete $2;
+		if ( $4 ) delete $4;
 	    }
 ;
 
@@ -1294,11 +1323,11 @@ print_statement:
 
 pic_statement:
 	PIC { lex_begin_rest_of_line(); } REST SEP
-	    { pic.push_back($3); }
+	    { the_graph->pic_string($3); delete $3;}
 ;
 troff_line:
 	TROFF SEP
-	    { troff.push_back($1); }
+	    { the_graph->troff_string($1); delete $1;}
 ;
 %%
 
@@ -1332,158 +1361,160 @@ int yyparse();
 extern int yylex();
 
 void draw_graph() {
-    int gn;
-    coord *c;
-    line *l;
-    plot *p;
-    circle *cir;
-    String *s;
-    coordinateDictionary::iterator ci;
+//     int gn;
+//     coord *c;
+//     line *l;
+//     plot *p;
+//     circle *cir;
+//     String *s;
+//     coordinateDictionary::iterator ci;
     
-    class string_out_f : public UnaryFunction<String*, int> {
-	ostream &f;
-    public:
-	int operator()(String *s) { f << *s << endl; }
-	string_out_f(ostream& ff) : f(ff) {};
-    } string_out(cout);
+//     class string_out_f : public UnaryFunction<String*, int> {
+// 	ostream &f;
+//     public:
+// 	int operator()(String *s) { f << *s << endl; }
+// 	string_out_f(ostream& ff) : f(ff) {};
+//     } string_out(cout);
 
-    class plot_out_f : public UnaryFunction<plot *,int> {
-	frame *f;
-    public:
-	plot_out_f(frame *ff) : f(ff) {};
-	int operator() (plot *p) { p->draw(f); }
-    } plot_out(&the_frame);
+//     class plot_out_f : public UnaryFunction<plot *,int> {
+// 	frame *f;
+//     public:
+// 	plot_out_f(frame *ff) : f(ff) {};
+// 	int operator() (plot *p) { p->draw(f); }
+//     } plot_out(&the_frame);
 	
-    class circle_out_f : public UnaryFunction<circle *,int> {
-	frame *f;
-    public:
-	circle_out_f(frame *ff) : f(ff) {};
-	int operator() (circle *c) { c->draw(f); }
-    } circle_out(&the_frame);
+//     class circle_out_f : public UnaryFunction<circle *,int> {
+// 	frame *f;
+//     public:
+// 	circle_out_f(frame *ff) : f(ff) {};
+// 	int operator() (circle *c) { c->draw(f); }
+//     } circle_out(&the_frame);
 	
-    class line_out_f : public UnaryFunction<line *,int> {
-	frame *f;
-    public:
-	line_out_f(frame *ff) : f(ff) {};
-	int operator() (lineDictionary::value_type li) {
-	    line *l = li.second;
-	    l->draw(f);
-	}
-    } line_out(&the_frame);
+//     class line_out_f : public UnaryFunction<line *,int> {
+// 	frame *f;
+//     public:
+// 	line_out_f(frame *ff) : f(ff) {};
+// 	int operator() (lineDictionary::value_type li) {
+// 	    line *l = li.second;
+// 	    l->draw(f);
+// 	}
+//     } line_out(&the_frame);
 	
-    class addm_f :
-    public UnaryFunction<coordinateDictionary::value_type, int> {
-    public:
-	int operator() (coordinateDictionary::value_type cp) {
-	    coord *c = cp.second;
-	    c->addmargin(0.07);
-	}
-    } addm;
+//     class addm_f :
+//     public UnaryFunction<coordinateDictionary::value_type, int> {
+//     public:
+// 	int operator() (coordinateDictionary::value_type cp) {
+// 	    coord *c = cp.second;
+// 	    c->addmargin(0.07);
+// 	}
+//     } addm;
 
-    for_each(coordinates.begin(), coordinates.end(), addm);
-    if ((ci = coordinates.find("grap.internal.default"))
-	 == coordinates.end()) {
-	cerr << "Lost default coords!!" << endl;
-	exit(20);
-    }
-    else { c = (*ci).second; }
-    if ( visible ) {
-	if ( !graphs++ ) {
-	    cout << ".PS";
-	    if (ps_param ) cout << *ps_param;
-	    cout << endl;
-	}
-	for_each(troff.begin(), troff.end(), string_out);
-	if ( graph_name ) cout << *graph_name << ": ";
-	cout << "[" << endl;
-	the_frame.draw();
+//     for_each(coordinates.begin(), coordinates.end(), addm);
+//     if ((ci = coordinates.find("grap.internal.default"))
+// 	 == coordinates.end()) {
+// 	cerr << "Lost default coords!!" << endl;
+// 	exit(20);
+//     }
+//     else { c = (*ci).second; }
+//     if ( visible ) {
+// 	if ( !graphs++ ) {
+// 	    cout << ".PS";
+// 	    if (ps_param ) cout << *ps_param;
+// 	    cout << endl;
+// 	}
+// 	for_each(troff.begin(), troff.end(), string_out);
+// 	if ( graph_name ) cout << *graph_name << ": ";
+// 	cout << "[" << endl;
+// 	the_graph->base->draw();
 	
-	for_each(plots.begin(), plots.end(), plot_out);
-	for_each(circles.begin(), circles.end(), circle_out);
-	for_each(lines.begin(), lines.end(), line_out ) ;
+// 	for_each(plots.begin(), plots.end(), plot_out);
+// 	for_each(circles.begin(), circles.end(), circle_out);
+// 	for_each(lines.begin(), lines.end(), line_out ) ;
 	
-	cout << "]";
-	if ( graph_pos ) cout << " " << *graph_pos << endl;
-	else cout << endl;
-	for_each(pic.begin(), pic.end(), string_out);
-    }
-    if ( graph_name ) {
-	delete graph_name;
-	graph_name = 0;
-    }
-    if ( graph_pos ) {
-	delete graph_pos;
-	graph_pos = 0;
-    }
+// 	cout << "]";
+// 	if ( graph_pos ) cout << " " << *graph_pos << endl;
+// 	else cout << endl;
+// 	for_each(pic.begin(), pic.end(), string_out);
+//     }
+//     if ( graph_name ) {
+// 	delete graph_name;
+// 	graph_name = 0;
+//     }
+//     if ( graph_pos ) {
+// 	delete graph_pos;
+// 	graph_pos = 0;
+//     }
 }
 
-void init_graph() {
-    int gotnext;
-    coord *c;
-    line *l;
-    plot *p;
-    circle *cir;
-    String *s;
-    linedescval defld = { invis,0,0 };
+void init_dict() {
+//     int gotnext;
+//     coord *c;
+//     line *l;
+//     plot *p;
+//     circle *cir;
+//     String *s;
 
-    class del_str_f : public UnaryFunction<String *, int> {
-    public:
-	int operator() (String *s) { delete s; }
-    } del_str;
+       linedescval defld = { invis,0,0 };
 
-    class del_plot_f : public UnaryFunction<plot *, int> {
-    public:
-	int operator() (plot *p) { delete p; }
-    } del_plot;
+//     class del_str_f : public UnaryFunction<String *, int> {
+//     public:
+// 	int operator() (String *s) { delete s; }
+//     } del_str;
 
-    class del_circle_f : public UnaryFunction<circle *, int> {
-    public:
-	int operator() (circle *c) { delete c; }
-    } del_circle;
+//     class del_plot_f : public UnaryFunction<plot *, int> {
+//     public:
+// 	int operator() (plot *p) { delete p; }
+//     } del_plot;
 
-    class del_coords_f :
-    public UnaryFunction<coordinateDictionary::value_type, int> {
-    public:
-	int operator() (coordinateDictionary::value_type ci) {
-	    coord * c = ci.second;
-	    delete c;
-	}
-    } del_coords;
+//     class del_circle_f : public UnaryFunction<circle *, int> {
+//     public:
+// 	int operator() (circle *c) { delete c; }
+//     } del_circle;
 
-    class del_line_f :
-    public UnaryFunction<lineDictionary::value_type, int> {
-    public:
-	int operator() (lineDictionary::value_type li) {
-	    line * l = li.second;
-	    delete l;
-	}
-    } del_line;
+//     class del_coords_f :
+//     public UnaryFunction<coordinateDictionary::value_type, int> {
+//     public:
+// 	int operator() (coordinateDictionary::value_type ci) {
+// 	    coord * c = ci.second;
+// 	    delete c;
+// 	}
+//     } del_coords;
 
-    visible = 0;
+//     class del_line_f :
+//     public UnaryFunction<lineDictionary::value_type, int> {
+//     public:
+// 	int operator() (lineDictionary::value_type li) {
+// 	    line * l = li.second;
+// 	    delete l;
+// 	}
+//     } del_line;
 
-    for_each(coordinates.begin(), coordinates.end(), del_coords);
-    for_each(lines.begin(), lines.end(), del_line);
-    for_each(plots.begin(), plots.end(), del_plot);
-    for_each(circles.begin(), circles.end(), del_circle);
-    for_each(troff.begin(), troff.end(), del_str);
-    for_each(pic.begin(), pic.end(), del_str);
+//     visible = 0;
+
+//     the_graph->clear();
+// //     for_each(coordinates.begin(), coordinates.end(), del_coords);
+// //     for_each(lines.begin(), lines.end(), del_line);
+// //     for_each(plots.begin(), plots.end(), del_plot);
+// //     for_each(circles.begin(), circles.end(), del_circle);
+//     for_each(troff.begin(), troff.end(), del_str);
+//     for_each(pic.begin(), pic.end(), del_str);
     
-    coordinates.erase(coordinates.begin(), coordinates.end());
-    lines.erase(lines.begin(), lines.end());
-    plots.erase(plots.begin(), plots.end());
-    circles.erase(circles.begin(), circles.end());
-    pic.erase(pic.begin(), pic.end());
-    troff.erase(troff.begin(), troff.end());
-    the_frame.clear();
+//     coordinates.erase(coordinates.begin(), coordinates.end());
+//     lines.erase(lines.begin(), lines.end());
+//     plots.erase(plots.begin(), plots.end());
+//     circles.erase(circles.begin(), circles.end());
+//     pic.erase(pic.begin(), pic.end());
+//     troff.erase(troff.begin(), troff.end());
+//     the_frame.clear();
 		
     defcoord = new coord;
-    coordinates["grap.internal.default"] = defcoord;
+    the_graph->coords["grap.internal.default"] = defcoord;
     for ( int i = 0 ; i < 4; i++) {
-	the_frame.tickdef[i].c = defcoord;
-	the_frame.griddef[i].c = defcoord;
+	the_graph->base->tickdef[i].c = defcoord;
+	the_graph->base->griddef[i].c = defcoord;
     }
     defline = new line(&defld,&String("\"\\(bu\"") );
-    lines["grap.internal.default"] = defline;
+    the_graph->lines["grap.internal.default"] = defline;
     nlines = 0;
 }
 
