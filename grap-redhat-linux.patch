@@ -1,0 +1,20 @@
+--- GNUmakefile-	Thu Jan 14 23:39:07 1999
++++ GNUmakefile	Wed Jan 20 16:31:07 1999
+@@ -1,5 +1,5 @@
+ # This file is (c) 1998 Ted Faber (faber@lunabase.org)
+-BINDIR=/usr/local/bin
++BINDIR=/usr/bin
+ DEFINESDIR=/usr/share/grap
+ MANDIR=/usr/local/man/man1
+ INSTALL=install
+@@ -16,8 +16,8 @@
+ CXXFLAGS=-g
+ #CXXFLAGS += -DLEX_DEBUG
+ CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+-CXXFLAGS += -DNO_SNPRINTF
+-CXXFLAGS += -DNO_RANDOM
++#CXXFLAGS += -DNO_SNPRINTF
++#CXXFLAGS += -DNO_RANDOM
+ #CXXFLAGS =+ -DNO_GETOPT
+ OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
+ 
