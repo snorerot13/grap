@@ -246,7 +246,7 @@ atan2|min|max		{
 			tokenpos += yyleng;
 			return NUMBER;
 			}
-[.'][^0-9].*$                  {
+[.'][ \t]*[^\t 0-9].*$                  {
 				tokenpos += yyleng;
 				if ( !strncmp(".G1", yytext, 3) ) {
 				    if ( lexstack.empty() ||
