@@ -27,7 +27,7 @@ AC_CHECK_PROGS(CKSUM_PROG,md5 cksum sum, echo)
 if test "$CKSUM_PROG" = "echo"; then
 	AC_MSG_WARN(no checksumming program - make check always succeeds)
 fi
-
+TVF_OS_VERSION
 
 dnl Checks for libraries.
 

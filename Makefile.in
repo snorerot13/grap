@@ -26,6 +26,7 @@ MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
 DISTDIR=grap-1.20pre6
 SOURCES=grap.cc grap_lex.cc *.cc
+OS_VERSION=@OS_VERSION@
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
 # CXXFLAGS = -pipe @GXXFLAGS@ @DEFS@ 
@@ -68,7 +69,8 @@ grap_lex.cc:	grap_lex.l y.tab.h
 version.cc:	Makefile
 	echo "#include <string>" > version.cc
 	echo "using namespace std;" >> version.cc
-	echo "string version=\"$(DISTDIR)\";" >> version.cc
+	echo "string version=\"$(DISTDIR) compiled under $(OS_VERSION)\";" \
+		>> version.cc
 
 # Under g++ the memory overhead for optimization of grap_tokenizer is
 # high.  Compilation time becomes prohibitive and the function is only
