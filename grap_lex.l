@@ -46,6 +46,7 @@ String linebuf;
 
 extern macroDictionary macros;
 extern graph *the_graph;
+extern stringSequence path; 
 
 int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
@@ -510,9 +511,8 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
-bool include_file(String *s, int rs=0) {
-    FILE *f;
-    char file[MAXPATHLEN];
+bool include_file(String *s, int rs=0, bool usepath=true) {
+    FILE *f=0;
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
 
@@ -523,9 +523,20 @@ bool include_file(String *s, int rs=0) {
             tokenpos = 0;
         }
 	if ( *s != "-" ) {
-	    strncpy(file, s->c_str(), MAXPATHLEN);
-	    if ( ( f = fopen(file,"r")) == 0 ) {
-		cerr << "Can't open " << file << " ";
+            if ( (*s)[0] != '/' && usepath ) {
+                // use path to look up relative path
+                for ( stringSequence::iterator i = path.begin();
+                      i != path.end(); i++) {
+                    String str = *(*i);
+
+                    str += "/"; str += *s;
+                    if ( ( f = fopen(str.c_str(),"r"))) break;
+                }
+            }
+            else f = fopen(s->c_str(),"r");
+
+            if ( !f ) {
+                cerr << "Can't open " << *s << " ";
 		perror(0);
 		return 0;
 	    }

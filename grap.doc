@@ -11,6 +11,7 @@
 .Nm
 .Op Fl d Ar defines_file
 .Op Fl D
+.Op Fl M Ar include path
 .Op Fl V
 .Op fl u
 .Op Ar filename ...
@@ -84,7 +85,20 @@ to the text of the paper.  I personally like it better that way and it
 saves space, but 
 .Fl u
 disables it.  This may be useful in porting old 
-.Nm grap .
+.Nm 
+programs.
+.Pp
+.Fl M
+is followed by a colon-separated list of directories used to search
+for relative pathnames included via 
+.Ic copy .
+The path is also used to locate the defines file, so if the 
+.Fl d
+changes the defines file name to a relative name, it will be searched
+for in the path given by 
+.Fl M .
+The search path always includes the current directory, and by default
+that directory is searched last.
 .Pp
 All
 .Nm

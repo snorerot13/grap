@@ -36,6 +36,7 @@ doubleDictionary vars;
 graph *the_graph =0;
 lexStack lexstack;
 macroDictionary macros;
+stringSequence path; 
 int first_line;
 bool unaligned_default = 0;	// Should strings be unaligned by default 
 
@@ -56,7 +57,7 @@ void init_dict();
 void process_frame(linedesc *, frame *, frame *);
 
 // defined in grap_lex.l
-extern bool include_file(String *, int i=0);
+extern bool include_file(String *, int =0, bool=true);
 extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
 extern void lex_begin_copy( String*s=0);
@@ -76,7 +77,7 @@ int in_copy=0;
 //  extern char *optarg;
 //  extern int optind;
 
-const char *opts = "d:lDvu";
+const char *opts = "d:lDvuM:";
 
 // Classes for various for_each calls
 
@@ -1778,6 +1779,7 @@ void init_dict() {
 int main(int argc, char** argv) {
     String defines=DEFINES;
     String fname;
+    String pathstring;
     int use_defines = 1;
     char c;
 
@@ -1797,17 +1799,48 @@ int main(int argc, char** argv) {
 	    case 'u':
 		unaligned_default = 1;
 		break;
+	    case 'M':
+		pathstring = (pathstring + ":") + optarg;
+		break;
 	}
+    pathstring += (pathstring.length() > 0) ? ":." : ".";
+
+    // Convert the colon separated file path into a sequence
+    while (pathstring.length()) {
+	String::size_type p = pathstring.find(':');
+	String *s;
+
+	if ( pathstring[p] == ':' ) {
+	    if ( p != 0 ) {
+		s = new String(pathstring.substr(0,p));
+		pathstring.erase(0,p+1);
+	    }
+	    else {
+		pathstring.erase(0,1);
+		continue;
+	    }
+	}
+	else {
+	    s = new String(pathstring);
+	    pathstring.erase(0,String::npos);
+	}
+	path.push_back(s);
+    }
+
     if ( argc == optind ) {
 	fname = "-";
-	include_file(&fname,1);
+	include_file(&fname, 1, false);
     }
     else {
 	for ( int i = argc-1; i >= optind; i-- ) {
 	    fname = argv[i];
-	    include_file(&fname,1);
+	    include_file(&fname, 1, false);
 	}
     }
     if ( use_defines) include_file(&defines,1);
     yyparse();
+    for (stringSequence::iterator i = path.begin(); i != path.end(); i++)
+	delete (*i);
+    path.erase(path.begin(),path.end());
+    
 }
