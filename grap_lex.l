@@ -562,7 +562,7 @@ int include_string(String *s, struct for_descriptor *f=0,
 	grap_buffer_state *g;
         grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
 
-        DEBUG("include string\n","");
+        DEBUG("include string %s\n",s->c_str());
 
         if ( gg ) {
             gg->tokenpos = tokenpos;

@@ -2,7 +2,7 @@
 .\" This file is (c) 1998,1999,2000 Ted Faber (faber@lunabase.org) see
 .\" COPYRIGHT for the full copyright and limitations of liabilities.
 .Dd August 19, 1998
-.Os FreeBSD 2.2.7
+.Os
 .Dt GRAP 1
 .Sh NAME
 .Nm grap 
@@ -904,6 +904,7 @@ block.
 .Op No +\(or-\(or*\(or/
 .Ar by_expr
 .Oc
+.Ic do
 .Ar block
 .Bd -filled -offset indent
 This command executes 
@@ -1075,4 +1076,7 @@ adherence to parameter order in the internal commands.
 Although much improved, the error reporting code can still be
 confused.  Notably, an error in a macro is not detected until the
 macro is used, and it produces unusual output in the error message.
-
+.Pp
+Iterating many times over a macro with no newlines can run 
+.Nm
+out of memory.

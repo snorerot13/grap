@@ -1445,13 +1445,15 @@ copy_statement:
 		else c = ($2) ? $2 : $6;
 		if ( c ) {
 		    // lex_begin_copy takes command of the string that's
-		    // passed to it, sio don't delete it.  (I don't
+		    // passed to it, so don't delete it.  (I don't
 		    // remember why I did that...)
-		    if ( c->t == copydesc::until ) lex_begin_copy(c->s);
+		    if ( c->t == copydesc::until ) {
+			lex_begin_copy(c->s);
+			c->s = 0;
+		    }
 		    else {
 			lex_begin_copy(0);
 			include_file(c->s, 0);
-			delete c->s;
 		    }
 		    delete c;
 		}

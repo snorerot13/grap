@@ -182,5 +182,12 @@ class copydesc {
     typedef enum { fname, until} type;
     type t;
     String *s;
+    copydesc() : t(fname), s(0) {} 
+    ~copydesc() {
+	if ( s ) {
+	    delete s;
+	    s = 0;
+	}
+    }
 };
 #endif
