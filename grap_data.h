@@ -7,6 +7,7 @@
 #endif
 
 #include <stl.h>
+#include <ctype.h>
 
 
 // These should be replaced by the standard string library, but under
@@ -404,25 +405,38 @@ public:
     }
     
     String *invoke() {
-	String *s = new String;
-	int i=0;
-	int argn;
+	String *s = new String;	// The expanded macro
+	int argn =0;		// the number of the arg to interpolate
+	int dig;		// Number of digits seen after this $
+	int i=0;		// the current character offset
 
 	while ((*text)[i] != '\0' ) {
 	    switch ((*text)[i] ) {
 		default:
-		    *s += (*text)[i];
+		    *s += (*text)[i++];
 		    break;
 		case '$':
+		    dig = 0;
 		    i++;
-		    argn = (*text)[i] - 0x30;
-		    if ( argn > 0 || argn <= numargs ) {
+		    while (isdigit((*text)[i])) {
+			argn *= 10;
+			argn += (*text)[i] - 0x30;
+			i++; dig++;
+		    }
+		    if ( argn > 0 && argn <= numargs ) {
 			if ( arg[argn-1] )
 			    *s += *(arg[argn-1]);
 		    }
+		    argn = 0;
+		    // If there was no digit after the $ leave the $
+		    // untouched and leave i as the offset of the
+		    // character immediately following the $
+		    
+		    if ( !dig ) {
+			*s += '$';
+		    }
 		    break;
 	    }
-	    i++;
 	}
 	next_arg = 0;
 	for ( i = 0 ; i < numargs; i ++ ) {

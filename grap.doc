@@ -980,10 +980,12 @@ span multiple lines, it should end in a semicolon to avoid parsing
 errors.
 .Pp
 Macros can take parameters, too.  If a macro call is followed by a
-parenthesized, comma-separated list the values $1-$9 will be replaced
-in the macro with the elements of the list.  This parsing is very
-rudimentary, no nesting or parentheses or escaping of commas is
-allowed.
+parenthesized, comma-separated list the values starting with $1 will
+be replaced in the macro with the elements of the list.  A $ not
+followed by a digit is left unchanged.  This parsing
+is very rudimentary, no nesting or parentheses or escaping of commas
+is allowed.  Also, there is no way to say argument 1 followed by a
+digit (${1}0 in sh(1)).
 .Pp
 The following will draw a line with slope 1.
 .Bd -literal -offset indent-two

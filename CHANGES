@@ -1,6 +1,6 @@
 Change log
 
-0.93a: bug fix: deleting grap_buffer_state contents twice on error, allow 
+1.0: bug fix: deleting grap_buffer_state contents twice on error, allow 
 more than one shift description on ticks, grids, and labels.  Thanks to
 Anindo Banerjea at ISI for spotting my misimplementation.
 
@@ -15,6 +15,13 @@ work now.  (If the { } is treated as a macro defined and expanded on
 the spot, the grap parser sees y = y + 1x = x + 1 and cannot parse the
 expression y+1x).  The new behavior is both more intuitive and more in
 line with previous grap implementations.
+
+More from Anindo: expansion of macro arguments assumed that the only
+possible character following a dollar sign was a single digit.  This
+caused problems both when a non-digit followed and the $ was literal,
+and when the intent was to access an argument with an index greater
+than 9.  Argument expansion now only expands when a $ is followed by 1
+or more digits, and includes all the digits in the index.
 
 0.92a: bug fix - string equality check.  Small change to Makefile.in
 to support default Solaris behavior.  Added -v for version info.  Some
