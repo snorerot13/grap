@@ -822,7 +822,7 @@ int main(int argc, char** argv) {
     string fname;
     string pathstring;
     int use_defines = 1;
-    char c;
+    int c;
 
     if (getenv("GRAP_DEFINES"))
 	defines = getenv("GRAP_DEFINES");

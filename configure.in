@@ -49,6 +49,17 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(snprintf random rand)
 AC_REPLACE_FUNCS(strdup)
 
+if test $ac_cv_func_snprintf = "yes" ; then
+	AC_CACHE_CHECK(for declaration of snprintf,grap_cv_decl_snprintf,
+		AC_EGREP_CPP(snprintf,
+#include <stdio.h>
+,grap_cv_decl_snprintf="yes",grap_cv_decl_snprintf="no"))
+	if test $grap_cv_decl_snprintf = "yes"; then
+		AC_DEFINE(SNPRINTF_DECLARED)
+	fi
+fi
+
+
 if test $ac_cv_func_random = "no" -a $ac_cv_func_rand = "no";  then
 AC_MSG_ERROR(grap requires either random or rand)
 fi

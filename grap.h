@@ -44,6 +44,13 @@ inline int snprintf(char *s, int lim, const char *fmt, double d) {
 
     return tot;
 }
+#else
+// AIX seems to have snprintf, but not prototype it..
+#ifndef SNPRINTF_DECLARED
+extern "C" {
+    int snprintf(char *, size_t, const char *, ...);
+}
+#endif
 #endif
 
 using namespace std;
