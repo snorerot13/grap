@@ -752,10 +752,8 @@ copy "boyhts.d"
 .KS
 .PP
 The same data with a linear regression, and the 90% confidence
-intervals drawn as lines.  My 
-.I grap 
-doesn't allow an assignment statement at the right hand side of an
-assignment statement, so those statements are expanded.  (Bentley and
+intervals drawn as lines.  Note the cascading assignment
+statements (patch courtesy of Bruce Lilly).  (Bentley and
 Kernigan's data is in centimeters, mine is in inches, so a different
 conversion to feet is used.)
 .EQ
@@ -768,7 +766,7 @@ delim off
 \&label bot "Heights of Boys in the US Ages 2-18"
 \&cmpft = 12
 \&minx = 1e12; maxx = -1e12
-\&n = 0; sigx = 0; sigx2 = 0; sigy = 0; sigxy = 0;
+\&n = sigx = sigx2 = sigy = sigxy = 0;
 \&copy "boyhts.d" thru {
 \&	line from $1, $2/cmpft to $1, $4/cmpft
 \&	ty = $3 / cmpft
@@ -792,7 +790,7 @@ label left "Heights in Feet"
 label bot "Heights of Boys in the US Ages 2-18"
 cmpft = 12
 minx = 1e12; maxx = -1e12
-n = 0; sigx = 0; sigx2 = 0; sigy = 0; sigxy = 0;
+n = sigx = sigx2 = sigy = sigxy = 0;
 copy "boyhts.d" thru {
 	line from $1, $2/cmpft to $1, $4/cmpft
 	ty = $3 / cmpft

@@ -174,4 +174,11 @@ public:
 	return s;		
     }
 };
+
+class copydesc {
+ public:
+    typedef enum { fname, until} type;
+    type t;
+    String *s;
+};
 #endif

@@ -173,12 +173,13 @@ public:
     axisdesc axistype;
     axis axisname;
     strmod stringmod;
+    copydesc *copyd;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
-%type <num> opt_wid
+%type <num> opt_wid assignment_statement
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
-%type <string> until_clause START string
+%type <string> START string
 %type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME
@@ -196,6 +197,7 @@ public:
 %type <axisname> log_desc
 %type <line_list> COPYTEXT
 %type <macro_val> MACRO
+%type <copyd> until_clause
 %left OR AND
 %right NOT
 %left EQ NEQ LT GT LTE GTE
@@ -613,7 +615,24 @@ assignment_statement:
 		    d = new double($3);
 		    vars[*$1] = d;
 		}
+		$$ = *d;
 	    }
+|	IDENT EQUALS assignment_statement
+ 	    {
+ 		double *d;
+ 		doubleDictionary::iterator di;
+ 		
+ 		if ( ( di = vars.find(*$1)) != vars.end() ) {
+ 		    d = (*di).second;
+ 		    *d = $3;
+ 		}
+ 		else {
+ 		    d = new double($3);
+ 		    vars[*$1] = d;
+ 		}
+ 		$$ = *d;
+  	    }
+;
 
 point:
 	opt_coordname expr COMMA expr
@@ -1271,7 +1290,16 @@ until_clause:
 |	UNTIL string
 	    {
 		unquote($2);
-		$$ = $2;
+		$$ = new copydesc;
+		$$->t = copydesc::until;
+		$$->s = $2;
+	    }
+| 	string
+            {
+		unquote($1);
+		$$ = new copydesc;
+		$$->t = copydesc::fname;
+		$$->s = $1;
 	    }
 ;
 
@@ -1281,15 +1309,21 @@ copy_statement:
 		unquote($2);
 		if (!include_file($2)) return 0;
 	    }
-|	COPY opt_string until_clause THRU { lex_hunt_macro(); } MACRO SEP
+|	COPY until_clause THRU { lex_hunt_macro(); } MACRO SEP
 	    {
-		if ( $2 && $3 ) {
-		    yyerror("Can't specify both filename and until");
-		}
-		lex_begin_copy($3);
+//  		if ( $2 && $3 ) {
+//  		    yyerror("Can't specify both filename and until");
+//  		}
 		if ( $2 ) {
-		    unquote($2);
-		    include_file($2);
+		    // lex_begin_copy takes command of the string that's
+		    // passed to it, sio don't delete it.  (I don't
+		    // remember why I did that...)
+		    if ( $2->t == copydesc::until ) lex_begin_copy($2->s);
+		    else {
+			lex_begin_copy(0);
+			include_file($2->s);
+			delete $2->s;
+		    }
 		    delete $2;
 		}
 	    }
@@ -1302,36 +1336,36 @@ copy_statement:
 
 		expand = new String;
 
-		while ( $9 && !$9->empty() ) {
+		while ( $8 && !$8->empty() ) {
 		    int i = 0;
 		    t = new String;
 		    
-		    s = $9->front();
-		    $9->pop_front();
+		    s = $8->front();
+		    $8->pop_front();
 		    lim = s->length();
 		    
 		    while ( i < lim ) {
 			if ( (*s)[i] == ' ' || (*s)[i] == '\t' ) {
 			    if ( t->length() ) {
-				if ( $6->add_arg(t)) 
+				if ( $5->add_arg(t)) 
 				    t = new String;
 			    }
 			} else *t += (*s)[i];
 			i++;
 		    }
-		    if ( t->length() ) $6->add_arg(t);
+		    if ( t->length() ) $5->add_arg(t);
 		    else if (t) delete t;
-		    t = $6->invoke();
+		    t = $5->invoke();
 		    *expand += *t;
 		    delete t;
 		    delete s;
 		}
 		include_string(expand,0,GMACRO);
 		delete expand;
-		delete $9;
+		delete $8;
 		// don't delete defined macros
-		if ( !$6->name)
-		    delete $6;
+		if ( !$5->name)
+		    delete $5;
 	    }
 ;
 
