@@ -912,6 +912,7 @@ first x value.
 1 2 3
 4 5 6
 .Ed
+.sp
 Will plot points using the default line style at (1,2), (1,3),(4,5)
 and (4,6).  A simple way to plot a set on numbers in a file named 
 .Pa ./data
@@ -920,7 +921,6 @@ is:
 .G1
 copy "./data"
 .G2
-.Ed
 .Ed
 .Sh FILES
 .Pa DEFINES
