@@ -19,31 +19,22 @@ MKDIR=mkdir
 LEX=@LEX@
 YACC=@YACC@
 CXX=@CXX@
+LD=${CXX}
 LIBOBJS=@LIBOBJS@
-PERL=@PERL@
 MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
-DISTDIR=grap-1.20pre6
+DISTDIR=grap-1.20pre7
 SOURCES=grap.cc grap_lex.cc *.cc
 OS_VERSION=@OS_VERSION@
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
-# CXXFLAGS = -pipe @GXXFLAGS@ @DEFS@ 
 
 # To suppress optimization of certain files under g++ where
 # optimization is costly at compilation time and of minimial use at
 # runtime.
 SUPPRESS_OPT=@SUPPRESS_OPT@
 NO_UNDEF=@NO_UNDEF@
-
-EXE=@EXEEXT@
-CKSUM_PROG=@CKSUM_PROG@
-
-# solaris make uses these as defaults:
-
-CCC=$(CXX)
-CCFLAGS=$(CXXFLAGS)
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
 	version.o $(LIBOBJS)
@@ -52,7 +43,6 @@ VERYCLEANFILES=grap.cc grap_lex.cc
 SPOTLESSFILES=
 
 include Makefile.common
-
 
 grap:	.depend $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap

@@ -9,7 +9,6 @@ examples/hist.awk
 examples/hist2.awk
 examples/internet.d
 examples/prof2.d
-examples/seats.pl
 examples/states.d
 examples/states2.d
 examples/states3.d
