@@ -413,8 +413,8 @@ linedesc:
 ;
 
 draw_statement:
-	DRAW opt_ident opt_linedesc opt_display_string SEP
-	    { draw_statement($2, $3, $4); }
+	DRAW { lex_no_coord(); } opt_ident opt_linedesc opt_display_string SEP
+	    { draw_statement($3, $4, $5); lex_coord_ok(); }
 ;
 
 num_list:

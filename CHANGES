@@ -1,10 +1,12 @@
 Change log
 
-1.23: made it possible to disable sprintf which is a potential security hole.  Still to do:
+1.24: Fixed a bug parsing draw/new with no line descriptions.  Thanks to
+Robert W. Numrich for spotting it.
 
-fix plot
+1.23: made it possible to disable sprintf and other calls to sprintf(3)
+with a user given format string, which is a potential security hole.
 
-disable plot formatting
+Fixed a plot bug I found while diaabling that.
 
 1.22: John Heidemann caught a bug with respect to large sizes and size
 changes in titles.  Those large szie changes are now supported.  Generally

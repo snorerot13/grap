@@ -20,6 +20,9 @@
 #undef OPTARG_DEFINED
 #undef SPRINTF_NOT_INT
 #undef GRAP_SAFER
+#undef PACKAGE_VERSION
+#undef PACKAGE_BUGREPORT
+#undef OS_VERSION
 
 #undef DEFINES 
 

@@ -29,8 +29,7 @@ MKDEP= 	@MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.23
-DISTDIR=grap-${VERSION}
+DISTDIR=@PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
 
@@ -72,10 +71,6 @@ grap_tokenizer.o:	grap_tokenizer.cc
 # warning under g++.
 grap_lex.o:	grap_lex.cc
 	${CXX} ${CXXFLAGS} ${NO_UNDEF} -c grap_lex.cc
-
-# Only grap_parse.cc needs to have the version defined.
-grap_parse.o:	grap_parse.cc
-	${CXX} ${CXXFLAGS} -DVERSION="\"${VERSION}\"" -DOS_VERSION=\""@OS_VERSION@"\" -c grap_parse.cc
 
 y.output:	grap.y
 	${YACC} -v grap.y

@@ -55,7 +55,7 @@ extern int yyparse();
 extern int nlines;
 
 extern macroDictionary macros;
-const char *opts = "d:lDvuM:CVh";
+const char *opts = "d:lDvuM:CVhS";
 
 // Classes for various for_each calls
 
@@ -295,18 +295,19 @@ void plot_statement(double val, DisplayString *fmt, point *pt) {
     stringlist *seq = new stringlist;
     DisplayString *s;
 
-    if ( fmt ) {
+    if ( fmt && do_sprintf ) {
 	unquote(fmt);
 	s = new DisplayString(val,fmt);
-	delete fmt;
     }
     else s = new DisplayString(val);
+   
+    // Delete format whether or not we used it (delete on 0 is OK)
+    delete fmt;
 
     quote(s);
     seq->push_back(s);
 
     the_graph->new_plot(seq,pt);
-    delete pt;
 }
 
 // Add a point to the current line (or the named line if ident is
@@ -383,7 +384,7 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, DisplayString *r
     ticklist *tl;
 
     tl = new ticklist;
-    if ( rfmt ) {
+    if ( rfmt && do_sprintf) {
 	unquote(rfmt);
 	fmt = new DisplayString(*rfmt);
 	delete rfmt;
@@ -815,8 +816,8 @@ int yyerror(char *s) {
 }
 
 void usage() {
-    cerr << "Usage: grap [-h] [-d defines] [-l] [-D] [-V] [-v] [-u] " << 
-	"[-M path] [-C] [files]" << endl;
+    cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " << 
+	"[-M path] [files]" << endl;
     cerr << "\t-h\tprint this list and exit (also --help)" << endl;
     cerr << "\t-d\tuse given defines file" << endl;
     cerr << "\t-D\tuse no defines file" << endl;
@@ -826,7 +827,14 @@ void usage() {
     cerr << "\t-u\tforce graph labels to be unaligned by default" << endl;
     cerr << "\t-M\tspecify search path for files" << endl;
     cerr << "\t-C\tcompatibility mode" << endl;
+    cerr << "\t-S\tsafer mode, no internal user sprintf calls" << endl;
     cerr << "See the man page for more information." << endl;
+    exit(5);
+}
+
+inline void version() {
+    cout << "grap " << PACKAGE_VERSION << " compiled under ";
+    cout << OS_VERSION << " report bugs to " << PACKAGE_BUGREPORT << endl;
     exit(5);
 }
 
@@ -847,11 +855,7 @@ int main(int argc, char** argv) {
     for (int i = 1; i< argc; i++ ) {
 	string av(argv[i]);
 	
-	if ( av == "--version" ) {
-	    cout << "grap " << VERSION << " compiled under ";
-	    cout << OS_VERSION << endl;
-	    exit(5);
-	}
+	if ( av == "--version" ) version();
 	else if ( av == "--help" ) usage();
     }
 
@@ -866,9 +870,8 @@ int main(int argc, char** argv) {
 		use_defines = false;
 		break;
 	    case 'v':
-		cout << "grap " << VERSION << " compiled under ";
-		cout << OS_VERSION << endl;
-		exit(5);
+		version();
+		break;
 	    case 'V':
 		print_lex_debug = true;
 		break;

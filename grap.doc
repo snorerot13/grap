@@ -442,7 +442,27 @@ is converted to a string and placed on the graph.
 is a 
 .Xr printf 3
 format string.  Only formatting escapes for printing
-floating point numbers make sense.
+floating point numbers make sense.  The format string is only respected
+if the 
+.Ic sprintf 
+command is also active.  See the description of 
+.Ic sprintf
+for the various ways to disable it.  
+.Ic Plot
+and 
+.Ic sprintf
+respond differently when 
+.Nm
+is running safely.  
+.Ic Sprintf
+ignores any arguments, passing the format string through without
+substitution. 
+.Ic plot
+ignores the format string completely, plotting
+.Ar expr
+using the 
+.Qq %g 
+format.
 .Pp
 Points are specified the same way as for 
 .Ic next
@@ -587,6 +607,14 @@ To place ticks with no labels, specify
 .Ar format_string 
 as
 .Qq \& .
+.Pp
+If 
+.Ic sprintf
+is disabled, 
+.Ic ticks
+behaves as
+.Ic plot
+with respect to the format string.
 .Pp
 The labels on the ticks may be shifted by specifying a direction and
 the distance in inches to offset the label.  That is the optional
@@ -755,6 +783,14 @@ line descriptions are allowed.
 Grids are labelled by default.  To omit labels, specify the format
 string as 
 .Qq \& .
+.Pp
+If 
+.Ic sprintf
+is disabled, 
+.Ic grid
+behaves as
+.Ic plot
+with respect to the format string.
 .Ed
 .Pp
 .Ic label

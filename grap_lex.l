@@ -311,6 +311,7 @@ log[ \t]+(x|y|log)	{
 			   
 			   debug("Coord search");
 			   debug(first, second);
+			   debug(active.count(first), active.count(second));
 			   
 			   if (active.count(first) || active.count(second)) {
 			       debug("<REJECTED_COORD>");
@@ -382,7 +383,7 @@ log[ \t]+(x|y|log)	{
 			       
 				   if ( k.clear ) active.clear();
 				   for ( i = 0; i < k.add.size(); i++ ) 
-				       debug("added", k.add[i]);
+				       active.insert(k.add[i]);
 				   for ( i = 0; i < k.remove.size(); i++) 
 				       active.erase(k.remove[i]);
 

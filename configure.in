@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap.y)
+AC_INIT(grap, 1.24pre1, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
@@ -104,13 +104,13 @@ else
 fi
 AC_SUBST(INSTALL_DEPS)
 
-AC_MSG_CHECKING(whether to force safe mode)
-AC_ARG_WITH(safe-mode,
-[  --with-safe-mode        disable sprintf to avoid attacks],
-ac_cv_grap_safe_mode="yes",  
-AC_CACHE_VAL(ac_cv_grap_safe_mode, ac_cv_grap_safe_mode="no"))
-AC_MSG_RESULT($ac_cv_grap_safe_mode)
-if test $ac_cv_grap_safe_mode = "yes" ; then
+AC_MSG_CHECKING(whether to force safer mode)
+AC_ARG_WITH(safer-mode,
+[  --with-safer-mode       disable sprintf to avoid attacks],
+ac_cv_grap_safer_mode="yes",  
+AC_CACHE_VAL(ac_cv_grap_safer_mode, ac_cv_grap_safer_mode="no"))
+AC_MSG_RESULT($ac_cv_grap_safer_mode)
+if test $ac_cv_grap_safer_mode = "yes" ; then
 	AC_DEFINE(GRAP_SAFER)
 fi
 
