@@ -16,7 +16,7 @@ version of grap, so I built one.
 %setup
 
 %build
-./configure --prefix=/usr/
+./configure --prefix=/usr/ --mandir=/usr/share/man
 make 
 
 %install
@@ -31,5 +31,5 @@ make install
 %doc CHANGES
 
 /usr/bin/grap
-/usr/man/man1/grap.1
+/usr/share/man/man1/grap.1
 /usr/share/grap/
