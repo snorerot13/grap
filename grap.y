@@ -42,6 +42,7 @@ macroDictionary macros;
 int first_line;
 
 extern int lex_expand_macro;
+extern char *version; 
 
 line* defline;
 coord *defcoord;
@@ -74,7 +75,7 @@ extern int optopt;
 extern int opterr;
 extern int optreset;
 
-const char *opts = "d:D";
+const char *opts = "d:Dv";
 
 // Classes for various for_each calls
 
@@ -216,7 +217,7 @@ graph :
 		the_graph->begin_block($1);
 	    } prog END
             {
-		the_graph->draw();
+		the_graph->draw(0);
 		the_graph->end_block();
 	    }
 ;
@@ -1247,6 +1248,7 @@ copy_statement:
 			i++;
 		    }
 		    if ( t->strlen() ) $6->add_arg(t);
+		    else if (t) delete t;
 		    t = $6->invoke();
 		    *expand += t;
 		    delete t;
@@ -1255,7 +1257,9 @@ copy_statement:
 		include_string(expand,0,GMACRO);
 		delete expand;
 		delete $9;
-		delete $6;
+		// don't delete defined macros
+		if ( !$6->name)
+		    delete $6;
 	    }
 ;
 
@@ -1271,7 +1275,7 @@ define_statement:
 			m->text = $5;
 		    }
 		} else {
-		    m = new macro($5);
+		    m = new macro($5,$3);
 		    macros[$3] = m;
 		}
 	    }
@@ -1344,7 +1348,7 @@ graph_statement:
 	GRAPH IDENT { lex_begin_rest_of_line(); } REST SEP
 	    {
 		if ( !first_line ) {
-		    the_graph->draw();
+		    the_graph->draw(0);
 		    the_graph->init($2, $4);
 		    init_dict();
 		}
@@ -1494,6 +1498,9 @@ int main(int argc, char** argv) {
 	    case 'D':
 		use_defines = 0;
 		break;
+	    case 'v':
+		cout << version << endl;
+		exit(0);
 	}
     if ( argc == optind ) {
 	fname = "-";

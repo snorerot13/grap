@@ -1,7 +1,9 @@
 Change log
 
 0.92a: bug fix - string equality check.  Small change to Makefile.in
-to support default Solaris behavior.
+to support default Solaris behavior.  Added -v for version info.  Some
+general internals fiddling (I'd like to call it cleanup, but I think
+that's generous).
 
 0.91a: small changes for the RPM
 

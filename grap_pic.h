@@ -93,11 +93,14 @@ class Picgraph : public graph {
 public:
     Picgraph() :
 	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0),
-	pframe(0) {}
+	pframe(0)
+	{ }
     
     
     ~Picgraph() {
 	sfree_f sfree;
+
+	// pframe should always be a copy of base, so don't delete it
 
 	if ( ps_param ) delete ps_param;
 	if ( name ) delete name;
@@ -141,6 +144,6 @@ public:
 	Picbox *pb = new Picbox(b);
 	objs.push_back(pb);
     }
-    void draw();
+    void draw(frame *);
 };
 #endif

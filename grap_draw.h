@@ -322,7 +322,7 @@ public:
 	}
     }
 
-    ~frame() {
+    virtual ~frame() {
 	for ( int i = 0; i < 4; i++ ) {
 	    if ( label[i] ) {
 		if ( !label[i]->empty() ) 
@@ -491,7 +491,7 @@ public:
     box(const box &b) : p1(b.p1), p2(b.p2), ld(b.ld) { }
 };
 
-class graph {
+class graph : public drawable {
     // Catchall data structure for each graph in progress.  It will be
     // the base class for various subclasses for specific output
     // devices
@@ -550,21 +550,10 @@ public:
     coordinateDictionary coords;// The coodrinate systems defined
     lineDictionary lines;	// The lines being defined for this graph
     frame *base;		// The frame surrounding this graph
-    drawable *the_frame;	// This is the same as base, but drawable
     bool visible;		// is this graph visible?
     
-    graph() : objs(), coords(), lines(), base(0), the_frame(0), visible(0) { }
+    graph() : objs(), coords(), lines(), base(0), visible(0) { }
     virtual ~graph() { init();}
-
-    virtual void draw() {
-	displayer_f displayer(base);
-
-	for_each(coords.begin(), coords.end(), addmargin);
-	if ( visible ) {
-	    the_frame->draw(base);
-	    for_each(objs.begin(), objs.end(), displayer);
-	}
-    };
 
     // This clears graph parameters
     virtual void init(String * =0, String* =0 ) {
@@ -581,8 +570,10 @@ public:
 	    for_each(lines.begin(), lines.end(), line_freer);
 	    lines.erase(lines.begin(), lines.end());
 	}
-	// Subclasses allocate and release base & the_frame because
-	// they depend on the drawing model
+	if ( base ) {
+	    delete base;
+	    base =0;
+	}
     }
 
     // Called when a .G1 is encountered

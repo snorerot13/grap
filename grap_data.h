@@ -368,7 +368,13 @@ public:
 */
 class macro {
 public:
-    macro(String *t=0) : next_arg(0), text(t) {
+    static const int numargs = 9;	// maximum number of arguments
+    int next_arg;			// the index into the next argument
+    String *text;			// the text of the macro
+    String *arg[numargs];		// the current argument values
+    String *name;			// the name of the macro if it's in a
+                                        // dictionary.
+    macro(String *t=0, String *n =0) : next_arg(0), text(t), name(n) {
 	for ( int i = 0; i < numargs ; i++ )
 	    arg[i] = 0;
     }
@@ -376,6 +382,10 @@ public:
 	if ( text ) {
 	    delete text;
 	    text = 0;
+	}
+	if ( name ) {
+	    delete name;
+	    name = 0;
 	}
 	for ( int i = 0; i < numargs ; i++ )
 	    if ( arg[i] ) {
@@ -421,9 +431,5 @@ public:
 	}
 	return s;		
     }
-    static const int numargs = 9;
-    int next_arg;
-    String *text;
-    String *arg[numargs];
 };
 #endif

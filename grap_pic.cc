@@ -31,8 +31,7 @@ public:
 	line_convert_f(graph *gg) : g(gg) { }
 	int operator()(lineDictionary::value_type li) {
 	    line *l = (li).second;
-	    Picline *pl = new Picline(*l);
-	    g->objs.push_back(pl);
+	    g->add_line(*l);
 	    return 0;
 	}
 };
@@ -76,30 +75,25 @@ public:
 void Picgraph::init(String *n=0, String* p=0) {
     // Start a new graph, but maybe not a new block.
     
-    graph::init();	// Init the base classes parameters
+    graph::init();	// clear the base classes parameters
 
-    if ( pframe) {
-	delete pframe;
-	pframe = 0; base = 0; the_frame = 0;
-    }
-
-    if ( (pframe = new Picframe) ) {
-	base = pframe;
-	the_frame = pframe;
-    }
+    if ( !base ) 
+	base = pframe = new Picframe;
     if ( n ) name = new String(n);
     if ( p ) pos = new String(p);
 }
 	
-void Picgraph::draw() {
+void Picgraph::draw(frame *) {
 // Do the work of drawing the current graph.  Convert non-drawable
 // lines to Piclines, and put them in the object list for this graph.
 // Do pic specific setup for the graph, and let the base class plot
 // all the elements (they're all pic objects by now).  This also
 // clears out the pic specific data structures as they're drawn.
 
-    // Lots of functors to output, convert aand delete list elements
+    // Lots of functors to output, convert, draw and delete list elements
     
+    displayer_f displayer(pframe); 	// call draw on the object.  This is
+                                        // an embedded class of graph.
     string_out_f string_out(cout);	// output a string
     string_del_f string_del;		// delete a string
     line_convert_f line_convert(this);  // convert a generic line to
@@ -134,7 +128,12 @@ void Picgraph::draw() {
 
 	// The graph itself
 	cout << "[" << endl;
-	graph::draw();
+
+	for_each(coords.begin(), coords.end(), addmargin);
+	if ( visible ) {
+	    pframe->draw(pframe);
+	    for_each(objs.begin(), objs.end(), displayer);
+	}
 	cout << "]";
 
 	// Positioning info relative to another graph in this block

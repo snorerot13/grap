@@ -70,6 +70,9 @@ The
 .Fl D
 option inhibits the reading of any initial macros file.
 .Pp
+.Fl v
+prints the version on the standard output and exits.
+.Pp
 All
 .Nm
 commands are included between 

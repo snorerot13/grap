@@ -332,6 +332,7 @@ atan2|min|max		{
 					    } else {
 						macro *m = new macro(macrotext);
 						yylval.macro_val = m;
+						macrotext = 0;
 						return MACRO;
 					    }
 					}
@@ -501,8 +502,11 @@ void macro_args(macro *m) {
 	else slashcount = 0;
 	*arg += (char) c;
     }
-    if ( c == ')' && arg->strlen() )
+    if ( c == ')' && arg->strlen() ) {
 	if ( !m->add_arg(arg)) delete arg;
+    }
+    else
+	if (arg) delete arg;
 }
 
 void lex_begin_copy(String *s=0) {
