@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap, 1.25, faber@lunabase.org)
+AC_INIT(grap, 1.26pre, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 

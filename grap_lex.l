@@ -720,17 +720,10 @@ atan2|min|max		{
 // Most of these that begin with lex_ are an interface from the parser
 // (grap.y)
 
-// Store the line number info in the output text as a .lf.  This isn't
-// quite right yet.
-void linenum() {
-    if (lexstack.empty()) return;
-    struct grap_buffer_state *g = lexstack.front();
-
-    if ( g->type == GFILE) {
-	cout << ".lf " <<  g->line << " " << 
-	    ((g->name ) ? g->name->c_str() : "") << endl;;
-    }
-}
+// XXX: Store the line number info in the output text as a .lf.  This isn't
+// quite right yet.  It's nulled out because it was worse than "not right" it
+// was emitting text outside the PS/PE.
+void linenum() { }
 
 // Put the given file into the input stream.  If rs is true, report
 // start tokens from that buffer.  If usepath is true the grap path is
