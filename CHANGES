@@ -1,5 +1,17 @@
 Change log
 
+0.98b: Bruce Lilly reported some bugs and DWP incompatibilities,
+mainly with negative numbers in number lists and comma separations in
+them.  He also compiles in UWIN under NT, which broke autoconf in some
+weird ways.  The most important of these necessitated adding a check
+to ensure that install supports -d.
+
+His test case is in the example file now.
+
+While tinkering with those autoconf changes I found that grap didn't
+compile under g++ 2.7.2.1 any more.  Good thing that 0.97b wasn't
+really released.  All is well again.
+
 0.97b: Finally have a copy of egcs, so grap will now compile under it
 using both the stl and the standard string class.  What do you know,
 compiling under egcs halves the run time.  This is roughly half due to
