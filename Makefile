@@ -1,8 +1,16 @@
 .NULL: .out
 
+BINDIR=/usr/local/bin
+DEFINESDIR=/usr/share/grap
+MANDIR=/usr/local/man/man1
+INSTALL=install
+RM=rm
+RMDIR=rmdir
+MKDIR=mkdir
+
 LDLIBS=-ll -ly
 CXXFLAGS=-g
-CXXFLAGS += -DDEFINES=\"/usr/share/grap/grap.defines\"
+CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
 OBJS=grap.o grap_lex.o grap_draw.o
 
 .o.out:
@@ -33,4 +41,18 @@ y.output:	grap.y
 	$(YACC) -v $(.ALLSRC)
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h pic.h
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h
+
+install:	grap grap.defines
+	$(INSTALL) -c -g bin -o root -m 755 grap $(BINDIR)
+	$(INSTALL) -d -g bin -o root -m 755 $(DEFINESDIR)
+	$(INSTALL) -d -g bin -o root -m 755 $(DEFINESDIR)/examples
+	$(INSTALL) -c -g bin -o root -m 644 grap.defines $(DEFINESDIR)
+	$(INSTALL) -c -g bin -o root -m 644 examples/*.d examples/*.ms examples/Makefile $(DEFINESDIR)/examples
+
+uninstall:
+	$(RM) $(BINDIR)/grap
+	$(RM) $(DEFINESDIR)/grap.defines
+	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile
+	$(RMDIR) $(DEFINESDIR)/examples
+	$(RMDIR) $(DEFINESDIR)
