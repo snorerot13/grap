@@ -1,5 +1,12 @@
 Change log
 
+1.03: Added the -m path option to make groff handle grap better.  I
+also added the GRAP_DEFINES environment variable to change the defines
+file.  I also added a new source file, grap_parse.cc in an attempt to
+break up the monolithic and gigantic grap.y.  I had some small
+success.  In the course of creating grap_parse.cc I think I caught
+some memory leaks, too.
+
 1.02: Bruce's error handling code produced a few inconsistencies
 (eating the last newline of a file, and adding one befor ethe file.  I
 think it no longer does that.  In addition I took care of a error

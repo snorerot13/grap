@@ -71,7 +71,10 @@ option specifies a file of macro definitions to be read at startup,
 and defaults to DEFINES.
 The
 .Fl D
-option inhibits the reading of any initial macros file.
+option inhibits the reading of any initial macros file.  The defines
+file can also be given using the 
+.Ev GRAP_DEFINES
+environment variable. (See below).
 .Pp
 .Fl v
 prints the version on the standard output and exits.
@@ -1068,9 +1071,9 @@ option will be searched for it.
 .Ev GRAP_DEFINES
 overrides the compiled in location of the defines file, but may be
 overridden by the
-.Dl d
+.Fl d
 or
-.FL D
+.Fl D
 flags.
 .Sh FILES
 .Pa DEFINES
