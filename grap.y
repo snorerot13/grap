@@ -781,11 +781,11 @@ log_desc:
 ;
 
 ident_or_coord:
-            { $$ = new coordid(0,0); }
+            { $$ = new coordid((coord *) 0, (String *) 0); }
 |       IDENT
-            { $$ = new coordid(0,$1); }
+            { $$ = new coordid((coord *) 0,$1); }
 |       COORD_NAME
-            { $$ = new coordid($1,0); }
+            { $$ = new coordid($1, (String *) 0); }
 
 coord_statement:
 	COORD { lex_begin_coord(); } ident_or_coord x_axis_desc y_axis_desc log_list SEP
