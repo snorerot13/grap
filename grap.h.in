@@ -152,11 +152,14 @@ class grap_buffer_state {
     int line;
     int report_start;
     grap_input type;
+    int tokenpos;
     grap_buffer_state() :
-	yy(0), f(0), name(0), line(0), report_start(0), type(GFILE) { }
+	yy(0), f(0), name(0), line(0), report_start(0), type(GFILE),
+	tokenpos(0) { }
     grap_buffer_state(struct yy_buffer_state *yyb, for_descriptor *fo,
-		      String *n, int l, int rs, grap_input t) :
-	yy(yyb), f(fo), name(n), line(l), report_start(rs), type(t) { }
+		      String *n, int l, int rs, grap_input t, int tp=0) :
+	yy(yyb), f(fo), name(n), line(l), report_start(rs), type(t),
+	tokenpos(tp) { }
     // this does *not* call yy_delete_buffer
     ~grap_buffer_state() {
         if ( f ) {

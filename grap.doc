@@ -1071,3 +1071,8 @@ They include the
 .Ic sh
 command not expanding variables and macros, and a more strict
 adherence to parameter order in the internal commands.
+.Pp
+Although much improved, the error reporting code can still be
+confused.  Notably, an error in a macro is not detected until the
+macro is used, and it produces unusual output in the error message.
+

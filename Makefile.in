@@ -19,7 +19,7 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 
-DISTDIR=grap-1.01
+DISTDIR=grap-1.02
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
@@ -85,7 +85,7 @@ clean:
 
 veryclean:
 	${MAKE} clean
-	rm -f config.log config.status config.cache config.h version.cc grap.h
+	rm -f config.log config.status config.cache config.h version.cc grap.h *.tgz
 
 install:	grap grap.defines grap.1
 	strip grap

@@ -107,8 +107,6 @@ public:
 	return strcmp(str,s.str) < 0;
     }
 
-    friend ostream& operator<<(ostream&, String&);
-
     void quote() {
 	int l;
 	if ( len < strlen()+3 ) resize(len+3);
@@ -139,6 +137,22 @@ public:
     }
     const char *c_str() const { return str;}
     int length() { return strlen();}
+
+    ostream& print(ostream& f) const {
+	return f << str;
+    }
+
+    String substr(int i, int n=0) {
+	String s;
+
+	s.resize(strlen());
+	if ( n == 0 || n > strlen()-i )
+	    n = strlen() - i;
+	for ( int j = 0; j < n; j++ )
+	    s.str[j] = str[i+j];
+	s.str[n] = '\0';
+	return s;
+    }
     
 protected:
     char *str;
@@ -161,7 +175,7 @@ protected:
     }
 };
 
-inline ostream& operator<<(ostream& f, String& s) { return f << s.str; }
+inline ostream& operator<<(ostream& f, const String& s) { return s.print(f); }
 
 inline String *dblString(double d, String *f=0) {
     return new String(d,f);

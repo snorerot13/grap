@@ -61,9 +61,9 @@ extern void lex_hunt_macro();
 extern int yyparse(void);	// To shut yacc (vs. bison) up.
 void draw_graph();
 void init_graph();
-extern char *pre_context(void);
+extern String pre_context(void);
 extern char *token_context(void);
-extern char *post_context(void);
+extern String post_context(void);
     
 int nlines;
 int in_copy=0;
@@ -1685,27 +1685,29 @@ bar_statement:
 
 int yyerror(char *s) {
     grap_buffer_state *g = 0;
+    int tp= 0;
 
+    cerr << "grap: " << s << endl;
     while ( !lexstack.empty() ) {
 	g = lexstack.front();
 	lexstack.pop_front();
-	cerr << "grap: " << s << endl;
 	switch ( g->type) {
 	    case GFILE:
 		cerr << "Error near line " << g->line << ", " ;
-		if ( g->name ) cerr << "file \"" << *g->name << "\"";
+		if ( g->name ) cerr << "file \"" << *g->name << "\"" << endl;
 		break;
 	    case GMACRO:
 		cerr << "Error near line " << g->line << " " ;
-		cerr << "of macro";
+		cerr << "of macro" << endl;
 		break;
 	    default:
 		break;
 	}
-        cerr << " context is:" << endl << "        " << pre_context();
-	cerr << " >>> " << token_context() << " <<< " << post_context() << endl;
+	tp = g->tokenpos;
 	delete g;
     }
+    cerr << " context is:" << endl << "        " << pre_context();
+    cerr << " >>> " << token_context() << " <<< " << post_context() << endl;
     //abort();
     //exit (1);
     return 0;

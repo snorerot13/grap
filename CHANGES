@@ -1,5 +1,12 @@
 Change log
 
+1.02: Bruce's error handling code produced a few inconsistencies
+(eating the last newline of a file, and adding one befor ethe file.  I
+think it no longer does that.  In addition I took care of a error
+placement bug when the error was in a line containing a macro
+expansion, and changed the error handling from using char * to using
+String s, like the rest of grap.
+
 1.01: Fixed a compilation bug under RedHat 6.1.  Cleaned up autoconf
 and tweaked the makefile.
 

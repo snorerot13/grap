@@ -19,11 +19,11 @@ extern "C" {
 #include "grap_draw.h" 
 #include "y.tab.h"
 
-//#define LEX_DEBUG
+#define LEX_DEBUG
 #ifndef LEX_DEBUG
 #define DEBUG(a,b) {}
 #else
-#define DEBUG(a,b) fprintf(stderr,a,b)
+#define DEBUG(a,b) fprintf(stderr,a,b); fprintf(stderr," %d %d\n",tokenpos, yyleng);
 #endif
 
 int return_macro = 0;
@@ -42,7 +42,7 @@ int lex_expand_macro =1;
 linelist *sl=0;
 String *copy_end, *copy_backstop;
 
-char linebuf[8192 /* large enough for a very long line; as large as YY_READ_BUF_SIZE*/];
+String linebuf; 
 
 extern macroDictionary macros;
 extern graph *the_graph;
@@ -83,12 +83,14 @@ char *f2names[NF2] = {
 %x RESTOFLINE
 %%
 <INITIAL>{
-\n.*$	{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+^.*$ 	{
+          linebuf = yytext;
 	  tokenpos = 0;
+	  REJECT;
+        }
+\n	{
+          DEBUG("<INITIAL> %s","newline");
 	  newline();
-	  if (yyleng > 1)
-		  yyless(1);
-	  DEBUG("<INITIAL>linebuf: %s\n", linebuf);
 	  tokenpos += yyleng;
 	  cout << yytext;
 	}
@@ -108,18 +110,17 @@ char *f2names[NF2] = {
 	}
 }
 <GRAP>{
-\n.*$			{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+^.*$			{
+                          linebuf = yytext;
 			  tokenpos = 0;
+			  REJECT;
+			}
+\\\n 			{ newline(); tokenpos = 0;} 
+\n			{
+                          tokenpos = 0;
 			  newline();
-			  if (yyleng > 1)
-				  yyless(1);
-			  if (continuation) {
-				DEBUG("<GRAP>linebuf: %s\n", linebuf);
-				continuation = 0;
-			  } else {
-				DEBUG("<GRAP>SEP linebuf: %s\n", linebuf);
-				return SEP; 
-			  }
+                          DEBUG("SEP\n",0);
+			  return SEP; 
 			}
 \#.*$
 [ \t]+			tokenpos += yyleng;
@@ -261,22 +262,12 @@ atan2|min|max		{
 
 					DEBUG("<GRAP>End: %s\n",yytext);
 					BEGIN(INITIAL);
-					/* discard whitespace (including newline) */
-//  					{ int c;
-//  						while ((c=yyinput())) {
-//  							if (c == EOF)
-//  								break;
-//  							if (isspace(c))
-//  								continue;
-//  							/* not whitespace or EOF */
-//  							unput(c);
-//  							break;
-//  						}
-//  					}
+                                        // Eat the newline
+                                        yyinput();
 					return END;
 				    }
 				    else YY_BREAK;
-				}				
+				}			
                                 yylval.string = new String(yytext);
                                 DEBUG("Troff: %s\n",yytext);
 				return TROFF;
@@ -299,10 +290,14 @@ atan2|min|max		{
 			id = new String(yytext);
 			if ( lex_expand_macro &&
 			     ( mi = macros.find(*id)) != macros.end() ) {
+                                tokenpos+= yyleng;
 			        m = (*mi).second;
 				delete id;
 				ch = yyinput();
-				if ( ch == '(') macro_args(m);
+				if ( ch == '(') {
+                                    macro_args(m);
+                                    tokenpos++;
+                                }
 				else unput(ch);
 				id = m->invoke();
 				include_string(id);
@@ -322,10 +317,13 @@ atan2|min|max		{
 			    }
 			}
                         }
-\\$			continuation = 1;
 .			tokenpos += yyleng; DEBUG("unknown: %s\n",yytext); return 0;
 }
 <MACROTEXT>{
+^.*$			{
+                          linebuf = yytext;
+			  REJECT;
+			}
 [ \t]+			{
 				slashcount = 0;
 			        tokenpos += yyleng;
@@ -386,13 +384,11 @@ atan2|min|max		{
 					}
 				}
 			}
-\n.*$			{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+\n			{ 
 			  *macrotext += *yytext;
 			  slashcount =0;
 			  tokenpos = 0;
 			  newline();
-			  yyless(1);
-			  DEBUG("<MACROTEXT>linebuf: %s\n", linebuf);
 			  // don't return SEP here
 			}
 .			{
@@ -419,13 +415,13 @@ atan2|min|max		{
 			}
 }
 <COPYSTATE>{
-\n.*$	{ strncpy(linebuf, yytext+1, sizeof(linebuf)-1);
+^.*$	{
+          linebuf = yytext;
+          REJECT;
+	}
+\n	{ 
 	  tokenpos = 0;
 	  newline();
-	  if (yyleng > 1)
-		  yyless(1);
-	  DEBUG("<COPYSTATE>linebuf: %s\n", linebuf);
-	  // don't return SEP here
 	}
 .+ 	{
     String *s;
@@ -518,8 +514,13 @@ bool include_file(String *s, int rs=0) {
     FILE *f;
     char file[MAXPATHLEN];
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
+    grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
 
     if ( s ) {
+        if ( gg ) {
+            gg->tokenpos = tokenpos;
+            tokenpos = 0;
+        }
 	if ( !lexstack.empty()) {
 	    unput('\n');
 	    lexstack.front()->line--;
@@ -561,16 +562,24 @@ void lex_begin_macro_text() {
 int include_string(String *s, struct for_descriptor *f=0,
 		   grap_input it=GMACRO) {
 	char *cbuf;
-	int len;
+        int len;
 	grap_buffer_state *g;
+        grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
+
+        DEBUG("include string\n","");
+
+        if ( gg ) {
+            gg->tokenpos = tokenpos;
+            tokenpos = 0;
+        }
 
 	g = new grap_buffer_state(0, f, 0, 1, 1, it);
 	cbuf = new char[len = s->length()+1];
 
 	strncpy(cbuf,s->c_str(),len-1);
 	cbuf[len-1] = '\0';
-	g->yy = yy_scan_string(cbuf);
 	lexstack.push_front(g);
+	g->yy = yy_scan_string(cbuf);
 	delete cbuf;
 	return 1;
 }
@@ -598,12 +607,14 @@ void macro_args(macro *m) {
 	if ( c == '\\' ) slashcount++;
 	else slashcount = 0;
 	*arg += (char) c;
+        tokenpos++;
     }
     if ( c == ')' && arg->length() ) {
 	if ( !m->add_arg(arg)) delete arg;
     }
     else
 	if (arg) delete arg;
+    tokenpos++;
 }
 
 void lex_begin_copy(String *s=0) {
@@ -674,13 +685,13 @@ int yywrap() {
     }
     // If we get here, we need to switch to the previous buffer
 
-
     yy_delete_buffer(g->yy);
     delete g;
 
     if ( lexstack.empty() ) return 1;
     else {
 	g = lexstack.front();
+        tokenpos = g->tokenpos;
 	yy_switch_to_buffer(g->yy);
     }
 
@@ -694,17 +705,15 @@ void newline() {
     }
 }
 
-char *pre_context(void) {
-    if (!tokenpos)
-	return ("");
-    linebuf[tokenpos-yyleng] = '\0';
-    return (linebuf);
+String pre_context(void) {
+    if (!tokenpos) return "";
+    else return linebuf.substr(0,tokenpos-yyleng);
 }
 
 char *token_context(void) {
     return (yytext);
 }
 
-char *post_context(void) {
-    return (linebuf+tokenpos);
+String post_context(void) {
+    return linebuf.substr(tokenpos);
 }
