@@ -70,6 +70,13 @@ protected:
 };
 
 class Picline : public line, public drawable {
+protected:
+    // Returns true if the coordinate is between 0 and 1 (withing tolerance).
+    inline bool Picline::inbox(double a) {
+	return ( a < 1+EPSILON && a > 0-EPSILON );
+    }
+    bool clipx( double &, double &, double &, double &);
+    bool clip( double &, double &, double &, double &);
 public:
     Picline(line &l) : line(l) { };
     ~Picline() { }

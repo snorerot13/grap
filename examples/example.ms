@@ -2296,3 +2296,181 @@ line from 1998,890 to 1992.5, 890
 line from 1992.5, 890 to 1992.5,940
 .G2
 .KE
+.KS
+This example shows off the new automatic tick generation for named
+coordinate systems.  It is a re-plot of earlier data.  The automatic
+ticks do not look great here because they are generated on a
+logarithmic axis.  Still, it means that the graph can be generated
+without constants in the grap code.
+.DS
+.CW
+\&.G1
+\&define square {"\s-2\(sq\s0"}
+\&frame ht 3 wid 3.5
+\&label left "Population in Millions (Plotted as \(bu)"
+\&label bot "Rank in Population"
+\&label right "Representatives (Plotted as \(sq)"
+\&coord pop log y
+\&coord rep log y
+\&ticks left out auto pop
+\&ticks bot out auto pop
+\&ticks right out auto rep
+\&thisrank = 50
+\&copy "states.d" thru {
+\&	bullet at pop thisrank,$3/1e6
+\&	square at rep thisrank,$2
+\&	thisrank = thisrank -1
+\&}
+\&.G2
+.DE
+.G1
+define square {"\s-2\(sq\s0"}
+frame ht 3 wid 3.5
+label left "Population in Millions (Plotted as \(bu)"
+label bot "Rank in Population"
+label right "Representatives (Plotted as \(sq)"
+coord pop log y
+coord rep log y
+ticks left out auto pop
+ticks bot out auto pop
+ticks right out auto rep
+thisrank = 50
+copy "states.d" thru {
+	bullet at pop thisrank,$3/1e6
+	square at rep thisrank,$2
+	thisrank = thisrank -1
+}
+.G2
+.KE
+.KS
+.PP
+This is a demonstration of the new line clipping.  The right graph is
+a detail of the left, created by simply respecifying the coordinate
+limits.  (The region plotted in the right graph is the dotted
+rectangle in the left.)  Note that the data is clipped leaving the
+area plotted and returning.  The data is the 400 Meter Run Olympic
+data from before.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&graph Main
+\&frame invis ht 2 wid 2.5 left solid bot solid
+\&label left "Time (in seconds)"
+\&label bot "Olympic 400 Meter Run: Winning Times" right 1.75
+\&coord x 1894, 1994 y 42, 56
+\&ticks left out at 44 "44", 46, 48 "48", 50, 52 "52", 54
+\&ticks bot in from 1900 to 1980 by 20
+\&draw solid
+\&copy "400mpairs.d"
+\&bar (1908,46), (1940,49) dashed
+\&# detail graph
+\&graph Detail with .w at Main.Frame.e +(0.1,0)
+\&frame dashed ht 2 wid 2.5 right solid bot solid
+\&label right "Time (in seconds)" 
+\&ticks left off
+\&ticks right on
+\&ticks bot in
+\&draw solid
+\&copy "400mpairs.d"
+\&coord x 1908,1942 y 45,49
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+graph Main
+frame invis ht 2 wid 2.5 left solid bot solid
+label left "Time (in seconds)"
+label bot "Olympic 400 Meter Run: Winning Times" right 1.75
+coord x 1894, 1994 y 42, 56
+ticks left out at 44 "44", 46, 48 "48", 50, 52 "52", 54
+ticks bot in from 1900 to 1980 by 20
+draw solid
+copy "400mpairs.d"
+bar (1908,46), (1940,49) dashed
+# detail graph
+graph Detail with .w at Main.Frame.e +(0.1,0)
+frame dashed ht 2 wid 2.5 right solid bot solid
+label right "Time (in seconds)" 
+ticks left off
+ticks right on
+ticks bot in
+draw solid
+copy "400mpairs.d"
+coord x 1908,1942 y 45,49
+.G2
+.KE
+.KS
+.PP
+Revisiting the boy heights example to demonstrate some other 
+.CW grap
+features.  New to this version is the ability to use x and y directly
+as varaible names anywhere but a 
+.CW coord
+statement.  Fixed as of release
+1.10 is the ability to start a new line of the named style (or the
+default if no name is given) using the 
+.CW new 
+statement.  The variable 
+.CW y
+is directly used in the computation of the regression, and each dashed
+error bar is drawn using the conf line style.  Otherwise this is the
+earlier graph.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&label left "Heights in Feet"
+\&label bot "Heights of Boys in the US Ages 2-18"
+\&cmpft = 12
+\&minx = 1e12; maxx = -1e12
+\&n = sigx = sigx2 = sigy = sigxy = 0;
+\&draw conf dashed
+\&copy "boyhts.d" thru {
+\&	new conf
+\&	next conf at $1, $2/cmpft
+\&	next conf at $1, $4/cmpft
+\&	y = $3 / cmpft
+\&	bullet at $1, y
+\&	n = n+1
+\&	sigx = sigx + $1; sigx2 = sigx2 + $1 * $1
+\&	sigy = sigy + y; sigxy = sigxy + $1*y
+\&	minx = min(minx,$1); maxx = max(maxx,$1);
+\&}
+\&slope = ( n*sigxy - sigx* sigy) / (n*sigx2 - sigx * sigx)
+\&inter = ( sigy - slope * sigx) / n
+\&line from minx, slope * minx+inter to maxx, slope * maxx + inter
+\&.G2
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+label left "Heights in Feet"
+label bot "Heights of Boys in the US Ages 2-18"
+cmpft = 12
+minx = 1e12; maxx = -1e12
+n = sigx = sigx2 = sigy = sigxy = 0;
+draw conf dashed
+copy "boyhts.d" thru {
+	new conf
+	next conf at $1, $2/cmpft
+	next conf at $1, $4/cmpft
+	y = $3 / cmpft
+	bullet at $1, y
+	n = n+1
+	sigx = sigx + $1; sigx2 = sigx2 + $1 * $1
+	sigy = sigy + y; sigxy = sigxy + $1*y
+	minx = min(minx,$1); maxx = max(maxx,$1);
+}
+slope = ( n*sigxy - sigx* sigy) / (n*sigx2 - sigx * sigx)
+inter = ( sigy - slope * sigx) / n
+line from minx, slope * minx+inter to maxx, slope * maxx + inter
+.G2
+.KE

@@ -49,6 +49,11 @@ generated for the default coordinate system.
 
 Added the ln function.  Why did that take me so long?
 
+Revised and (finally) spell-checked the man page.  I also stopped
+including the auto-generated manual page in an macros.  A text version
+of the man page is now installed, but the manual uses the doc macors
+exclusively.
+
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.
 

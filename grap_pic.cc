@@ -393,6 +393,85 @@ void Picframe::draw(frame *) {
     for_each(gds.begin(), gds.end(), draw_grid);
 }
 
+bool Picline::clipx(double& x1, double& y1, double& x2, double& y2) {
+// Clip the line to x = 0 and x = 1.  We use the parametric
+// representation of the line for simplicity of calculation.  This
+// gets called with the coordinates reversed to do the y-axis clip.
+
+    // the line is p + tv where x1, y1 is t==0 and x2, y2 is t==1
+
+    double px = x1;		// Point coordinate
+    double py = y1;		// Point coordinate
+    double vx = x2 - x1;	// vector component
+    double vy = y2 - y1;	// vector component
+    double t;			// The parameter
+
+
+    // The line is parallel to the x axis.  It's either all valid or
+    // all invalid.
+    if ( vx > -EPSILON && vx < EPSILON )
+	if ( inbox(px) ) return true;
+	else return false;
+
+    // Do the x = 0 intercept
+
+    t = -px / vx;
+
+    // The semantics of inbox here mean that the line has been
+    // clipped.  The intersection with x = 0 is between x1, y1 (t==0)
+    // and x2, y2 (t==1).
+    if ( inbox(t) ) {
+	// This is the zero intercept, and one point has been clipped,
+	// so if the first hasn't been clipped, the second must have.
+	// We recalculate the parametric representation so we can
+	// repeat the clip for x == 1.
+	if ( px < EPSILON ) {
+	    x1 = px + t * vx;
+	    y1 = py + t * vy;
+	    px = x1;
+	    py = y1;
+	}
+	else {
+	    x2 = px + t * vx;
+	    y2 = py + t * vy;
+	    vx = x2 - x1;
+	    vy = y2 - y1;
+	}
+    }
+    // repeat for 1
+
+    t = (1 - px) / vx;
+	    
+    // The semantics of inbox here mean that the line has been
+    // clipped.
+    if ( inbox(t) ) {
+	// This is the 1 intercept, and one point has been clipped,
+	// so if the first hasn't been clipped, the second must have.
+	if ( px > 1 - EPSILON ) {
+	    x1 = px + t * vx;
+	    y1 = py + t * vy;
+	}
+	else {
+	    x2 = px + t * vx;
+	    y2 = py + t * vy;
+	}
+    }
+    // If both x points are clipped to inside the box, we have a line,
+    // otherwise, the whole line is invalid.
+    return inbox(x1) && inbox(x2);
+}    
+    
+bool Picline::clip(double& x1, double& y1, double& x2, double& y2) {
+// If all 4 points are in the frame, return true.  If not call
+// clip twice to clip the lines, and return true only if both
+// clips return valid lines.  There is a little sleight of hand
+// there: the && guarantees that we only keep clipping while there
+// is a line to clip.
+
+    if ( inbox(x1) && inbox(x2) && inbox(y1) && inbox(y2) ) return true;
+    else return clipx(x1, y1, x2, y2) && clipx(y1, x1, y2, x2);
+}
+
 void Picline::draw(frame *f) {
 // Iterate through the points in the line and draw them.  Map them
 // according to the point's coordinates, then put them into the graph.
@@ -400,60 +479,76 @@ void Picline::draw(frame *f) {
 // strings correctly.
     list<line::linepoint*>::iterator lpi;// An iterator to traverse the list
     linepoint *lp;			// The current point
-    double x,y;				// Scratch
+    double lastx, lasty;		// The last point plotted (if any)
+    double x,y;				// The current point's coordinates
+    double lastcx, lastcy;		// The last point plotted post clipping
+    double cx,cy;			// The current point post clipping
 
     if ( pts.empty() ) return;
 
+    // Not strictly necessary, but I hate uninitialized warnings.
+    lastx = lasty = 0.0;
+    
     for ( lpi = pts.begin(); lpi != pts.end(); lpi++ ) {
 	lp = *lpi;
 	x = lp->c->map(lp->x,x_axis);
 	y = lp->c->map(lp->y,y_axis);
-	if ( x > 1+EPSILON || x < 0-EPSILON ) {
-	    cerr << "Point outside coordinates: " << lp->x << ", " << lp->y;
-	    cerr << endl;
-	    continue;
-	}
-	if ( y > 1+EPSILON || y < 0-EPSILON ) {
-	    cerr << "Point outside coordinates: " << lp->x << ", " << lp->y;
-	    cerr << endl;
-	    continue;
-	}
-	x *= f->wid;
-	y *= f->ht;
-	if ( lp->desc.color ) {
-	    unquote(lp->desc.color);
-	    cout << ".grap_color " << *lp->desc.color << endl;
-	}
-	if ( lp->initial ) cout << "move ";
-	else {
-	    if ( lp->arrow ) cout << "arrow ";
-	    else cout << "line ";
-	    switch (lp->desc.ld) {
-		case invis:
-		    cout << "invis ";
-		    break;
-		case solid:
-		default:
-		    break;
-		case dotted:
-		    cout << "dotted ";
-		    if ( lp->desc.param ) cout << lp->desc.param << " ";
-		    break;
-		case dashed:
-		    cout << "dashed ";
-		    if ( lp->desc.param ) cout << lp->desc.param << " ";
-		    break;
+
+	lastcx = lastx;
+	lastcy = lasty;
+	cx = x;
+	cy = y;
+	if ( lp->initial || clip(lastcx, lastcy, cx, cy) ) {
+	    // If clipping has left us a (partial) line to draw, do
+	    // so.  This also is invoked on the first point of a line.
+	    
+	    if ( lp->desc.color ) {
+		unquote(lp->desc.color);
+		cout << ".grap_color " << *lp->desc.color << endl;
 	    }
+	    if ( lp->initial ) {
+		if ( inbox(x) && inbox(y) )
+		    cout << "move to Frame.Origin + (" << x * f->wid << ", "
+			 << y * f->ht << ")" << endl;
+	    }
+	    else {
+		// Chop off the arrowhead if the line is clipped
+		if ( lp->arrow && inbox(x) && inbox(y) ) cout << "arrow ";
+		else cout << "line ";
+		switch (lp->desc.ld) {
+		    case invis:
+			cout << "invis ";
+			break;
+		    case solid:
+		    default:
+			break;
+		    case dotted:
+			cout << "dotted ";
+			if ( lp->desc.param ) cout << lp->desc.param << " ";
+			break;
+		    case dashed:
+			cout << "dashed ";
+			if ( lp->desc.param ) cout << lp->desc.param << " ";
+			break;
+		}
+		cout << "from Frame.Origin + (" << lastcx * f->wid << ", "
+		     << lastcy * f->ht << ") ";
+		cout << "to Frame.Origin + (" << cx * f->wid << ", "
+		     << cy * f->ht << ")" << endl;
+	    }
+	    // if a plot string has been specified and the point has
+	    // not been clipped, put the plotstring out.
+	    if ( lp->plotstr && inbox(x) && inbox(y) ) {
+		cout <<  *lp->plotstr ;
+		if ( lp->initial ) 
+		    cout << " at Frame.Origin + (" << x * f->wid << ", "
+			 << y * f->ht << ")" << endl;
+		else cout << " at last line.end" << endl;
+	    }
+	    if ( lp->desc.color )
+		cout << ".grap_color prev" << endl;
 	}
-	cout << "to Frame.Origin + (" << x << ", " << y << ")";
-	cout << endl;
-	if ( lp->plotstr ) {
-	    cout <<  *lp->plotstr ;
-	    if ( lp->initial ) cout << " at Here" << endl;
-	    else cout << " at last line.end" << endl;
-	}
-	if ( lp->desc.color )
-	    cout << ".grap_color prev" << endl;
+	lastx = x; lasty = y;
     }
 }
 
@@ -664,14 +759,33 @@ void Picbox::draw(frame *f) {
     double x1,y1, x2,y2;	// The box edges in device coords.
     double ht, wid;		// height and width in device units (inches)
 
-    x1 = p1.c->map(p1.x,x_axis) * f->wid;
-    y1 = p1.c->map(p1.y,y_axis) * f->ht;
-    x2 = p2.c->map(p2.x,x_axis) * f->wid;
-    y2 = p2.c->map(p2.y,y_axis) * f->ht;
+    x1 = p1.c->map(p1.x,x_axis);
+    y1 = p1.c->map(p1.y,y_axis);
+    x2 = p2.c->map(p2.x,x_axis);
+    y2 = p2.c->map(p2.y,y_axis);
 
     // make (x1,y1) upper right and (x2,y2) lower left
     if ( x1 < x2 ) swap(x1,x2);
     if ( y1 < y2) swap(y1,y2);
+
+    // Clip the box
+
+    // If the box is entirely out of frame, ignore it
+    if ( (x1 > 1+EPSILON && x2 > 1+EPSILON) ||
+	 (x1 <-EPSILON && x2 < -EPSILON ) ) return;
+    if ( (y1 > 1+EPSILON && y2 > 1+EPSILON) ||
+	 (y1 <-EPSILON && y2 < -EPSILON ) ) return;
+
+    // Box is at least partially in frame - clip it
+    if ( x1 > 1+EPSILON) x1 = 1;
+    if ( y1 > 1+EPSILON) y1 = 1;
+    if ( x2 < -EPSILON) x2 = 0;
+    if ( y2 < -EPSILON) y2 = 0;
+
+    x1 *= f->wid;
+    y1 *= f->ht;
+    x2 *= f->wid;
+    y2 *= f->ht;
 
     wid = fabs(x1-x2);
     ht = fabs(y1-y2);

@@ -167,6 +167,9 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
 	}
     } else {
 	l = defline;
+	// This is a bit of a kludge.  Don't reset any parameters of
+	// the default line if new is given alone.
+	if ( !ld && !plot ) extant = true;
     }
 
     // If a linedesc is specified, set the current line's description.
