@@ -649,6 +649,7 @@ final_size:
 		if ( $1->wid != 0) $$->wid = $1->wid;
 		delete $1;
 	    }
+;
 sides:
 	side linedesc {
 		$$ = new frame;
@@ -879,6 +880,7 @@ log_list:
             { $$ = combine_logs($1, $2); }
 |
             { $$ = none; }
+;
 
 log_desc:
 	LOG_X

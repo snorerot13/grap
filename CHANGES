@@ -3,6 +3,10 @@ Change log
 1.24: Fixed a bug parsing draw/new with no line descriptions.  Thanks to
 Robert W. Numrich for spotting it.
 
+Cygwin seems to need errno.h to declare errno in grap_lex.l. I added the
+machinery to look for it and use it if it's there.  I also added a couple
+missing semi-colons to grap.y yo shut bison up.
+
 1.23: made it possible to disable sprintf and other calls to sprintf(3)
 with a user given format string, which is a potential security hole.
 

@@ -36,6 +36,10 @@ extern "C" {
 extern char *strerror(int errnum);
 #endif
 #endif 
+// CGYWIN needs errno if we have it:
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
 
 // Templates for debugging.  Print the parameters to cerr.  
 
