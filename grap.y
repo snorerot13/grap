@@ -392,10 +392,15 @@ linedesc:
 		if ( $2->color ) {
 		    if ( $$->color ) delete $$->color;
 		    $$->color = $2->color;
+		    // Don't let the destructor delete the color in $$.
+		    $2->color = 0;
 		}
 		if ( $2->fillcolor ) {
 		    if ( $$->fillcolor ) delete $$->fillcolor;
 		    $$->fillcolor = $2->fillcolor;
+		    // Don't let the destructor delete the fillcolor
+		    // in $$.
+		    $2->fillcolor = 0;
 		}
 		delete $2;
 	    }

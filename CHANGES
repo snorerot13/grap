@@ -10,6 +10,11 @@ Strings, like the rest of grap.
 Got rid of an error on SunOS (and presumably other architectures) 
 where -0 labels were printed on auto-generated labels.
 
+Fixed bugs in sprintf when compiled using standard strings.
+
+Fixed a memory leak and general bug with the undocumented color
+commands. (There, that'll tell me if anyone reads this!)
+
 1.01: Fixed a compilation bug under RedHat 6.1.  Cleaned up autoconf
 and tweaked the makefile.
 

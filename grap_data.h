@@ -52,10 +52,12 @@ public:
 	char *c = new char [len];
 	char *fmt = new char[len];
 	char *f;
+	char *cc;	// Save the start of the new string for deletion 
 	int first = 1;
 
 	copy(c, npos);
-	c[length()+1] = '\0';
+	c[length()] = '\0';
+	cc = c;
 	
 	f = fmt;
 	for(f=fmt; (*f = *c); c++,f++ ) {
@@ -74,7 +76,7 @@ public:
 	snprintf(c,len,fmt,d);
 	*this = c;
 	delete[] fmt;
-	delete[] c;
+	delete[] cc;
     }
     
     void finish_fmt() {

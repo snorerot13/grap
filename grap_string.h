@@ -177,6 +177,12 @@ protected:
 
 inline ostream& operator<<(ostream& f, const String& s) { return s.print(f); }
 
+// These functions and classes are all duplicated for standard strings
+// in grap_data.h.  The choice is to either support 2 versions of
+// these functions or to make the emulation of standard strings better
+// and support that.  Because this code was already written, I chose
+// this.
+
 inline String *dblString(double d, String *f=0) {
     return new String(d,f);
 }
