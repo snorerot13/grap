@@ -9,8 +9,8 @@ AC_PROG_LEX
 AC_PROG_YACC
 AC_PROG_INSTALL
 
-AC_MSG_CHECKING(that $ac_cv_path_install supports -d)
-if $ac_cv_path_install -d /tmp/test$$ && test -d /tmp/test$$; then 
+AC_MSG_CHECKING(that $INSTALL supports -d)
+if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$; then 
 	AC_MSG_RESULT(yes)
 else
 	INSTALL=$ac_install_sh
