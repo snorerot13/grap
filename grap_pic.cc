@@ -230,7 +230,10 @@ void Picframe::label_line(sides s) {
 		break;
 	}
     }
-	    
+
+    // DWB grap did not put the whitespace around for unlabelled sizes of the
+    // graph, so omit that space if in compatibility mode.
+    if ( compat_mode && label[s]->empty() ) return;
     cout << "line invis ";
 
     // draw all the labels

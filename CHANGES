@@ -1,5 +1,8 @@
 Change log
 
+1.31: In compatibility mode grap will no longer add whitespace around graphs.
+I like it, but Yuval Tamir rightly complained.
+
 1.30: Made the undocumented color commands support GNU pic color commands.  In
 other words added color to grap.  Probably the easiest place to see teh syntax
 is the new example added to the examples file.  The changes are on the manual
@@ -28,10 +31,10 @@ Tuned the makefile so you can use pmake in parallel.
 1.23: made it possible to disable sprintf and other calls to sprintf(3)
 with a user given format string, which is a potential security hole.
 
-Fixed a plot bug I found while diaabling that.
+Fixed a plot bug I found while disabling that.
 
 1.22: John Heidemann caught a bug with respect to large sizes and size
-changes in titles.  Those large szie changes are now supported.  Generally
+changes in titles.  Those large size changes are now supported.  Generally
 the groff [] syntax is now used for the embedded \s commans that size
 generates.  This can be turned off by using -C.
 
@@ -80,7 +83,7 @@ line command executed.  It's not ignored anymore.
 
 I also found a bug in the execution order of copy through macros,
 although I'm uncertain if a version was ever released with the bug
-intact.  I think this may have been a related to Lee Ji Hwan's bug,
+intact.  I think this may have been related to Lee Ji Hwan's bug,
 which means it probably hasn't seen the light of day.
 
 -h prints a usage summary.  --help is a synonym for -h and --version is a
@@ -206,7 +209,7 @@ Added the ln function.  Why did that take me so long?
 
 Revised and (finally) spell-checked the man page.  I also stopped
 including the auto-generated manual page in an macros.  A text version
-of the man page is now installed, but the manual uses the doc macors
+of the man page is now installed, but the manual uses the doc macros
 exclusively.
 
 Line clipping was added in here, too.
