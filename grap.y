@@ -1341,12 +1341,18 @@ sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
 else_clause:
 	    { $$ = 0; }
 | 	ELSE {lex_begin_macro_text(); } TEXT
-	    { $$ = $3; }
+	    {
+		// force else clause to end with a SEP
+		*$3+= ';';
+		$$ = $3;
+	    }
 ;
 
 if_statement:
 	IF expr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
 	    {
+		// force all if blocks to be terminated by a SEP
+		*$5 += ';';
 		if ( fabs($2) > EPSILON ) include_string($5,0,GINTERNAL);
 		else if ( $6 ) include_string($6,0,GINTERNAL);
 		delete $5;
@@ -1378,7 +1384,8 @@ for_statement:
 		f->limit = $6;
 		f->by = $7.expr;
 		f->by_op = $7.op;
-		
+		// force "anything" to end with a sep
+		*$10 += ';';
 		f->anything = $10;
 		include_string($10,f,GINTERNAL);
 	    }
