@@ -19,7 +19,7 @@ typedef enum { ljust = 1, rjust = 2, above = 4, below = 8, aligned = 16,
 // These should be classes, but they're used by yacc as union
 // members, and thererefore need versions without constructors
 
-typedef struct {
+typedef  struct {
     linedesc ld;	// The basic style
     double param;	// Some styles hava parameters e.g., dotted 0.3
     String *color;	// The name of a color for the line
@@ -29,8 +29,9 @@ class linedescclass : public linedescval {
     // Basic class features for line descriptions: constructors,
     // destructor, and assignment
 public:
-    linedescclass(linedesc l=def, double p=0, String *c=0) :
-	ld(l), param(p) {
+    linedescclass(linedesc l=def, double p=0, String *c=0) {
+	    ld = l;
+	    param = p;
 	    if ( c ) color = new String(c);
 	    else color = 0;
     }
@@ -49,9 +50,11 @@ public:
 	}
     }
     
-    linedescclass(linedescclass& ldc) : ld(ldc.ld), param(ldc.param),
-	color(0) {
+    linedescclass(linedescclass& ldc) {
+	    ld = ldc.ld;
+	    param = ldc.param;
 	    if ( ldc.color ) color = new String(ldc.color);
+	    else color = 0;
     }
 
     ~linedescclass() {
@@ -80,7 +83,10 @@ class shiftclass : public shiftdesc {
     // Basic class features for shift descriptions: constructors,
     // destructor, and assignment
 public:
-    shiftclass(sides s=top, double p=0) : dir(s), param(p) {}
+    shiftclass(sides s=top, double p=0) {
+	dir= s;
+	param = p;
+    }
     shiftclass(shiftdesc *sh ) {
 	if ( sh ) {
 	    dir = sh->dir;
@@ -322,13 +328,15 @@ public:
     gridlist gds;		// gridlines to draw
 
     frame() : ht(2), wid(3), tks(), gds() {
+	String g = "%g";
+	
 	for ( int i = 0 ; i < 4 ; i ++ ) {
 	    desc[i] = linedescclass(def,0,0);
 	    label[i] = new stringlist;
 	    lshift[i] = shiftclass(top,0);
-	    griddef[i] = grid(0.0,desc+i,top,&String("%g"),lshift+i,0);
+	    griddef[i] = grid(0.0,desc+i,top,&g,lshift+i,0);
 	    tickdef[i] = tick(0.0,((i== bottom || i == left ) ? 0.125 : 0),
-			      (sides) i, &String("%g"), lshift+i, 0);
+			      (sides) i, &g, lshift+i, 0);
 	}
     }
 

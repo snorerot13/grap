@@ -4,6 +4,68 @@
 #include "grap.h"
 #include "grap_pic.h"
 
+// Lots of functors to output, convert aand delete list elements
+
+// Output a string (from a pointer)
+class string_out_f : public UnaryFunction<String*, int> {
+    ostream &f;
+public:
+    int operator()(String *s) { f << *s << endl; }
+    string_out_f(ostream& ff) : f(ff) {};
+};
+
+// Delete a string (from a pointer)
+class string_del_f : public UnaryFunction<String*, int> {
+public:
+    int operator()(String *s) { delete s; }
+};
+
+// Convert a line to a Picline
+class line_convert_f :
+    public UnaryFunction<lineDictionary::value_type,int> {
+	graph *g;
+public:
+	line_convert_f(graph *gg) : g(gg) { }
+	int operator()(lineDictionary::value_type li) {
+	    line *l = (li).second;
+	    Picline *pl = new Picline(*l);
+	    g->objs.push_back(pl);
+	}
+};
+		
+// convert a DisplayString to a PicdisplayString and print it
+class display_f : public UnaryFunction<DisplayString*, int> {
+public:
+    int operator() (DisplayString *str) {
+	PicDisplayString *p = new PicDisplayString(*str);
+	p->draw(0);
+	delete p;
+    }
+};
+
+// draw ticks and grids.  We generate temporary Pic objects and plot them.
+class draw_tick_f : public UnaryFunction<tick *, int> {
+    frame *f;
+public:
+    draw_tick_f(frame *fr) : f(fr) {};
+    int operator()(tick* t) {
+	Pictick *pt = new Pictick(*t);
+	pt->draw(f);
+	free(pt);
+    }
+};
+
+class draw_grid_f : public UnaryFunction<grid *, int> {
+    frame *f;
+public:
+    draw_grid_f(frame *fr) : f(fr) {};
+    int operator()(grid* t) {
+	Picgrid *pt = new Picgrid(*t);
+	pt->draw(f);
+	free(pt);
+    }
+};
+
 void Picgraph::init(String *n=0, String* p=0) {
     // Start a new graph, but maybe not a new block.
     
@@ -31,29 +93,10 @@ void Picgraph::draw() {
 
     // Lots of functors to output, convert aand delete list elements
     
-    class string_out_f : public UnaryFunction<String*, int> {
-	ostream &f;
-    public:
-	int operator()(String *s) { f << *s << endl; }
-	string_out_f(ostream& ff) : f(ff) {};
-    } string_out(cout);
-
-    class string_del_f : public UnaryFunction<String*, int> {
-    public:
-	int operator()(String *s) { delete s; }
-    } string_del;
-
-    class line_convert_f :
-    public UnaryFunction<lineDictionary::value_type,int> {
-	graph *g;
-    public:
-	line_convert_f(graph *gg) : g(gg) { }
-	int operator()(lineDictionary::value_type li) {
-	    line *l = (li).second;
-	    Picline *pl = new Picline(*l);
-	    g->objs.push_back(pl);
-	}
-    } line_convert(this);
+    string_out_f string_out(cout);	// output a string
+    string_del_f string_del;		// delete a string
+    line_convert_f line_convert(this);  // convert a generic line to
+	                                // a pic line
 		
 
     // Hook the lines up
@@ -195,14 +238,7 @@ void Picframe::label_line(sides s) {
 // is straightforward.
 
     // Functor to convert a DisplayString to a PicdisplayString and print it
-    class display_f : public UnaryFunction<DisplayString*, int> {
-    public:
-	int operator() (DisplayString *str) {
-	    PicDisplayString *p = new PicDisplayString(*str);
-	    p->draw(0);
-	    delete p;
-	}
-    } display;
+    display_f display;
 	    
     cout << "line invis ";
 
@@ -333,29 +369,10 @@ void Picframe::draw(frame *) {
 // result is a frame that is labelled for pic placement of other
 // graphs in the same block.
     
-    // functors to draw ticks and grids out of the lists.  We generate
-    // temporary Pic objects and plot them.
-    class draw_tick_f : public UnaryFunction<tick *, int> {
-	frame *f;
-    public:
-	draw_tick_f(frame *fr) : f(fr) {};
-	int operator()(tick* t) {
-	    Pictick *pt = new Pictick(*t);
-	    pt->draw(f);
-	    free(pt);
-	}
-    } draw_tick(this);
+    // functors to draw ticks and grids out of the lists.  
 
-    class draw_grid_f : public UnaryFunction<grid *, int> {
-	frame *f;
-    public:
-	draw_grid_f(frame *fr) : f(fr) {};
-	int operator()(grid* t) {
-	    Picgrid *pt = new Picgrid(*t);
-	    pt->draw(f);
-	    free(pt);
-	}
-    } draw_grid(this);
+    draw_tick_f draw_tick(this);
+    draw_grid_f draw_grid(this);
 
     cout << "Frame: [" << endl;
     cout << "Origin: " << endl;
@@ -633,15 +650,7 @@ void Picplot::draw(frame *f) {
     double x, y;  // To transform the point into device coordinates
 
     // To print a set of strings
-    class display_f: public UnaryFunction<drawable*, int> {
-    public:
-	int operator() (DisplayString *s) {
-	    PicDisplayString *ps = new PicDisplayString(*s);
-	    
-	    ps->draw(0);
-	    delete ps;
-	}
-    } display;
+    class display_f display;
 
     if ( !strs || !loc ) return;
 

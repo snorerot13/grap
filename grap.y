@@ -45,6 +45,70 @@ extern int optreset;
 
 const char *opts = "d:D";
 
+// Classes for various for_each calls
+
+// print the next number in a sprintf
+class num_to_str_f : public UnaryFunction<double,int> {
+    grap_sprintf_String *s;
+public:
+    num_to_str_f(grap_sprintf_String *ss) : s(ss) {};
+    int operator()(double d) { s->next_number(d);}
+};
+
+// This collects the modifiers for other strings in
+// a string list to construct the modifiers for the next string
+class modaccumulator :
+    public UnaryFunction <DisplayString *, int > {
+public:
+	int just;
+	double size;
+	int rel;
+	modaccumulator() : just(0), size(0), rel(0) {};
+	int operator()(DisplayString* s) {
+	    just = s->j;
+	    size = s->size;
+	    rel = s->relsz;
+	}
+};
+
+// To assign the coordate system to all the ticks in
+// the queue
+class coord_to_tick : public UnaryFunction<coord *,int> {
+public:
+    coord *c;
+    coord_to_tick(coord *cc) : c(cc) {};
+    int operator() (tick *t) { t->c = c; }
+};
+
+// Add a tick to the graph
+class add_tick_f : public UnaryFunction<tick*, int> {
+    sides side;
+    double size;
+    shiftdesc shift;
+public:
+    add_tick_f(sides sd, double sz, shiftdesc sc) :
+	side(sd), size(sz), shift(sc) {};
+    int operator()(tick *t) {
+	t->side = side;
+	t->size = size;
+	t->shift = shift;
+	the_graph->base->tks.push_back(t);
+	if ( t->side == top || t->side == bottom )
+	    t->c->newx(t->where);
+	else 
+	    t->c->newy(t->where);
+    }
+};
+
+
+// Align a list of strings
+class align_string :
+    public UnaryFunction<DisplayString *,int> {
+public:
+	int operator() (DisplayString *ds) {
+	    if ( ! (ds->j & unaligned) ) ds->j |= aligned;
+	}
+};
 %}
 %token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
@@ -201,13 +265,7 @@ string:
              {
 		 double d;
 		 grap_sprintf_String *s = new grap_sprintf_String($3);
-		 class num_to_str_f : public UnaryFunction<double,int> {
-		     grap_sprintf_String *s;
-		 public:
-		     num_to_str_f(grap_sprintf_String *ss) : s(ss) {};
-		     int operator()(double d) { s->next_number(d);}
-		 } num_to_str(s);
-		     
+		 num_to_str_f num_to_str(s);    
 
 		 for_each($5->begin(), $5->end(), num_to_str);
 		 s->finish_fmt();
@@ -286,11 +344,12 @@ draw_statement:
 		line *l;
 		lineDictionary::iterator li;
 		linedescval defld = { invis,0,0 };
+		String s = "\"\\(bu\"";
 
 		if ( $2 ) {
 		    li = the_graph->lines.find($2);
 		    if ( li == the_graph->lines.end() ) {
-			l = new line(&defld,&String("\"\\(bu\""));
+			l = new line(&defld,&s);
 			the_graph->lines[$2] = l;
 		    }
 		    else {
@@ -533,19 +592,7 @@ strlist:
 	    {
 		// This collects the modifiers for other strings in
 		// the list to construct the modifiers for this string
-		class modaccumulator :
-                      public UnaryFunction <DisplayString *, int > {
-		public:
-			  int just;
-			  double size;
-			  int rel;
-			  modaccumulator() : just(0), size(0), rel(0) {};
-			  int operator()(DisplayString* s) {
-			      just = s->j;
-			      size = s->size;
-			      rel = s->relsz;
-			  }
-		} last;
+		modaccumulator last;
 		DisplayString *s;
 			
 		last = for_each($1->begin(), $1->end(), modaccumulator());
@@ -599,11 +646,12 @@ next_statement:
 	    {
 		line *l;
 		lineDictionary::iterator li;
+		String s = "\"\\(bu\"";
 
 		if ( $2 ) {
 		    li = the_graph->lines.find($2);
 		    if ( li == the_graph->lines.end() ) {
-			l = new line((linedescval *)0, &String("\"\\(bu\"") );
+			l = new line((linedescval *)0, &s );
 			the_graph->lines[$2] = l;
 		    }
 		    else { l = (*li).second; }
@@ -775,14 +823,6 @@ by_clause:
 tickat:
 	AT opt_coordname ticklist
 	    {
-                // To assign the coordate system to all the ticks in
-                // the queue
-		class coord_to_tick : public UnaryFunction<coord *,int> {
-		public:
-		    coord *c;
-		    coord_to_tick(coord *cc) : c(cc) {};
-		    int operator() (tick *t) { t->c = c; }
-		};
 
 		$$ = $3;
 		for_each($3->begin(), $3->end(), coord_to_tick($2));
@@ -850,24 +890,7 @@ ticks_statement:
 	    {
 		tick *t;
 		int gn;
-		class add_tick_f : public UnaryFunction<tick*, int> {
-		    sides side;
-		    double size;
-		    shiftdesc shift;
-		public:
-		    add_tick_f(sides sd, double sz, shiftdesc sc) :
-			side(sd), size(sz), shift(sc) {};
-		    int operator()(tick *t) {
-			t->side = $2;
-			t->size = $3;
-			t->shift = $4;
-			the_graph->base->tks.push_back(t);
-			if ( t->side == top || t->side == bottom )
-			    t->c->newx(t->where);
-			else 
-			    t->c->newy(t->where);
-		    }
-		} add_tick($2,$3,$4);
+		add_tick_f add_tick($2,$3,$4);
 
 		the_graph->base->tickdef[$2].side = $2;
 		the_graph->base->tickdef[$2].shift = $4;
@@ -967,13 +990,7 @@ label_statement:
 	    {
 		int gn;
 		DisplayString *ds;
-		class align_string :
-                      public UnaryFunction<DisplayString *,int> {
-		public:
-			  int operator() (DisplayString *ds) {
-			      if ( ! (ds->j & unaligned) ) ds->j |= aligned;
-			  }
-		} a;
+		align_string a;
 			      
 		for_each($3->begin(),  $3->end(), a);
 		
@@ -1335,6 +1352,7 @@ extern int yylex();
 
 void init_dict() {
     linedescclass defld(invis,0,0);
+    String s = "\"\\(bu\"";
     
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
@@ -1342,7 +1360,7 @@ void init_dict() {
 	the_graph->base->tickdef[i].c = defcoord;
 	the_graph->base->griddef[i].c = defcoord;
     }
-    defline = new line(&defld,&String("\"\\(bu\"") );
+    defline = new line(&defld,&s);
     the_graph->lines["grap.internal.default"] = defline;
     nlines = 0;
 }

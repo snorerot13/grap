@@ -8,7 +8,6 @@ RM=rm
 RMDIR=rmdir
 MKDIR=mkdir
 
-LDLIBS=-ll -ly
 CXXFLAGS=-g
 #CXXFLAGS += -DLEX_DEBUG
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" -DHAVE_SNPRINTF

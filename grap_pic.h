@@ -59,22 +59,27 @@ class Picgraph : public graph {
     stringSequence troff;	// troff commands encountered in the code
     int graphs;			// the number of graphs drawn this block
     Picframe *pframe;		// The pic frame for deallocation
+
+    // To delete strings
+    class sfree_f : UnaryFunction<String *, int> {
+    public:
+	int operator()(String *s) { delete s; }
+    };
+    
 public:
     Picgraph() :
 	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0) {}
     
+    
     ~Picgraph() {
-	class sfree_f : UnaryFunction<String *, int> {
-	public:
-	    int operator()(String *s) { delete s; }
-	} sfree;
+	sfree_f sfree;
 
 	if ( ps_param ) delete ps_param;
 	if ( name ) delete name;
 	if ( pos ) delete pos;
-	if ( !troff.empty )
+	if ( !troff.empty() )
 	    for_each(troff.begin(), troff.end(), sfree);
-	if ( !pic.empty )
+	if ( !pic.empty() )
 	    for_each(pic.begin(), pic.end(), sfree);
     }
 
