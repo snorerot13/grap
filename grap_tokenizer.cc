@@ -26,7 +26,7 @@ string gk[] = {
     "plot", "at", "frame", "graph", "coord", "for", "if", "print", "sprintf",
     "ticks", "tick", "label", "grid", "pic", "sh", "bar", "ljust", "rjust",
     "above", "below", "aligned", "unaligned", "size", "undefine", "clipped",
-    "unclipped"
+    "unclipped", "color"
 };
 
 // These are the keywords recognized by any keyword that takes a line
