@@ -434,10 +434,13 @@ class circle {
 public:
     point center;	// center of the circle
     double rad;		// radius
+    linedesc ld;
     
-    circle() : center(0,0,0), rad(0) { }
-    circle(point *p, double r) : center(p), rad(r) { }
-    circle(circle& c) : center(&c.center), rad(c.rad) { }
+    circle() : center(0,0,0), rad(0), ld(solid) { }
+    circle(point *p, double r, linedesc *l=0) : center(p), rad(r), ld(solid) {
+	if ( l ) ld = *l;
+    }
+    circle(circle& c) : center(&c.center), rad(c.rad), ld(c.ld) { }
 };
 
 class box {

@@ -594,11 +594,18 @@ as a
 .Op Ar coordinate_name
 .Ar expr , expr
 .Op Cm radius Ar expr
+.Op linedesc
 .Bd -filled -offset indent
-This draws an unfilled circle at the point indicated.  By default, the
+This draws an circle at the point indicated.  By default, the
 circle is small, 0.025 inches.  This can be over-ridden by specifying
 a radius.  The coordinates of the point are relative to the named
 coordinate system, or the default system if none is specified.
+.Pp
+This command has been extended to take a line description,
+e.g. dotted.  It also accepts the filling extensions described below
+in the 
+.Ic bar
+command.
 .Ed
 .Pp
 .Ic line 

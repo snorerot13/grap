@@ -352,6 +352,7 @@ linedesc:
 		    $$->ld = $2->ld;
 		    $$->param = $2->param;
 		}
+		if ( $2->fill ) $$->fill = $2->fill;
 		if ( $2->color ) {
 		    if ( $$->color ) delete $$->color;
 		    $$->color = $2->color;
@@ -1050,13 +1051,11 @@ radius_spec:
 ;
 
 circle_statement:
-	CIRCLE AT point radius_spec SEP
+	CIRCLE AT point radius_spec opt_linedesc SEP
 	    {
-		circle *c = new circle($3,$4);
+		circle *c = new circle($3,$4,$5);
 		the_graph->add_circle(*c);
-		delete c;
-//		delete $3;
-//		circles.push_back(c);
+		delete c; delete $3; delete $5;
 	    }
 ;
 

@@ -646,8 +646,49 @@ void Piccircle::draw(frame *f) {
     }
     x *= f->wid;
     y *= f->ht;
+    if ( ld.fillcolor ) {
+	// fillcolor takes precedence over fill - if fillcolor is not
+	// null, we draw one box filled with that color, and then a
+	// second unfilled one in color (black is none specified)
+
+	ld.fill = 0;
+	ld.fillcolor->unquote();
+	cout << ".grap_color " << *ld.fillcolor << endl;
+	cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
+	cout << " rad " << rad << " invis fill 10" << endl;
+	cout << ".grap_color prev" << endl;
+    }	
+
+    // Draw the circle with appropriate line style, fill, and color
+    if ( ld.color ) {
+	ld.color->unquote();
+	cout << ".grap_color " << *ld.color << endl;
+    }
     cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
-    cout << " rad " << rad << endl;
+    cout << " rad " << rad ;
+    switch (ld.ld) {
+	case invis:
+	    cout << " invis ";
+	    break;
+	case solid:
+	default:
+	    break;
+	case dotted:
+	    cout << " dotted ";
+	    if ( ld.param )
+		cout << ld.param << " ";
+	    break;
+	case dashed:
+	    cout << " dashed ";
+	    if ( ld.param )
+		cout << ld.param << " ";
+	    break;
+    }
+
+    if ( ld.fill ) cout << " fill " << ld.fill;
+    cout << endl;
+    if ( ld.color )
+	cout << ".grap_color prev" << endl;
 }
 
 void Picbox::draw(frame *f) {

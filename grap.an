@@ -230,12 +230,16 @@ By default the labels on the left and right labels run parallel to
 the frame. You can cancel this by specifying unaligned as a
 \fIstring\fR\fB_\fR\fImodifier\fR.
 .LP
-\fBcircle\fR \fBat\fR [\fIcoordinate\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR [\fBradius\fR \fIexpr\fR]
+\fBcircle\fR \fBat\fR [\fIcoordinate\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR [\fBradius\fR \fIexpr\fR] [linedesc]
 .LP
-This draws an unfilled circle at the point indicated. By default,
-the circle is small, 0.025 inches. This can be over\-ridden by
-specifying a radius. The coordinates of the point are relative to
-the named coordinate system, or the default system if none is specified.
+This draws an circle at the point indicated. By default, the circle
+is small, 0.025 inches. This can be over\-ridden by specifying
+a radius. The coordinates of the point are relative to the named
+coordinate system, or the default system if none is specified.
+.LP
+This command has been extended to take a line description, e.g.
+dotted. It also accepts the filling extensions described below in
+the \fBbar\fR command.
 .LP
 \fBline\fR [\fIline\fR\fB_\fR\fIdescription\fR] \fBfrom\fR [\fIcoordinate\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR \fBto\fR
 [\fIcoordinate\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR [\fIline\fR\fB_\fR\fIdescription\fR]

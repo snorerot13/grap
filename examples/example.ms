@@ -1609,3 +1609,26 @@ DONE
 bar 1.45,10.35, 2.25, 8.85 dashed
 .G2
 .KE
+.KS
+.PP
+This shows the new filling and linestyle capabilities of the 
+.CW circle
+and 
+.CW bar
+commands
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&bar (1,1), (0,0) fill 0.25
+\&circle at 0.5,0.5 rad 0.5 dashed 0.05 fill 0.5
+\&.G2
+.ft
+.DE
+.G1
+bar (1,1), (0,0) fill 0.25
+circle at 0.5,0.5 rad 0.5 dashed 0.05 fill 0.5
+.G2
+.KE
