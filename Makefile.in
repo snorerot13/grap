@@ -20,10 +20,10 @@ CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
 
-DISTDIR=grap-1.10
+DISTDIR=grap-1.20
 SOURCES=grap.cc grap_lex.cc *.cc
 
-CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+CXXFLAGS += @GXXFLAGS@ @DEFS@ 
 
 # solaris make uses these as defaults:
 
@@ -50,7 +50,8 @@ grap_lex.cc:	grap_lex.l y.tab.h
 
 
 version.cc:	Makefile
-	echo "char *version=\"$(DISTDIR)\";" > version.cc
+	echo "#include <string>" > version.cc
+	echo "string version=\"$(DISTDIR)\";" >> version.cc
 
 y.output:	grap.y
 	$(YACC) -v grap.y

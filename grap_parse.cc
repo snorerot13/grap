@@ -6,7 +6,7 @@
 #include "config.h"
 #endif
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <math.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -35,16 +35,16 @@ extern bool unaligned_default;	// Should strings be unaligned by default
 
 extern line* defline;
 extern coord *defcoord;
-extern char *version; 
+extern string version; 
 bool compat_mode=false;			//  Compatibility mode
 
 // defined in grap_lex.l
-extern int include_string(String *,struct for_descriptor *f=0,
+extern int include_string(string *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
-extern String pre_context(void);
+extern string pre_context(void);
 extern char *token_context(void);
-extern String post_context(void);
-extern bool include_file(String *, int =0, bool=true);
+extern string post_context(void);
+extern bool include_file(string *, int =0, bool=true);
 extern int yyparse();
 extern int nlines;
 
@@ -56,7 +56,7 @@ const char *opts = "d:lDvuM:C";
 // This collects the modifiers for other strings in
 // a string list to construct the modifiers for the next string
 class modaccumulator :
-    public UnaryFunction <DisplayString *, int > {
+    public unary_function <DisplayString *, int > {
 public:
 	int just;
 	double size;
@@ -72,7 +72,7 @@ public:
 
 
 // Add a tick to the graph
-class add_tick_f : public UnaryFunction<tick*, int> {
+class add_tick_f : public unary_function<tick*, int> {
     sides side;
     double size;
     shiftlist shift;
@@ -135,7 +135,7 @@ linedesc* combine_linedesc(linedesc *desc, linedesc* elem) {
 // Process a draw statement.  Create a new line description if this is
 // a new name, assign the line description to it, and a plot string if
 // necessary.
-void draw_statement(String *ident, linedesc *ld, String *plot) {
+void draw_statement(string *ident, linedesc *ld, string *plot) {
     line *l;
     lineDictionary::iterator li;
     linedesc defld(invis,0,0);
@@ -146,7 +146,7 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
 	if ( li == the_graph->lines.end() ) {
 	    macroDictionary::iterator md;
 	    macro *m;
-	    String *s;
+	    string *s;
 	
 	    // We need to create a new line with default perameters.
 	    // Initialize the line to be invisible with a bullet
@@ -155,7 +155,7 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
 		m = (*md).second;
 		s = m->invoke();
 	    }
-	    else s = new String("\"\\(bu\"");
+	    else s = new string("\"\\(bu\"");
 
 	    l = new line(&defld, s);
 	    the_graph->lines[*ident] = l;
@@ -178,7 +178,7 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
     if ( plot ) {
 	if ( *plot != "" ) {
 	    if ( l->plotstr ) *l->plotstr = *plot;
-	    else l->plotstr = new String(*plot);
+	    else l->plotstr = new string(*plot);
 	}
 	else {
 	    // If the string is "", don't issue the pic commands to
@@ -201,7 +201,7 @@ void draw_statement(String *ident, linedesc *ld, String *plot) {
 	    }
 	}
     }
-    l->initial = 1;
+    l->lastplotted(0);
     delete ident;
     delete plot;
     delete ld;
@@ -223,15 +223,13 @@ void num_list(doublelist *dl) {
     }
 		
     if ( dl->empty() ) {
-	defline->addpoint(nlines,x,defcoord);
-	defcoord->newpt(nlines,x);
+	the_graph->new_linesegment(nlines, x, defcoord, defline);
     }
     else {
 	while ( !dl->empty() ) {
 	    y = dl->front();
 	    dl->pop_front();
-	    defline->addpoint(x,y,defcoord);
-	    defcoord->newpt(x,y);
+	    the_graph->new_linesegment(x, y, defcoord, defline);
 	}
     }
     delete dl;
@@ -240,7 +238,7 @@ void num_list(doublelist *dl) {
 
 // Assign the double to the variable named by ident.  If no such
 // variable exists, create it.
-double assignment_statement(String *ident, double val) {
+double assignment_statement(string *ident, double val) {
     double *d;
     doubleDictionary::iterator di;
 		
@@ -256,17 +254,17 @@ double assignment_statement(String *ident, double val) {
     delete ident;
     return *d;
 }
-
+/*
 // Create an new point and return it.  Also note the new point with
 // its coordinate system so that automatic coordinates work right.
 point *new_point(coord *c, double x, double y) {
     c->newpt(x, y);
     return new point(x, y, c);
 }
-
+*/
 // This collects the modifiers for other strings in the list to
 // construct the modifiers for the current string.
-stringlist *combine_strings(stringlist *sl, String *st, strmod &sm)  {
+stringlist *combine_strings(stringlist *sl, string *st, strmod &sm)  {
     modaccumulator last;
     DisplayString *s;
 			
@@ -291,10 +289,9 @@ stringlist *combine_strings(stringlist *sl, String *st, strmod &sm)  {
 
 // Create a new plot, that is a string created from a double, and add
 // it to the current graph.
-void plot_statement(double val, String *fmt, point *pt) {
+void plot_statement(double val, string *fmt, point *pt) {
     stringlist *seq = new stringlist;
     DisplayString *s;
-    plot *p;
 
     if ( fmt ) {
 	unquote(fmt);
@@ -306,16 +303,14 @@ void plot_statement(double val, String *fmt, point *pt) {
     quote(s);
     seq->push_back(s);
 
-    p = new plot(seq,pt);
-    the_graph->add_plot(*p);
-    delete p;
+    the_graph->new_plot(seq,pt);
     delete pt;
 }
 
 // Add a point to the current line (or the named line if ident is
 // non-0).  It may also include a pointer to a linedesc, wich should be
 // passed on if non-0.
-void next_statement(String *ident, point *p, linedesc* ld) {
+void next_statement(string *ident, point *p, linedesc* ld) {
     line *l;
     lineDictionary::iterator li;
 
@@ -324,7 +319,7 @@ void next_statement(String *ident, point *p, linedesc* ld) {
 	if ( li == the_graph->lines.end() ) {
 	    macroDictionary::iterator md;
 	    macro *m;
-	    String *s;
+	    string *s;
 	
 	    // We need to create a new line with default perameters.
 	    // Initialize the line to be invisible with a bullet
@@ -333,7 +328,7 @@ void next_statement(String *ident, point *p, linedesc* ld) {
 		m = (*md).second;
 		s = m->invoke();
 	    }
-	    else s = new String("\"\\(bu\"");
+	    else s = new string("\"\\(bu\"");
 	    l = new line((linedesc *)0, s );
 	    the_graph->lines[*ident] = l;
 	    delete s;
@@ -343,9 +338,9 @@ void next_statement(String *ident, point *p, linedesc* ld) {
     delete ident;
 		
     if ( ld )
-	l->addpoint(p->x,p->y,p->c,0,ld);
+	the_graph->new_linesegment(p->x, p->y, p->c, l, 0, ld);
     else 
-	l->addpoint(p->x,p->y,p->c);
+	the_graph->new_linesegment(p->x, p->y, p->c, l);
 		
     delete p;
     delete ld;
@@ -354,9 +349,9 @@ void next_statement(String *ident, point *p, linedesc* ld) {
 // Create a new tick with the given format (if any) and add it to the
 // current ticklist (which we're creating as we go).  If no such list
 // exists, create it.
-ticklist *ticklist_elem(double d, String *fmt, ticklist *tl) {
+ticklist *ticklist_elem(double d, string *fmt, ticklist *tl) {
     tick *t = new tick(d,0,top,0, (shiftlist *) 0, 0);
-    String *s;
+    string *s;
 
     if ( fmt ) {
 	unquote(fmt);
@@ -375,10 +370,10 @@ ticklist *ticklist_elem(double d, String *fmt, ticklist *tl) {
 // including the coordinate system to put the ticks in, the beginning
 // and ending ticks, a general increment descriptor (by) and a string
 // to format each tick value.  Return the list.
-ticklist *tick_for(coord *c, double from, double to, bydesc by, String *rfmt) {
+ticklist *tick_for(coord *c, double from, double to, bydesc by, string *rfmt) {
     tick *t;
-    String *s;
-    String *fmt;
+    string *s;
+    string *fmt;
     double idx;
     int dir;
     ticklist *tl;
@@ -386,10 +381,10 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, String *rfmt) {
     tl = new ticklist;
     if ( rfmt ) {
 	unquote(rfmt);
-	fmt = new String(*rfmt);
+	fmt = new string(*rfmt);
 	delete rfmt;
     } else
-	fmt = new String("%g");
+	fmt = new string("%g");
 		
     if ( to - from >= 0 ) dir = 1;
     else dir = -1;
@@ -541,18 +536,18 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
     }
     else { l = (*li).second; } 
 
-    l->initial = 1;
+    l->lastplotted(0);
 
     if ( des.ld != def || des.color) {
-	l->addpoint(p1->x,p1->y,p1->c,0,&des);
+	the_graph->new_linesegment(p1->x, p1->y, p1->c, l, 0, &des);
 	if ( is_line )
-	    l->addpoint(p2->x,p2->y,p2->c,0,&des);
+	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des);
 	else
-	    l->addarrow(p2->x,p2->y,p2->c,0,&des);
+	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des, true);
     } else {
-	l->addpoint(p1->x,p1->y,p1->c);
-	if (is_line) l->addpoint(p2->x,p2->y,p2->c);
-	else l->addarrow(p2->x,p2->y,p2->c);
+	the_graph->new_linesegment(p1->x, p1->y, p1->c, l);
+	if (is_line) the_graph->new_linesegment(p2->x, p2->y, p2->c, l);
+	else the_graph->new_linesegment(p2->x,p2->y,p2->c, l, 0, 0, true);
     }
     delete ld1; delete ld2;
     delete p1; delete p2;
@@ -574,7 +569,7 @@ axisdesc axis_description(axis which, double d1, double d2) {
 
 // Create a coordinate object.  Assign the mins and maxes to the axes
 // and tell which if any are logarithmic.
-void coord_statement(String *ident, axisdesc& xa, axisdesc& ya, axis log) {
+void coord_statement(string *ident, axisdesc& xa, axisdesc& ya, axis log) {
     coord *c;
 
     if (ident) {
@@ -621,8 +616,8 @@ void coord_statement(coord *co, axisdesc& xa, axisdesc& ya, axis log) {
 // Initiate a for statement by generating a for descriptor and
 // including the string.  The body is captured by changing lex state
 // in the middle of the for_statement yacc rule.
-void for_statement(String *ident, double from, double to,
-		   bydesc by, String *body) {
+void for_statement(string *ident, double from, double to,
+		   bydesc by, string *body) {
     struct for_descriptor *f;
     doubleDictionary::iterator di;
     double *d;
@@ -724,7 +719,7 @@ axis combine_logs(axis old, axis n) {
 }
 // If a macro with the given name is defined, redefine it to be text,
 // otherwise create a new macro and define it to be text.
-void define_macro(String *name, String *text) {
+void define_macro(string *name, string *text) {
     macro *m;				// The new macro
     macroDictionary::iterator mi;	// To search defined macros
     
@@ -742,7 +737,6 @@ void define_macro(String *name, String *text) {
 void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
 		   double base, linedesc *ld) {
     point *p1, *p2;		// The defining points of the box
-    box *b;			// The new box
 
     switch (dir) {
 	case right:
@@ -759,10 +753,8 @@ void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
     c->newpt(p1->x,p1->y);
     c->newpt(p2->x,p2->y);
 		
-    b = new box(p1, p2, ld);
-    the_graph->add_box(*b);
+    the_graph->new_box(p1, p2, ld);
     delete p1; delete p2; delete ld;
-    delete b;
 }
 
 
@@ -775,13 +767,13 @@ void init_dict() {
     linedesc defld(invis,0,0);		// The default line descriptor
     macroDictionary::iterator md;	// An iterator to search for bullet
     macro *m;				// The bullet macro
-    String *s;				// The plot string for the default line
+    string *s;				// The plot string for the default line
 
     if ( ( md = macros.find("bullet")) != macros.end()) {
 	m = (*md).second;
 	s = m->invoke();
     }
-    else s = new String("\"\\(bu\"");
+    else s = new string("\"\\(bu\"");
     
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
@@ -825,9 +817,9 @@ int yyerror(char *s) {
 }
 
 int main(int argc, char** argv) {
-    String defines=DEFINES;
-    String fname;
-    String pathstring;
+    string defines=DEFINES;
+    string fname;
+    string pathstring;
     int use_defines = 1;
     char c;
 
@@ -863,12 +855,12 @@ int main(int argc, char** argv) {
 
     // Convert the colon separated file path into a sequence
     while (pathstring.length()) {
-	String::size_type p = pathstring.find(':');
-	String *s;
+	string::size_type p = pathstring.find(':');
+	string *s;
 
 	if ( pathstring[p] == ':' ) {
 	    if ( p != 0 ) {
-		s = new String(pathstring.substr(0,p));
+		s = new string(pathstring.substr(0,p));
 		pathstring.erase(0,p+1);
 	    }
 	    else {
@@ -877,8 +869,8 @@ int main(int argc, char** argv) {
 	    }
 	}
 	else {
-	    s = new String(pathstring);
-	    pathstring.erase(0,String::npos);
+	    s = new string(pathstring);
+	    pathstring.erase(0,string::npos);
 	}
 	path.push_back(s);
     }

@@ -3,8 +3,6 @@
 #define GRAP_DRAW_H
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
-#include <iostream.h>
-#include <stl.h>
 
 // Names for the sides of graphs
 typedef enum { top=0, bottom,left, right} sides;
@@ -38,14 +36,14 @@ public:
     linetype ld;	// The basic style
     double param;	// Some styles have parameters e.g., dotted 0.3
     double fill;	// Used for drawing solids, e.g. box
-    String *color;	// The name of a color for the line
-    String *fillcolor ;	// The color to fill a solid
+    string *color;	// The name of a color for the line
+    string *fillcolor ;	// The color to fill a solid
 
-    linedesc(linetype l=def, double p=0, String *c=0, double f=0,
-		  String *fc=0) :
+    linedesc(linetype l=def, double p=0, string *c=0, double f=0,
+		  string *fc=0) :
 	ld(l), param(p), fill(f), color(0), fillcolor(0) {
-	    if ( c ) color = new String(*c);
-	    if ( fc ) fillcolor = new String(*fc);
+	    if ( c ) color = new string(*c);
+	    if ( fc ) fillcolor = new string(*fc);
     }
 
     linedesc(linedesc *l) {
@@ -53,9 +51,9 @@ public:
 	    ld = l->ld;
 	    param = l->param;
 	    fill = l->fill;
-	    if ( l->color ) color = new String(*l->color);
+	    if ( l->color ) color = new string(*l->color);
 	    else color = 0;
-	    if ( l->fillcolor ) fillcolor = new String(*l->fillcolor);
+	    if ( l->fillcolor ) fillcolor = new string(*l->fillcolor);
 	    else fillcolor = 0;
 	}
 	else {
@@ -69,8 +67,8 @@ public:
 
     linedesc(const linedesc& ldc) :
 	ld(ldc.ld), param(ldc.param), fill(ldc.fill), color(0), fillcolor(0) {
-	    if ( ldc.color ) color = new String(*ldc.color);
-	    if ( ldc.fillcolor ) fillcolor = new String(*ldc.fillcolor);
+	    if ( ldc.color ) color = new string(*ldc.color);
+	    if ( ldc.fillcolor ) fillcolor = new string(*ldc.fillcolor);
     }
     // Make a new linedescriptor that combines the properites in ld1 and
     // ld2.
@@ -81,7 +79,7 @@ public:
 	    ld = ld2->ld;
 	    param = ld2->param;
 	}
-	if ( ld2 && ld2->color ) color = new String(*ld2->color);
+	if ( ld2 && ld2->color ) color = new string(*ld2->color);
     }
 
     ~linedesc() {
@@ -94,9 +92,9 @@ public:
 	param= l.param;
 	fill = l.fill;
 	if ( color ) { delete color; color = 0;}
-	if ( l.color ) color = new String(*l.color);
+	if ( l.color ) color = new string(*l.color);
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
-	if ( l.fillcolor ) fillcolor = new String(*l.fillcolor);
+	if ( l.fillcolor ) fillcolor = new string(*l.fillcolor);
 	return *this;
     }
     
@@ -154,7 +152,7 @@ public:
 
 typedef list<drawable *> objlist;
 
-class DisplayString : public String {
+class DisplayString : public string {
     // These are primarily used to keep track of the extended string
     // info.  A drawable class is derived to display them.
 public:
@@ -163,23 +161,23 @@ public:
     double size;	// Fontsize
     int relsz;		// True if the fintsize is relative
 
-    DisplayString() : String(), j(none), size(0), relsz(0) {}
-    DisplayString(String s, int ju=0, double sz=0, int rsz=0 ) :
-	String(s), j(ju), size(sz), relsz(rsz) { }
+    DisplayString() : string(), j(none), size(0), relsz(0) {}
+    DisplayString(string s, int ju=0, double sz=0, int rsz=0 ) :
+	string(s), j(ju), size(sz), relsz(rsz) { }
     DisplayString(DisplayString& ds) :
-	String(ds), j(ds.j), size(ds.size), relsz(ds.relsz) { }
-    DisplayString(double e, const String *fmt=0) :
+	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz) { }
+    DisplayString(double e, const string *fmt=0) :
 	j(0), size(0), relsz(0) {
 	char *c = new char[64];
 	int delf =0;
 
 	if ( !fmt) {
-	    fmt = new String("%g");
+	    fmt = new string("%g");
 	    delf = 1;
 	}
 
 	snprintf(c,64,fmt->c_str(),e);
-	*(String*)this = c;
+	*(string*)this = c;
 	delete[] c;
 	if ( delf ) delete fmt;
     }
@@ -204,7 +202,9 @@ public:
     int xautoscale;	// True if the user has not given an explicit x range
     int yautoscale;	// True if the user has not given an explicit y range
 
-    void newpt(double, double);
+    void coord::newpt(double x, double y) {
+	newx(x); newy(y);
+    }
     void newx(double);
     void newy(double);
 
@@ -222,7 +222,7 @@ public:
     double where;	// x or y value of the tick
     double size;	// how large a tick mark to make
     sides side;		// Which side of the graph the mark is on
-    String *prt;	// The string to print next to the mark
+    string *prt;	// The string to print next to the mark
     shiftlist shift;	// Shift information, to fine tune position of prt
     coord *c;		// The coordinate scale that the tick is in
     
@@ -231,15 +231,15 @@ public:
 	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
 	shiftcpy sc(&shift);
 	
-	if ( t.prt ) prt = new String(*t.prt);
+	if ( t.prt ) prt = new string(*t.prt);
 	else prt =0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
     }
-    tick(double w, double s, sides sd, String *p, shiftlist *sh,
+    tick(double w, double s, sides sd, string *p, shiftlist *sh,
 	 coord *co) : where(w), size(s), side(sd), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new String(*p);
+	if ( p ) prt = new string(*p);
 	else prt =0;
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
@@ -268,7 +268,7 @@ public:
 	shift = t.shift;
 	c = t.c;
 	if ( prt ) { delete prt; }
-	if ( t.prt ) prt = new String(*t.prt);
+	if ( t.prt ) prt = new string(*t.prt);
 	else prt = 0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
 	return *this;
@@ -281,18 +281,18 @@ public:
     double where;	// x or y value of the grid line
     linedesc desc;	// style of the grid line
     sides side;		// Side of the graph where line labels are printed
-    String *prt;	// The label for this line
+    string *prt;	// The label for this line
     shiftlist shift;	// Shift info for the label
     coord *c;		// Coordinate system for this line
     
     grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(), c(0) { }
 
-    grid(double w, linedesc *l, sides sd, String *p, shiftlist *sh,
+    grid(double w, linedesc *l, sides sd, string *p, shiftlist *sh,
 	 coord *co) :
 	where(w), desc(l), side(sd), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new String(*p);
+	if ( p ) prt = new string(*p);
 	else prt =0;
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
@@ -303,7 +303,7 @@ public:
 	    shift(), c(t->c) {
 	shiftcpy sc(&shift);
 
-	if ( t->prt ) prt = new String(*t->prt);
+	if ( t->prt ) prt = new string(*t->prt);
 	else prt =0;
 	for_each(t->shift.begin(), t->shift.end(), sc);
     }
@@ -312,7 +312,7 @@ public:
 		shift(), c(g.c) {
 	shiftcpy sc(&shift);
 
-	if ( g.prt ) prt = new String(*g.prt);
+	if ( g.prt ) prt = new string(*g.prt);
 	else prt =0;
 	for_each(g.shift.begin(), g.shift.end(), sc);
     }
@@ -341,7 +341,7 @@ public:
 	shift = g.shift;
 	c = g.c;
 	if ( prt ) delete prt;
-	if ( g.prt ) prt = new String(*g.prt);
+	if ( g.prt ) prt = new string(*g.prt);
 	else prt = 0;
 	for_each(g.shift.begin(), g.shift.end(), sc);
 	return *this;
@@ -354,8 +354,16 @@ public:
     coord *c;		// system the coordinates are in
 
     point() : x(0), y(0), c(0) {}
-    point(double xx, double yy, coord* cc) : x(xx), y(yy), c(cc) { }
-    point(point *p) : x(p->x), y(p->y), c(p->c) { }
+    point(double xx, double yy, coord* cc) : x(xx), y(yy), c(cc) {
+	if ( c ) c->newpt(x, y);
+    }
+    point(point *p) : x(p->x), y(p->y), c(p->c) {
+	if ( c ) c->newpt(x, y);
+    }
+    point& operator=(point &p) {
+	x = p.x; y = p.y; c = p.c;
+	return *this;
+    }
 };
 
 class frame {
@@ -378,7 +386,7 @@ public:
     gridlist gds;		// gridlines to draw
 
     frame() : ht(2), wid(3), tks(), gds() {
-	String g = "%g";
+	string g = "%g";
 	
 	for ( int i = 0 ; i < 4 ; i ++ ) {
 	    desc[i] = linedesc(def,0,0);
@@ -430,92 +438,69 @@ public:
     }
 };
 
-class line {
-protected:
-    // An internal class that describes each point on the line.  Each
-    // can have a different plotting symbol or drawing style.
-    class linepoint : public point {
-    public:
-	linedesc desc;		// style for the connection to this point
-	String *plotstr;	// string to plot
-	int initial;		// true if this is the first point in a segment
-	int arrow;		// true if the connection ends with an arrow
-	
-	linepoint() : point(),  desc(invis, 0.0, 0),  plotstr(0), initial(0),
-	    arrow(0)  { } ;
-	linepoint(double xx, double yy, coord* cc, line *ll, String *s,
-		  linedesc *l, int a=0);
-	linepoint(linepoint& lp) :
-	    point(lp.x,lp.y,lp.c), desc(lp.desc), plotstr(0),
-	    initial(lp.initial), arrow(lp.arrow) {
-	    if ( lp.plotstr ) plotstr = new String(*lp.plotstr);
-	}
-
-	~linepoint() {
-	    if ( plotstr ) {
-		delete plotstr;
-		plotstr = 0;
-	    }
-	}
-    };
+// A class that describes each point on the line.  Each can have a
+// different plotting symbol or drawing style.
+class linesegment {
 public:
-    String *plotstr;		// default plotting string
-    linedesc desc;		// Default connection style
-    list<linepoint*> pts;	// the list of points
-    int initial;		// the value of initial for the next point
-
-    line() : plotstr(0), desc(), pts(),initial(1) {}
-
-    line(linedesc *l, String *s ) : desc(l), pts(), initial(1) {
-	plotstr = new String(*s);
-    }
-    
-    line(linedesc *l) :  plotstr(0), desc(l), pts(), initial(1) { }
-    line(line& l) : plotstr(0), desc(l.desc),  pts(), initial(l.initial) {
-	list<linepoint*>::iterator lpi;
+    point to;		// The end point of this segment
+    point *from;	// the point this segment started from (if any)
+    linedesc desc;	// style for the connection to this point
+    string *plotstr;	// string to plot
+    bool arrow;		// true if the connection ends with an arrow
 	
-	if ( l.plotstr ) {
-	    plotstr = new String(*l.plotstr);
-	}
-	// make a copy of the points as well as the list in pts
-
-	for ( lpi = l.pts.begin(); lpi != l.pts.end(); lpi++ ) {
-	    linepoint *lp = *lpi;
-	    linepoint *nlp = new linepoint(*lp);
-
-	    pts.push_back(nlp);
-	}
-	    
+    linesegment() : to(),  from(0), desc(invis, 0.0, 0),  plotstr(0),
+		    arrow(false) { } ;
+    linesegment(double xx, double yy, coord* cc, line *ll, string *s=0,
+	      linedesc *l=0, bool a=0);
+    linesegment(linesegment& ls) :
+	to(ls.to), desc(ls.desc), plotstr(0) , arrow(ls.arrow) {
+	if ( ls.from ) from = new point(ls.from);
+	if ( ls.plotstr ) plotstr = new string(*ls.plotstr);
     }
-    ~line() {
-	linepoint* lp;
-	if ( plotstr ) {
-	    delete plotstr;
-	    plotstr = 0;
-	}
-	while ( !pts.empty() ) {
-	    lp = pts.front();
-	    pts.pop_front();
-	    if ( lp ) 
-		delete lp;
-	}
+
+    ~linesegment() {
+	delete plotstr;
+	plotstr = 0;
+	delete from;
+	from = 0;
+    }
+};
+
+class line {
+public:
+    string *plotstr;		// default plotting string
+    linedesc desc;		// Default connection style
+    point *lastpoint;		// The last point plotted on the line
+
+    line() : plotstr(0), desc(), lastpoint(0) {}
+
+    line(linedesc *l, string *s=0 ) : plotstr(0), desc(l), lastpoint(0) {
+	if (s) plotstr = new string(*s);
     }
     
-    void addpoint(double x, double y, coord* c, String *s=0,
-		  linedesc *l=0) {
-	linepoint *lp;
-
-	lp = new linepoint(x,y,c,this,s,l);
-	pts.push_back(lp);
-    }
-    void addarrow(double x, double y, coord* c, String *s=0,
-		  linedesc *l=0) {
-	linepoint *lp;
-
-	lp = new linepoint(x,y,c,this,s,l,1);
-	pts.push_back(lp);
+    line(line& l) : plotstr(0), desc(l.desc),  lastpoint(0) {
+	if ( l.plotstr ) {
+	    plotstr = new string(*l.plotstr);
+	}
     }
 
+    ~line() {
+	delete plotstr;
+	plotstr = 0;
+    }
+    // Access to the last point plotted on the line, if any.
+    point *lastplotted() { return lastpoint; }
+    point *lastplotted(point *p) {
+	if (!p) {
+	    delete lastpoint;
+	    lastpoint = 0;
+	}
+	else {
+	    if ( !lastpoint ) lastpoint = new point(p);
+	    else *lastpoint = *p;
+	}
+	return lastpoint;
+    }
 };
 
 class plot {
@@ -590,14 +575,14 @@ class graph : public drawable {
 protected:
     // These are internal functors to delete and display lists.  
     
-    class displayer_f : UnaryFunction<drawable *,int> {
+    class displayer_f : unary_function<drawable *,int> {
 	frame *base;
     public:
 	displayer_f(frame *f) : base(f) {} ;
 	int operator()(drawable *d) { d->draw(base); return 0;}
     };
 
-    class obj_freer_f : public UnaryFunction<drawable *, int> {
+    class obj_freer_f : public unary_function<drawable *, int> {
     public:
 	int operator()(drawable *d) {
 	    delete d;
@@ -606,7 +591,7 @@ protected:
     } obj_freer;
     
     class coord_freer_f :
-	public UnaryFunction<coordinateDictionary::value_type, int> {
+	public unary_function<coordinateDictionary::value_type, int> {
     public:
 	int operator()(coordinateDictionary::value_type ci) {
 	    coord *c = ci.second;
@@ -617,7 +602,7 @@ protected:
     } coord_freer;
 
     class line_freer_f :
-	public UnaryFunction<lineDictionary::value_type, int> {
+	public unary_function<lineDictionary::value_type, int> {
     public:
 	int operator()(lineDictionary::value_type li) {
 	    line *l = li.second;
@@ -628,7 +613,7 @@ protected:
     } line_freer;
     
     class addmargin_f :
-	public UnaryFunction<coordinateDictionary::value_type, int> {
+	public unary_function<coordinateDictionary::value_type, int> {
     public:
 	    int operator() (coordinateDictionary::value_type cp) {
 		coord *c = cp.second;
@@ -648,12 +633,12 @@ public:
     virtual ~graph() { init();}
 
     // This clears graph parameters
-    virtual void init(String * =0, String* =0 ) {
+    virtual void init(string * =0, string* =0 ) {
 	objlist::iterator o;
 	coordinateDictionary::iterator c;
 	lineDictionary::iterator l;
 	
-	visible = 0;
+	visible = false;
 
 	for (o = objs.begin(); o != objs.end(); o++)
 	    delete (*o);
@@ -667,33 +652,39 @@ public:
 	    delete (*l).second;
 	lines.erase(lines.begin(), lines.end());
 	
-	if ( base ) {
-	    delete base;
-	    base =0;
-	}
+	delete base;
+	base =0;
+
     }
+
+    bool is_visible() { return visible; }
+    bool is_visible(bool v) { return visible = v; }
 
     // Called when a .G1 is encountered
     
-    virtual void begin_block(String *) { }
+    virtual void begin_block(string *) { }
     
     // Called when a .G2 is encountered
     virtual void end_block() { }
 
     // Called when pic or troff strings are found
-
-    virtual void pic_string(String *) { }
-    virtual void troff_string(String *) { }
+    virtual void passthru_string(string& ) { }
 
     // Virtual functions to allocate the proper subclassed elements.
     // Each real function should allocate an element and place it on
-    // the objs list of the graph.
-    
-    virtual void add_line(line&) = 0;
-    virtual void add_plot(plot&) = 0;
-    virtual void add_circle(circle&) = 0;
-    virtual void add_box(box&) = 0;
+    // the objs list of the graph.  It returns the base class of the
+    // object created.  The returned element is a pointer to the
+    // object on the list.  Don't delete it, although you can modify
+    // it.
+    virtual linesegment *new_linesegment(double x, double y, coord* c, line *l,
+					 string *s=0, linedesc *ld=0,
+					 bool a=false) =0;
+    virtual plot *new_plot(stringlist *s =0, point *p=0)  =0;
+    virtual circle *new_circle(point *p, double r, linedesc *l=0) =0;
+    virtual box *new_box(point *p1, point *p2, linedesc *l) = 0;
 
+    // put a drawable version of the frame on the object list.
+    virtual void queue_frame() =0;
 };
 
 #endif

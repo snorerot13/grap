@@ -1,7 +1,6 @@
 // -*-c++-*-
 #ifndef GRAP_PIC_H
 #define GRAP_PIC_H
-#include <iostream.h>
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
@@ -69,17 +68,20 @@ protected:
     void label_line(sides);
 };
 
-class Picline : public line, public drawable {
+class Piclinesegment : public linesegment, public drawable {
 protected:
     // Returns true if the coordinate is between 0 and 1 (withing tolerance).
-    inline bool Picline::inbox(double a) {
+    inline bool inbox(double a) {
 	return ( a < 1+EPSILON && a > 0-EPSILON );
     }
     bool clipx( double &, double &, double &, double &);
     bool clip( double &, double &, double &, double &);
 public:
-    Picline(line &l) : line(l) { };
-    ~Picline() { }
+    Piclinesegment(linesegment &ls) : linesegment(ls) { }
+    Piclinesegment(double x, double y, coord* c, line *l, string *s=0,
+		   linedesc *ld=0, bool a=false) :
+	linesegment(x, y, c, l, s, ld, a) { }
+    ~Piclinesegment() { }
     void draw(frame *);
 };
 
@@ -87,6 +89,7 @@ public:
 class Picplot: public plot, public drawable {
 public:
     Picplot(plot& p) : plot(p) { }
+    Picplot(stringlist *s =0, point *p=0) : plot(s, p) { }
     ~Picplot() { }
     void draw(frame *);
 };
@@ -94,6 +97,7 @@ public:
 class Piccircle: public circle, public drawable {
 public:
     Piccircle(circle& c) : circle(c) { }
+    Piccircle(point *p, double r, linedesc *l=0) : circle(p, r, l) { }
     ~Piccircle() { }
     void draw(frame *);
 };
@@ -107,132 +111,96 @@ protected:
     }
 public:
     Picbox(box& b) : box(b) { }
+    Picbox(point *p1, point *p2, linedesc *l) : box(p1, p2, l) { }
     ~Picbox() { }
     void draw(frame *);
 };
 
+class Picthrustring : public string, public drawable {
+public:
+    Picthrustring(string &s) : string(s) { }
+    ~Picthrustring() { }
+    void draw(frame *) {
+	cout << *this << endl;
+    }
+};
+
 class Picgraph : public graph {
-    String *ps_param;		// The params to .G1
-    String *name;		// The name of the graph
-    String *pos;		// the position of the graph (in pic)
-    stringSequence pic;		// Pic commands encountered in the code
-    stringSequence troff;	// troff commands encountered in the code
+    string *ps_param;		// The params to .G1
+    string *name;		// The name of the graph
+    string *pos;		// the position of the graph (in pic)
     int graphs;			// the number of graphs drawn this block
+    bool frame_queued;		// The frame is on the object list
     Picframe *pframe;		// The pic frame for deallocation
 
 public:
-    // Lots of functors to output and convert objects
-
-    // Convert lines to Piclines and add them to the given graph
-    class line_convert_f :
-	public UnaryFunction<lineDictionary::value_type,int> {
-	graph *g;
-    public:
-	line_convert_f(graph *gg) : g(gg) { }
-	int operator()(lineDictionary::value_type li) {
-	    line *l = (li).second;
-	    g->add_line(*l);
-	    return 0;
-	}
-    };
-
-    // Print strings to the given ostream.  These two are not strictly
-    // beautiful things, but those above are, and mixing for_each and
-    // direct iterator manipulation in Picgraph::draw is ugly.  This
-    // avoids that ugliness at low cost.
-
-    class print_string_f :
-	public UnaryFunction<String *, int> {
-	ostream &f;
-    public:
-	print_string_f(ostream& s) : f(s) { }
-	int operator()(String *s) {
-	    f << *s << endl;
-	    return 0;
-	}
-    };
-
-    // Free a string.  See above for justification.
-    class free_string_f :
-	public UnaryFunction<String *, int> {
-    public:
-	free_string_f() { }
-	int operator()(String *s) {
-	    delete s;
-	    return 0;
-	}
-    };
-   
     // regular member functions 
     Picgraph() :
-	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0),
-	pframe(0)
+	graph(), ps_param(0), name(0), pos(0), graphs(0), pframe(0)
 	{ }
     
     
     ~Picgraph() {
-	free_string_f free_string;	// We've defined this for use
-	                                // elsewhere, so we'll use it here.
+	// pframe should always be a copy of base, so don't delete it.
+	// It will be deallocated by graph::init.
+	delete ps_param;
+	ps_param = 0;
 
-	// pframe should always be a copy of base, so don't delete it
-	if ( ps_param ) {
-	    delete ps_param;
-	    ps_param = 0;
-	}
-	if ( name ) {
-	    delete name;
-	    name = 0;
-	}
-	if ( pos ) {
-	    delete pos;
-	    pos = 0;
-	}
-	for_each(troff.begin(), troff.end(), free_string);
-	troff.erase(troff.begin(), troff.end());
+	delete name;
+	name = 0;
 
-	for_each(pic.begin(), pic.end(), free_string);
-	pic.erase(pic.begin(), pic.end());
+	delete pos;
+	pos = 0;
     }
 
     // overload the virtual functions in graph
     
-    void init(String * =0, String* =0);
-    void begin_block(String *param) { graphs = 0; ps_param = param; }
+    void init(string * =0, string* =0);
+    void begin_block(string *param) { graphs = 0; ps_param = param; }
     void end_block() { if ( graphs ) cout << ".PE" << endl; }
-    void troff_string(String *s) {
-	String *t;
-	if ( s ) {
-	    t = new String(*s);
-	    troff.push_back(t);
-	}
-    }
-	
-    void pic_string(String *s) {
-	String *p;
-	if ( s ) {
-	    p = new String(*s);
-	    pic.push_back(p);
-	}
-    }
-	
-    void add_line(line &l) {
-	Picline *pl = new Picline(l);
-	objs.push_back(pl);
+    void passthru_string(string& s) {
+	Picthrustring *t = new Picthrustring(s);
+	if ( t ) objs.push_back(t);
     }
 
-    void add_plot(plot &p) {
-	Picplot *pp = new Picplot(p);
-	objs.push_back(pp);
+    virtual linesegment *new_linesegment(double x, double y, coord* c, line *l,
+					 string *s=0, linedesc *ld=0,
+					 bool a=false) {
+	Piclinesegment *pls = new Piclinesegment(x, y, c, l, s, ld, a);
+	queue_frame();
+	if (pls) objs.push_back(pls);
+	return pls;
     }
 
-    void add_circle(circle &c) {
-	Piccircle *pc = new Piccircle(c);
-	objs.push_back(pc);
+    virtual plot *new_plot(stringlist *s =0, point *p=0) {
+	Picplot *pl = new Picplot(s, p);
+	queue_frame();
+	if ( pl ) objs.push_back(pl);
+
+	return pl;
     }
-    void add_box(box &b) {
-	Picbox *pb = new Picbox(b);
-	objs.push_back(pb);
+    virtual circle *new_circle(point *p, double r, linedesc *l=0) {
+	Piccircle *c = new Piccircle(p, r, l);
+	queue_frame();
+	if ( c ) objs.push_back(c);
+
+	return c;
     }
+    virtual box *new_box(point *p1, point *p2, linedesc *l) {
+	Picbox *b = new Picbox(p1, p2, l);
+	queue_frame();
+	if ( b ) objs.push_back(b);
+
+	return b;
+    }
+
+    virtual void queue_frame() {
+	if ( !frame_queued ) {
+	    objs.push_back(pframe);
+	    frame_queued = true;
+	}
+    }
+
     void draw(frame *);
 };
 #endif

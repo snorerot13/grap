@@ -2,7 +2,7 @@
 #include "config.h"
 #endif
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <math.h>
 #include "grap.h"
 #include "grap_data.h"
@@ -17,7 +17,7 @@
 // to keep g++ 2.7.3 happy.
 template <class FROM, class TO>
 class draw_f :
-    public UnaryFunction<FROM *, int> {
+    public unary_function<FROM *, int> {
     frame *f;
 public:
     draw_f(frame *fr) : f(fr) { }
@@ -33,39 +33,23 @@ typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
 typedef draw_f<tick, Pictick> draw_tick_f;
 typedef draw_f<grid, Picgrid> draw_grid_f;
 
-void Picgraph::init(String *n=0, String* p=0) {
+void Picgraph::init(string *n=0, string* p=0) {
     // Start a new graph, but maybe not a new block.
     
+    if ( frame_queued ) base = 0;
     graph::init();	// clear the base classes parameters
 
     if ( !base ) 
 	base = pframe = new Picframe;
-    if ( n ) name = new String(*n);
-    if ( p ) pos = new String(*p);
+    if ( n ) name = new string(*n);
+    if ( p ) pos = new string(*p);
+    frame_queued = false;
 }
 	
 void Picgraph::draw(frame *) {
-// Do the work of drawing the current graph.  Convert non-drawable
-// lines to Piclines, and put them in the object list for this graph.
-// Do pic specific setup for the graph, and let the base class plot
-// all the elements (they're all pic objects by now).  This also
-// clears out the pic specific data structures as they're drawn.
-
-    // Lots of functors to output, convert, draw and delete list elements
-    
-    print_string_f print_string(cout);	// Print a string.
-    free_string_f free_string;		// Delete a string.
+    // Do the work of drawing the current graph.
     displayer_f displayer(pframe); 	// Call draw on the object.  This is
                                         // an embedded class of graph.
-    line_convert_f line_convert(this); 	// Convert a generic line to
-                                        // a pic line.  This inserts
-                                        // the converted line into the
-                                        // graph.
-    
-    // Hook the lines up
-    if ( !lines.empty() ) 
-	for_each(lines.begin(), lines.end(), line_convert);
-
     if ( visible ) {
 	if ( !graphs++ ) {
 	    cout << ".PS";
@@ -76,8 +60,6 @@ void Picgraph::draw(frame *) {
 	    }
 	    cout << endl;
 	}
-	// Print any saved embedded troff
-	for_each(troff.begin(), troff.end(), print_string);
 
 	// if we have a name, use it
 	if ( name ) {
@@ -90,10 +72,8 @@ void Picgraph::draw(frame *) {
 	cout << "[" << endl;
 
 	for_each(coords.begin(), coords.end(), addmargin);
-	if ( visible ) {
-	    pframe->draw(pframe);
+//	if ( visible ) 
 	    for_each(objs.begin(), objs.end(), displayer);
-	}
 	cout << "]";
 
 	// Positioning info relative to another graph in this block
@@ -104,17 +84,8 @@ void Picgraph::draw(frame *) {
 	}
 	else cout << endl;
 
-	// Saved pic commands
-	for_each(pic.begin(), pic.end(), print_string);
     }
 
-    // Clear out any saved pic/troff commands
-    for_each(troff.begin(), troff.end(), free_string);
-    troff.erase(troff.begin(), troff.end());
-
-    for_each(pic.begin(), pic.end(), free_string);
-    pic.erase(pic.begin(), pic.end());
-	    
 }
 
 
@@ -135,13 +106,9 @@ void PicDisplayString::draw(frame *) {
     }
     else cout << '"';
 
-#ifdef USE_STD_STRING
     unquote(this);
-#else
-    unquote();
-#endif
     
-    cout << *(String*)this;
+    cout << *(string*)this;
 
     if ( size ) cout << "\\s" << 0 << "\" ";
     else cout << "\" ";
@@ -393,7 +360,7 @@ void Picframe::draw(frame *) {
     for_each(gds.begin(), gds.end(), draw_grid);
 }
 
-bool Picline::clipx(double& x1, double& y1, double& x2, double& y2) {
+bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 // Clip the line to x = 0 and x = 1.  We use the parametric
 // representation of the line for simplicity of calculation.  This
 // gets called with the coordinates reversed to do the y-axis clip.
@@ -461,7 +428,7 @@ bool Picline::clipx(double& x1, double& y1, double& x2, double& y2) {
     return inbox(x1) && inbox(x2);
 }    
     
-bool Picline::clip(double& x1, double& y1, double& x2, double& y2) {
+bool Piclinesegment::clip(double& x1, double& y1, double& x2, double& y2) {
 // If all 4 points are in the frame, return true.  If not call
 // clip twice to clip the lines, and return true only if both
 // clips return valid lines.  There is a little sleight of hand
@@ -472,83 +439,77 @@ bool Picline::clip(double& x1, double& y1, double& x2, double& y2) {
     else return clipx(x1, y1, x2, y2) && clipx(y1, x1, y2, x2);
 }
 
-void Picline::draw(frame *f) {
-// Iterate through the points in the line and draw them.  Map them
-// according to the point's coordinates, then put them into the graph.
-// There are some details to laying out the styles and poltting
-// strings correctly.
-    list<line::linepoint*>::iterator lpi;// An iterator to traverse the list
-    linepoint *lp;			// The current point
+void Piclinesegment::draw(frame *f) {
+// Draw this line segment.  Clip the line segment according to the
+// point's coordinates, then put them into the graph.  There are some
+// details to laying out the styles and poltting strings correctly.
     double lastx, lasty;		// The last point plotted (if any)
     double x,y;				// The current point's coordinates
     double lastcx, lastcy;		// The last point plotted post clipping
     double cx,cy;			// The current point post clipping
 
-    if ( pts.empty() ) return;
+    x = to.c->map(to.x,x_axis);
+    y = to.c->map(to.y,y_axis);
 
-    // Not strictly necessary, but I hate uninitialized warnings.
-    lastx = lasty = 0.0;
-    
-    for ( lpi = pts.begin(); lpi != pts.end(); lpi++ ) {
-	lp = *lpi;
-	x = lp->c->map(lp->x,x_axis);
-	y = lp->c->map(lp->y,y_axis);
-
-	lastcx = lastx;
-	lastcy = lasty;
-	cx = x;
-	cy = y;
-	if ( lp->initial || clip(lastcx, lastcy, cx, cy) ) {
-	    // If clipping has left us a (partial) line to draw, do
-	    // so.  This also is invoked on the first point of a line.
+    if ( from ) {
+	lastcx = from->c->map(from->x, x_axis);
+	lastcy = from->c->map(from->y, y_axis);
+    }
+    else {
+	lastx = lasty = 0.0;
+    }
+	
+    cx = x;
+    cy = y;
+    if ( !from || clip(lastcx, lastcy, cx, cy) ) {
+	// If clipping has left us a (partial) line to draw, do
+	// so.  This also is invoked on the first point of a line.
 	    
-	    if ( lp->desc.color ) {
-		unquote(lp->desc.color);
-		cout << ".grap_color " << *lp->desc.color << endl;
-	    }
-	    if ( lp->initial ) {
-		if ( inbox(x) && inbox(y) )
-		    cout << "move to Frame.Origin + (" << x * f->wid << ", "
-			 << y * f->ht << ")" << endl;
-	    }
-	    else {
-		// Chop off the arrowhead if the line is clipped
-		if ( lp->arrow && inbox(x) && inbox(y) ) cout << "arrow ";
-		else cout << "line ";
-		switch (lp->desc.ld) {
-		    case invis:
-			cout << "invis ";
-			break;
-		    case solid:
-		    default:
-			break;
-		    case dotted:
-			cout << "dotted ";
-			if ( lp->desc.param ) cout << lp->desc.param << " ";
-			break;
-		    case dashed:
-			cout << "dashed ";
-			if ( lp->desc.param ) cout << lp->desc.param << " ";
-			break;
-		}
-		cout << "from Frame.Origin + (" << lastcx * f->wid << ", "
-		     << lastcy * f->ht << ") ";
-		cout << "to Frame.Origin + (" << cx * f->wid << ", "
-		     << cy * f->ht << ")" << endl;
-	    }
-	    // if a plot string has been specified and the point has
-	    // not been clipped, put the plotstring out.
-	    if ( lp->plotstr && inbox(x) && inbox(y) ) {
-		cout <<  *lp->plotstr ;
-		if ( lp->initial ) 
-		    cout << " at Frame.Origin + (" << x * f->wid << ", "
-			 << y * f->ht << ")" << endl;
-		else cout << " at last line.end" << endl;
-	    }
-	    if ( lp->desc.color )
-		cout << ".grap_color prev" << endl;
+	if ( desc.color ) {
+	    unquote(desc.color);
+	    cout << ".grap_color " << *desc.color << endl;
 	}
-	lastx = x; lasty = y;
+	if ( !from ) {
+	    if ( inbox(x) && inbox(y) )
+		cout << "move to Frame.Origin + (" << x * f->wid << ", "
+		     << y * f->ht << ")" << endl;
+	}
+	else {
+	    // Chop off the arrowhead if the line is clipped
+	    if ( arrow && inbox(x) && inbox(y) ) cout << "arrow ";
+	    else cout << "line ";
+	    switch (desc.ld) {
+		case invis:
+		    cout << "invis ";
+		    break;
+		case solid:
+		default:
+		    break;
+		case dotted:
+		    cout << "dotted ";
+		    if ( desc.param ) cout << desc.param << " ";
+		    break;
+		case dashed:
+		    cout << "dashed ";
+		    if ( desc.param ) cout << desc.param << " ";
+		    break;
+	    }
+	    cout << "from Frame.Origin + (" << lastcx * f->wid << ", "
+		 << lastcy * f->ht << ") ";
+	    cout << "to Frame.Origin + (" << cx * f->wid << ", "
+		 << cy * f->ht << ")" << endl;
+	}
+	// if a plot string has been specified and the point has
+	// not been clipped, put the plotstring out.
+	if ( plotstr && inbox(x) && inbox(y) ) {
+	    cout <<  *plotstr ;
+	    if ( !from ) 
+		cout << " at Frame.Origin + (" << x * f->wid << ", "
+		     << y * f->ht << ")" << endl;
+	    else cout << " at last line.end" << endl;
+	}
+	if ( desc.color )
+	    cout << ".grap_color prev" << endl;
     }
 }
 

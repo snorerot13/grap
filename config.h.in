@@ -8,7 +8,6 @@
 #undef STDC_HEADERS
 #undef HAVE_UNISTD_H
 #undef HAVE_HASH_MAP
-#undef USE_STD_STRING
 #undef HAVE_SNPRINTF
 #undef HAVE_RANDOM
 #undef HAVE_RAND
@@ -16,5 +15,7 @@
 #undef RANDOM_DECLARED
 #undef OPTARG_DEFINED
 #undef SPRINTF_NOT_INT
+
+#undef DEFINES 
 
 #endif

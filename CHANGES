@@ -1,5 +1,21 @@
 Change log
 
+1.20: The big jump reflects more internal changes than visible feature
+changes.  The class structure in the code has been substantially
+revamped, and the code brought into better conformance with the
+current state of the C++ world.  As of version 1.20, grap no longer
+attempts to compile under g++ 2.7.2.  grap 1.11 source will remain
+available from http://www.lunabase.org/~faber/Vault/software/grap for
+those who need it.
+
+The main feature change is that troff and pic commands are now placed
+correctly in their relative order rather than being collected before
+and after the graph.  This required specifying more carefully where
+the frame generation is placed.  Frames are output either immediately
+before the first plotted object or after the frame statement, if any.
+This change motivated much of the class changes and actually cleaned
+them up somewhat.  I'd still like to do a little cleaning in here yet.
+
 1.11: Strings are now clipped, thanks to John Heidemann for finding the error.
 
 1.10: Cleaned up the automatic tick generation and fixed a bug in
@@ -11,6 +27,7 @@ coord test
 copy "examples/cy_fatal.d"
 coord test x 1980,2000
 .G2
+
 Default line format now uses the bullet macro if it's defined.  The
 coord statement now will accept multiple log scale modifiers.  The
 statement

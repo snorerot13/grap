@@ -29,7 +29,7 @@ extern "C" {
 int return_macro = 0;
 int slashcount = 0;
 int macro_end = 0;
-String *macrotext;
+string *macrotext;
 int in_str = 0;
 int braces = 0;
 int stack_init =0;
@@ -40,16 +40,16 @@ unsigned int tokenpos =0;
 int lex_expand_macro =1;
 
 linelist *sl=0;
-String *copy_end, *copy_backstop;
+string *copy_end, *copy_backstop;
 
-String linebuf; 
+string linebuf; 
 
 extern macroDictionary macros;
 extern graph *the_graph;
 extern stringSequence path;
 extern bool compat_mode; 
 
-int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
+int include_string(string *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
 void macro_args(macro*);
 void newline();
@@ -94,10 +94,10 @@ char *f2names[NF2] = { "atan2", "min", "max" };
 
 	    for (c = yytext; *c != '\t' && *c != ' '&& *c != '\0'; c++ )
 		;
-	    yylval.string =  ( *c != '\0' ) ? new String(yytext+3) : 0;
+	    yylval.String =  ( *c != '\0' ) ? new string(yytext+3) : 0;
 	}
 	else
-	    yylval.string = 0;
+	    yylval.String = 0;
 	tokenpos += yyleng;
 	BEGIN(GRAP);
 	DEBUG("START\n",0); return START;
@@ -269,13 +269,13 @@ atan2|min|max		{
 				    }
 				    else YY_BREAK;
 				}			
-                                yylval.string = new String(yytext);
+                                yylval.String = new string(yytext);
                                 DEBUG("Troff: %s\n",yytext);
 				return TROFF;
                         }
 \"([^\"\n]|\\\")*\"	{ 
 			DEBUG("String: %s\n",yytext);
-			yylval.string = new String(yytext);
+			yylval.String = new string(yytext);
 			tokenpos += yyleng;
 			return STRING;
 			}
@@ -284,11 +284,11 @@ atan2|min|max		{
 			macroDictionary::iterator mi;
 			coordinateDictionary::iterator ci;
 			coord *c;
-			String *id;
+			string *id;
 			char ch;
 
 			DEBUG("ident: %s\n",yytext);
-			id = new String(yytext);
+			id = new string(yytext);
 			if ( lex_expand_macro &&
 			     ( mi = macros.find(*id)) != macros.end() ) {
                                 tokenpos+= yyleng;
@@ -313,7 +313,7 @@ atan2|min|max		{
 				yylval.coordptr = c;
 				return COORD_NAME;
 			    } else {
-				yylval.string = id;
+				yylval.String = id;
 				return IDENT;
 			    }
 			}
@@ -368,7 +368,7 @@ atan2|min|max		{
 					if ( macro_end == '}' && !braces ) {
 					    BEGIN(GRAP);
 					    if ( !return_macro) {
-						yylval.string = macrotext;
+						yylval.String = macrotext;
 						DEBUG("TEXT\n",0);
 						return TEXT;
 					    } else {
@@ -400,7 +400,7 @@ atan2|min|max		{
 					if ( *yytext == macro_end ) {
 					    BEGIN(GRAP);
 					    if ( !return_macro ) {
-						yylval.string = macrotext;
+						yylval.String = macrotext;
 						return TEXT;
 					    } else {
 						macro *m = new macro(macrotext);
@@ -426,10 +426,10 @@ atan2|min|max		{
 	  newline();
 	}
 .+ 	{
-    String *s;
+    string *s;
     
     if ( *copy_end != yytext && *copy_backstop != yytext ) {
-	s = new String(yytext);
+	s = new string(yytext);
 	sl->push_back(s);
     }
     else {
@@ -459,7 +459,7 @@ atan2|min|max		{
     macro *m;
     macroDictionary::iterator mi;
     
-    String *id = new String(yytext);
+    string *id = new string(yytext);
     if ( ( mi = macros.find(*id)) != macros.end()) {
 	m = (*mi).second;
 	delete id;
@@ -492,9 +492,9 @@ atan2|min|max		{
     tokenpos += yyleng;
     DEBUG("REST:%s\n",yytext);
     if ( strcmp("\n",yytext) )
-	yylval.string = new String(yytext);
+	yylval.String = new string(yytext);
     else
-	yylval.string = 0;
+	yylval.String = 0;
 
     return REST;
     }
@@ -512,7 +512,7 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
-bool include_file(String *s, int rs=0, bool usepath=true) {
+bool include_file(string *s, int rs=0, bool usepath=true) {
     FILE *f=0;
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
@@ -528,7 +528,7 @@ bool include_file(String *s, int rs=0, bool usepath=true) {
                 // use path to look up relative path
                 for ( stringSequence::iterator i = path.begin();
                       i != path.end(); i++) {
-                    String str = *(*i);
+                    string str = *(*i);
 
                     str += "/"; str += *s;
                     if ( ( f = fopen(str.c_str(),"r"))) break;
@@ -542,11 +542,11 @@ bool include_file(String *s, int rs=0, bool usepath=true) {
 		return 0;
 	    }
 	    g->yy = yy_create_buffer(f,YY_BUF_SIZE);
-	    g->name = new String(*s);
+	    g->name = new string(*s);
 	}
 	else {
 	    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
-	    g->name = new String("stdin");
+	    g->name = new string("stdin");
 	}
 	lexstack.push_front(g);
 	yy_switch_to_buffer(g->yy);
@@ -562,7 +562,7 @@ void lex_begin_macro_text() {
 	slashcount = 0;
 	macro_end = 0;
 	return_macro=0;
-	macrotext = new String;
+	macrotext = new string;
 	in_str = 0;
 	braces = 0;
 }
@@ -577,7 +577,7 @@ void lex_end_coord() {
 	DEBUG("<COORD> lex_end_coord_param\n",0);
 }
 
-int include_string(String *s, struct for_descriptor *f=0,
+int include_string(string *s, struct for_descriptor *f=0,
 		   grap_input it=GMACRO) {
 	char *cbuf;
         int len;
@@ -603,17 +603,17 @@ int include_string(String *s, struct for_descriptor *f=0,
 }
 
 void macro_args(macro *m) {
-    String *arg;
+    string *arg;
     int c;
     int parens = 0;
     int slashcount = 0;
     int in_str = 0;
 
-    arg = new String;
+    arg = new string;
     for ( c = yyinput(); c != EOF && ( c != ')' || parens ); c = yyinput()) {
 	if ( c == ',' && !in_str && !parens) {
 	    // End of arg
-	    if ( m->add_arg(arg)) arg = new String;
+	    if ( m->add_arg(arg)) arg = new string;
 	    continue;
 	}
 	if ( c == '(' ) parens++;
@@ -635,14 +635,14 @@ void macro_args(macro *m) {
     tokenpos++;
 }
 
-void lex_begin_copy(String *s=0) {
+void lex_begin_copy(string *s=0) {
     DEBUG("COPYSTATE (lex_begin_copy)\n",0);
     BEGIN(COPYSTATE);
     copystate = 1;
-    if ( !copy_backstop ) copy_backstop = new String(".G2");
+    if ( !copy_backstop ) copy_backstop = new string(".G2");
     if ( copy_end) delete copy_end;
     if ( s ) copy_end = s;
-    else copy_end = new String(".G2");
+    else copy_end = new string(".G2");
     if ( sl ) delete sl;
     sl = new linelist;
 }
@@ -723,7 +723,7 @@ void newline() {
     }
 }
 
-String pre_context(void) {
+string pre_context(void) {
     if (!tokenpos) return "";
     else return linebuf.substr(0,tokenpos-yyleng);
 }
@@ -732,6 +732,6 @@ char *token_context(void) {
     return (yytext);
 }
 
-String post_context(void) {
+string post_context(void) {
     return linebuf.substr(tokenpos);
 }

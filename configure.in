@@ -10,10 +10,10 @@ AC_PROG_YACC
 AC_PROG_INSTALL
 AC_PATH_PROG(PERL,perl)
 
-# it's possible to get separate tables out of byacc.  It is confusing
-# because g++ optimizes away the const static tables that byacc
-# generates, and compiling those tables aren't the problem anyway.  So
-# don't try it again.
+# Note to self: it's possible to get separate tables out of byacc.  It
+# is confusing because g++ optimizes away the const static tables that
+# byacc generates, and compiling those tables aren't the problem
+# anyway.  So don't try it again.
 
 AC_MSG_CHECKING(that $INSTALL supports -d)
 if $INSTALL -d /tmp/test$$ && test -d /tmp/test$$; then 
@@ -41,18 +41,6 @@ dnl Checks for libraries.
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h hash_map)
-
-AC_CACHE_CHECK(that stl.h and string are compatible,grap_cv_lang_stl_and_string,
-AC_TRY_COMPILE(
-#include <stl.h>
-#include <string>
-,
-list<string> ls;
-,grap_cv_lang_stl_and_string="yes",grap_cv_lang_stl_and_string="no"))
-
-if test $grap_cv_lang_stl_and_string = "yes" ; then
-AC_DEFINE(USE_STD_STRING)
-fi
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
@@ -111,5 +99,17 @@ if test $grap_cv_sprintf_int = "no" ; then
 AC_DEFINE(SPRINTF_NOT_INT)
 fi
 fi
+
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+
+# expand the data directory parameter.  Repeatedly eval the contents
+# of ddir until it has not $ in it.
+
+ddir=$datadir
+while echo $ddir | grep '\$' > /dev/null ; do 
+	ddir=`eval echo $ddir`
+done
+
+AC_DEFINE_UNQUOTED(DEFINES,"${ddir}/grap/grap.defines")
 
 AC_OUTPUT(examples/Makefile Makefile)

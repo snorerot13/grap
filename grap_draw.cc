@@ -1,8 +1,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <math.h>
 #include "grap.h"
 #include "grap_data.h"
@@ -11,11 +12,6 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
-void coord::newpt(double x, double y) {
-// Add apoint to a coordinate system
-    newx(x);
-    newy(y);
-}
 void coord::newx(double x) {
 // Specific code to add the x value.  If the axis is being autoscaled,
 // see if this point expands it.  Otherwise, sanity check it.
@@ -156,32 +152,30 @@ double coord::map(double v, axis ax ) {
     }
 }
 
-// Linepoint constructor. Too long for a header, but straightforward.
+// Linesegment constructor. Too long for a header, but
+// straightforward.  Connect this segment to the previous point in the
+// line.
+linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
+			   string *s=0, linedesc *l=0, bool a=false)
+    : to(xx,yy,cc), from(0) {
+    point *p;	// The last point on line ll.
+    
+    // If a null linedesc is passed in, use the one in the line
+    if ( !l ) l = &ll->desc;
 
-line::linepoint::linepoint(double xx, double yy, coord* cc, line *ll,
-			   String *s, linedesc *l, int a=0)
-    : point(xx,yy,cc) {
+    desc = *l;
 
+    if ( s ) plotstr = new string(*s);
+    else {
+	if ( ll->plotstr ) plotstr = new string(*ll->plotstr);
+	else plotstr = 0;
+    }
+    arrow = a;
 
-	// If a null linedesc is passed in, use the one in the line
-	
-	if ( !l ) l = &ll->desc;
-	
-	desc.ld = l->ld;
-	desc.param = l->param;
-	
-	if ( l-> color ) 
-	    desc.color = new String(*l->color);
-	else
-	    desc.color = 0;
-	
-	if ( s ) plotstr = new String(*s);
-	else {
-	    if ( ll->plotstr ) plotstr = new String(*ll->plotstr);
-	    else plotstr = 0;
-	}
-	initial = ll->initial;
-	ll->initial = 0;
-	arrow = a;
+    if ((p = ll->lastplotted())) 
+	from = new point(p);
+    
+    ll->lastplotted(&to);
 }
 
+    

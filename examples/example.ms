@@ -114,26 +114,19 @@ copy "400mpairs.d"
 .KE
 .KS
 .PP
-User specified axes, and a font change in the graph.  My version of
-.I grap
-issues all embedded 
-.I [g]troff
-commands before the pic commands that define the graph.  Any
-.I pic
-commands introduced by the 
-.CW pic
-keyword are issued after the graph description.  You must restore the
+User specified axes, and a font change in the graph.  
+You must restore the
 font after the terminating 
 .CW .G2 .
-Putting 
+Commands to 
+.I groff
+or 
 .I pic
-commands after the 
-.I pic 
-code that 
+are issued at the same place relative to other 
 .I grap
-produces allows the user 
-.I pic
-code to reference the frame and origin of the graph.
+commands in the file (as of version 1.50).  The frame is drawn before
+the first plotted element (invisible lines count) or when the frame
+statement is executed.
 .EQ
 delim off
 .EN
@@ -2472,5 +2465,53 @@ copy "boyhts.d" thru {
 slope = ( n*sigxy - sigx* sigy) / (n*sigx2 - sigx * sigx)
 inter = ( sigy - slope * sigx) / n
 line from minx, slope * minx+inter to maxx, slope * maxx + inter
+.G2
+.KE
+.KS
+.PP
+Some fun with embedded pic and troff to show that they work.  The
+plotting points are made by a troff font change to Helvetica, drawing
+an \*Qx\*U in grap, then a pic box around it, a second troff font
+change and another grap label.  This example will almost certainly fail
+under TeX.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&coord x 5,35 y 5, 35
+\&ticks off
+\&copy until "END" thru {
+\&.	ft H
+\&	"x" at $1, $2
+\&	pic box ht 0.1 wid 0.1 at Here
+\&.	ft R
+\&	"" "$3" below at $1, $2
+\&}
+\&10 10 here's
+\&20 20 some
+\&30 30 pic/troff
+\&END
+\&.G2
+.DE
+.EQ
+delim $$
+.EN
+.ft
+.G1
+coord x 5,35 y 5, 35
+ticks off
+copy until "END" thru {
+.	ft H
+	"x" at $1, $2
+	pic box ht 0.1 wid 0.1 at Here
+.	ft R
+	"" "$3" below at $1, $2
+}
+10 10 here's
+20 20 some
+30 30 pic/troff
+END
 .G2
 .KE

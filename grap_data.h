@@ -1,3 +1,4 @@
+//-*-c++-*-
 #ifndef GRAP_DATA_H
 #define GRAP_DATA_H
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
@@ -5,46 +6,40 @@
 #ifdef STDC_HEADERS
 #include <string.h>
 #endif
-
-#include <stl.h>
 #include <ctype.h>
-
-#ifndef USE_STD_STRING
-#include "grap_string.h"
-#else
 #include <string>
 typedef string String;
 
-inline String *dblString(double d, String *f=0) {
+inline string *dblString(double d, string *f=0) {
     const int sz = 64;
     char c[sz];
-    String *s;
+    string *s;
 
     if ( !f ) 
 	snprintf(c,sz,"%g",d);
     else 
 	snprintf(c,sz,f->c_str(),d);
-    s = new String(c);
+    s = new string(c);
     return s;
 }
 
-inline void unquote(String *s) {
+inline void unquote(string *s) {
     int i;
     if ( (*s)[0] == '"' ) s->erase(0,1);
     i = s->length()-1;
     if ( (*s)[i] == '"' ) s->erase(i,1);
 }
 
-inline void quote(String *s) {
-    s->insert((String::size_type) 0,1,'"');
+inline void quote(string *s) {
+    s->insert((string::size_type) 0,1,'"');
     s->append(1,'"');
 }
 
-class grap_sprintf_String : public String {
+class grap_sprintf_String : public string {
 public:
-    grap_sprintf_String(const char *f=0) : String(f) {}
-    grap_sprintf_String(const String& f) : String(f) {}
-    grap_sprintf_String(const String *f) : String() {
+    grap_sprintf_String(const char *f=0) : string(f) {}
+    grap_sprintf_String(const string& f) : string(f) {}
+    grap_sprintf_String(const string *f) : string() {
 	if (f) *this = *f;
     }
     void next_number(double d) {
@@ -94,17 +89,17 @@ public:
     }
 };
 
-#endif
+/*  #endif */
 
 class macro {
 public:
     static const int numargs = 32;	// maximum number of arguments
     int next_arg;			// the index into the next argument
-    String *text;			// the text of the macro
-    String *arg[numargs];		// the current argument values
-    String *name;			// the name of the macro if it's in a
+    string *text;			// the text of the macro
+    string *arg[numargs];		// the current argument values
+    string *name;			// the name of the macro if it's in a
                                         // dictionary.
-    macro(String *t=0, String *n =0) : next_arg(0), text(t), name(n) {
+    macro(string *t=0, string *n =0) : next_arg(0), text(t), name(n) {
 	for ( int i = 0; i < numargs ; i++ )
 	    arg[i] = 0;
     }
@@ -124,7 +119,7 @@ public:
 	    }
 	
     }
-    int add_arg(String *s ) {
+    int add_arg(string *s ) {
 	if ( next_arg < numargs ) {
 	    if ( arg[next_arg] ) delete arg[next_arg];
 	    arg[next_arg++] = s;
@@ -133,8 +128,8 @@ public:
 	else return 0;
     }
     
-    String *invoke() {
-	String *s = new String;	// The expanded macro
+    string *invoke() {
+	string *s = new string;	// The expanded macro
 	int argn =0;		// the number of the arg to interpolate
 	int dig;		// Number of digits seen after this $
 	int i=0;		// the current character offset
@@ -181,7 +176,7 @@ class copydesc {
  public:
     typedef enum { fname, until} type;
     type t;
-    String *s;
+    string *s;
     copydesc() : t(fname), s(0) {} 
     ~copydesc() {
 	if ( s ) {
@@ -192,5 +187,5 @@ class copydesc {
 };
 
 // we use this to make yacc happier
-typedef pair<coord *, String *> coordid;
+typedef pair<coord *, string *> coordid;
 #endif

@@ -7,7 +7,7 @@
 #include "config.h"
 #endif
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <math.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -36,9 +36,9 @@ extern int lex_expand_macro;
 
 line* defline;
 coord *defcoord;
-String *graph_name;
-String *graph_pos;
-String *ps_param;
+string *graph_name;
+string *graph_pos;
+string *ps_param;
 
 // bison wants these defined....
 int yyerror(char*);
@@ -46,13 +46,13 @@ int yylex();
 void init_dict(); 
 
 // defined in grap_lex.l
-extern bool include_file(String *, int =0, bool=true);
+extern bool include_file(string *, int =0, bool=true);
 extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
 extern void lex_begin_coord();
 extern void lex_end_coord();
-extern void lex_begin_copy( String*s=0);
-extern int include_string(String *,struct for_descriptor *f=0,
+extern void lex_begin_copy( string*s=0);
+extern int include_string(string *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern void lex_hunt_macro();
 extern int yyparse(void);	// To shut yacc (vs. bison) up.
@@ -65,24 +65,23 @@ void init_graph();
 extern graph *initial_graph(); 
 extern linedesc* combine_linedesc(linedesc *, linedesc*);
 extern axis combine_logs(axis, axis);
-extern void draw_statement(String *, linedesc *, String *);
+extern void draw_statement(string *, linedesc *, string *);
 void num_list(doublelist *);
-double assignment_statement(String *, double);
-point *new_point(coord *, double, double );
-stringlist *combine_strings(stringlist *, String *, strmod &);
-void plot_statement(double, String *, point *); 
-void next_statement(String *, point *, linedesc *);
-ticklist *ticklist_elem(double, String *, ticklist *);
-ticklist *tick_for(coord *, double, double, bydesc, String *);
+double assignment_statement(string *, double);
+stringlist *combine_strings(stringlist *, string *, strmod &);
+void plot_statement(double, string *, point *); 
+void next_statement(string *, point *, linedesc *);
+ticklist *ticklist_elem(double, string *, ticklist *);
+ticklist *tick_for(coord *, double, double, bydesc, string *);
 void ticks_statement(sides, double, shiftlist *, ticklist *);
 void grid_statement(sides, int, linedesc *, shiftlist *, ticklist *);
 void line_statement(int, linedesc *, point *, point *, linedesc *);
 axisdesc axis_description(axis, double, double );
-void coord_statement(String *, axisdesc&, axisdesc&, axis);
+void coord_statement(string *, axisdesc&, axisdesc&, axis);
 void coord_statement(coord *, axisdesc&, axisdesc&, axis);
-void for_statement(String *, double, double, bydesc, String *);
+void for_statement(string *, double, double, bydesc, string *);
 void process_frame(linedesc *, frame *, frame *);
-void define_macro(String *, String*);
+void define_macro(string *, string*);
 void bar_statement(coord *, sides, double, double, double,
 		   double, linedesc *); 
 void init_dict(); 
@@ -118,7 +117,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %union {
     int val;
     double num;
-    String *string;
+    string *String;
     frame *frameptr;
     shiftdesc *shift;
     shiftlist *shift_list;
@@ -142,8 +141,8 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
 %type <num> opt_wid assignment_statement lexpr pure_lexpr
 %type <stringmod> strmod
-%type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
-%type <string> START string
+%type <String> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
+%type <String> START string
 %type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME autotick
@@ -198,29 +197,33 @@ statement:
 	assignment_statement
 	    { first_line = 0;}
 |	num_list
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	frame_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    {
+		first_line = 0;
+		the_graph->queue_frame();
+		the_graph->is_visible(true);
+	    }
 |	draw_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	next_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	plot_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	ticks_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	grid_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	label_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	circle_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	bar_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	line_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	coord_statement
-	    { first_line = 0; the_graph->visible = 1;}
+	    { first_line = 0; the_graph->is_visible(true);}
 |	copy_statement
 	    { first_line = 0;}
 |	define_statement
@@ -278,7 +281,7 @@ string:
 		 delete $5;
 		 delete $3;
 
-		 $$ = (String *) s;
+		 $$ = (string *) s;
 	     }
 ;
 
@@ -458,9 +461,9 @@ assignment_statement:
 
 point:
 	opt_coordname expr COMMA expr
-            { $$ = new_point($1, $2, $4); }
+            { $$ = new point($2, $4, $1); }
 |	opt_coordname LPAREN expr COMMA expr RPAREN
-	    { $$ = new_point($1, $3, $5); }
+	    { $$ = new point($3, $5, $1); }
 ;
 
 strmod:
@@ -504,9 +507,7 @@ strlist:
 plot_statement:
 	strlist AT point SEP
 	    {
-		plot *p = new plot($1,$3);
-		the_graph->add_plot(*p);
-		delete p;
+  		the_graph->new_plot($1,$3);
 	    }
 |	PLOT expr opt_string AT point SEP
 	    { plot_statement($2, $3, $5); }
@@ -755,9 +756,8 @@ radius_spec:
 circle_statement:
 	CIRCLE AT point radius_spec opt_linedesc SEP
 	    {
-		circle *c = new circle($3,$4,$5);
-		the_graph->add_circle(*c);
-		delete c; delete $3; delete $5;
+		the_graph->new_circle($3,$4,$5);
+		delete $3; delete $5;
 	    }
 ;
 
@@ -800,11 +800,11 @@ log_desc:
 ;
 
 ident_or_coord:
-            { $$ = new coordid((coord *) 0, (String *) 0); }
+            { $$ = new coordid((coord *) 0, (string *) 0); }
 |       IDENT
             { $$ = new coordid((coord *) 0,$1); }
 |       COORD_NAME
-            { $$ = new coordid($1, (String *) 0); }
+            { $$ = new coordid($1, (string *) 0); }
 
 coord_statement:
 	COORD { lex_begin_coord(); } ident_or_coord x_axis_desc y_axis_desc log_list SEP
@@ -854,9 +854,9 @@ copy_statement:
 	    }
         COPYTEXT
             {
-		String s="";
+		string s="";
 		while ($6 && !$6->empty() ) {
-		    String *ss;
+		    string *ss;
 		    ss = $6->front();
 		    $6->pop_front();
 		    if ( ss ) {
@@ -895,17 +895,17 @@ copy_statement:
 	    }
 	COPYTEXT
 	    {
-		String *s;
-		String *t;
-		String *expand;
+		string *s;
+		string *t;
+		string *expand;
 		int lim;
 		char end;
 
-		expand = new String;
+		expand = new string;
 
 		while ( $9 && !$9->empty() ) {
 		    int i = 0;
-		    t = new String;
+		    t = new string;
 		    
 		    s = $9->front();
 		    $9->pop_front();
@@ -915,7 +915,7 @@ copy_statement:
 			if ( (*s)[i] == ' ' || (*s)[i] == '\t' ) {
 			    if ( t->length() ) {
 				if ( $5->add_arg(t)) 
-				    t = new String;
+				    t = new string;
 			    }
 			} else *t += (*s)[i];
 			i++;
@@ -1024,11 +1024,11 @@ print_statement:
 
 pic_statement:
 	PIC { lex_begin_rest_of_line(); } REST SEP
-	    { the_graph->pic_string($3); delete $3;}
+	    { the_graph->passthru_string(*$3); delete $3;}
 ;
 troff_line:
 	TROFF SEP
-	    { the_graph->troff_string($1); delete $1;}
+	    { the_graph->passthru_string(*$1); delete $1;}
 ;
 
 bar_dir:
@@ -1056,10 +1056,8 @@ bar_statement:
             {
 		// The point parsing has already autoscaled the
 		// coordinate system to include those points.
-		box *b = new box($2, $4, $5);
-		the_graph->add_box(*b);
+		the_graph->new_box($2, $4, $5);
 		delete $2; delete $4; delete $5;
-		delete b;
 	    }
 |	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base opt_linedesc SEP
            { bar_statement($2, $3, $4, $6, $7, $8, $9); }
