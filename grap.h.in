@@ -190,7 +190,7 @@ extern lexStack lexstack;
 
 
 #ifdef HAVE_RANDOM
-#ifdef RANDOM_DECLARED
+#ifndef RANDOM_DECLARED
 extern "C" {
     long random();
 }
