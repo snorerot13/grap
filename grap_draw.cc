@@ -156,7 +156,8 @@ double coord::map(double v, axis ax ) {
 // straightforward.  Connect this segment to the previous point in the
 // line.
 linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
-			   string *s=0, linedesc *l=0, bool a=false)
+			 string *s /* =0 */, linedesc *l /* =0 */,
+			 bool a /* =false */)
     : to(xx,yy,cc), from(0) {
     point *p;	// The last point on line ll.
     

@@ -15,16 +15,16 @@ public:
 	if ( sd->param != 0 ) {
 	    f << "move " ;
 	    switch (sd->dir) {
-		case left:
+		case left_side:
 		    f << "left ";
 		    break;
-		case right:
+		case right_side:
 		    f << "right ";
 		    break;
-		case top:
+		case top_side:
 		    f << "up ";
 		    break;
-		case bottom:
+		case bottom_side:
 		    f << "down ";
 		    break;
 	    }

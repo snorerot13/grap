@@ -92,8 +92,9 @@ public:
 /*  #endif */
 
 class macro {
-public:
+private:
     static const int numargs = 32;	// maximum number of arguments
+public:
     int next_arg;			// the index into the next argument
     string *text;			// the text of the macro
     string *arg[numargs];		// the current argument values

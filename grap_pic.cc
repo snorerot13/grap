@@ -33,7 +33,7 @@ typedef draw_f<DisplayString, PicDisplayString> draw_string_f;
 typedef draw_f<tick, Pictick> draw_tick_f;
 typedef draw_f<grid, Picgrid> draw_grid_f;
 
-void Picgraph::init(string *n=0, string* p=0) {
+void Picgraph::init(string *n /* =0 */, string* p /* =0 */ ) {
     // Start a new graph, but maybe not a new block.
     
     if ( frame_queued ) base = 0;
@@ -129,16 +129,16 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 	cout << ".grap_color " << *desc[s].color << endl;
     }
     switch (s) {
-	case left:
+	case left_side:
 	    cout << "Left: ";
 	    break;
-	case right:
+	case right_side:
 	    cout << "Right: ";
 	    break;
-	case top:
+	case top_side:
 	    cout << "Top: ";
 	    break;
-	case bottom:
+	case bottom_side:
 	    cout << "Bottom: ";
 	    break;
     }
@@ -177,16 +177,16 @@ void Picframe::label_line(sides s) {
     shiftlist::const_iterator csi;
 
     switch (s) {
-	case left:
+	case left_side:
 	    dx = -0.4; dy = 0;
 	    break;
-	case right:
+	case right_side:
 	    dx = 0.4; dy = 0;
 	    break;
-	case top:
+	case top_side:
 	    dx = 0; dy = 0.4;
 	    break;
-	case bottom:
+	case bottom_side:
 	    dx = 0; dy = -0.4;
 	    break;
 	default: // to keep the compiler quiet
@@ -196,16 +196,16 @@ void Picframe::label_line(sides s) {
 
     for (csi = lshift[s]->begin(); csi != lshift[s]->end(); csi++) {
 	switch ((*csi)->dir) {
-	    case left:
+	    case left_side:
 		dx -= (*csi)->param;
 		break;
-	    case right:
+	    case right_side:
 		dx += (*csi)->param;
 		break;
-	    case top:
+	    case top_side:
 		dy += (*csi)->param;
 		break;
-	    case bottom:
+	    case bottom_side:
 		dy -= (*csi)->param;
 		break;
 	}
@@ -217,19 +217,19 @@ void Picframe::label_line(sides s) {
     for_each(label[s]->begin(), label[s]->end(), draw_string);
 
     switch (s) {
-	case left:
+	case left_side:
 	    cout << "from Frame.Left.start + (" << dx << ", " << dy << ") " ;
 	    cout << "to Frame.Left.end + (" << dx << ", " << dy << ") " ;
 	    break;
-	case right:
+	case right_side:
 	    cout << "from Frame.Right.start + (" << dx << ", " << dy << ") " ;
 	    cout << "to Frame.Right.end + (" << dx <<  ", " << dy << ") " ;
 	    break;
-	case bottom:
+	case bottom_side:
 	    cout << "from Frame.Bottom.end + (" << dx <<  ", " << dy << ") " ;
 	    cout << "to Frame.Bottom.start + (" << dx <<  ", " << dy << ") " ;
 	    break;
-	case top:
+	case top_side:
 	    cout << "from Frame.Top.start + (" << dx <<  ", " << dy << ") " ;
 	    cout << "to Frame.Top.end + (" << dx << ", " << dy << ") " ;
 	    break;
@@ -249,7 +249,7 @@ void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
 
     // determine the range of the axes
     
-    if ( sd == bottom || sd == top ) {
+    if ( sd == bottom_side || sd == top_side ) {
 	lo = c->xmin;
 	hi = c->xmax;
 	ls = (c->logscale & x_axis);
@@ -343,10 +343,10 @@ void Picframe::draw(frame *) {
 
     cout << "Frame: [" << endl;
     cout << "Origin: " << endl;
-    frame_line(0,ht,left);
-    frame_line(wid,0,top);
-    frame_line(0,-ht,right);
-    frame_line(-wid,0,bottom);
+    frame_line(0,ht,left_side);
+    frame_line(wid,0,top_side);
+    frame_line(0,-ht,right_side);
+    frame_line(-wid,0,bottom_side);
     cout << "]" << endl;
 
     for ( int i = 0; i < 4 ; i++ ) {
@@ -525,25 +525,25 @@ void Pictick::draw(frame *f) {
 	
     switch (side) {
 	default:
-	case left:
+	case left_side:
 	    a = 0;
 	    b = c->map(where,y_axis);
 	    dir = "left";
 	    just = "rjust";
 	    break;
-	case right:
+	case right_side:
 	    a = 1;
 	    b = c->map(where,y_axis);
 	    dir = "right";
 	    just = "ljust";
 	    break;
-	case top:
+	case top_side:
 	    a = c->map(where,x_axis);
 	    b = 1;
 	    dir = "up";
 	    just = "above";
 	    break;
-	case bottom:
+	case bottom_side:
 	    a  = c->map(where,x_axis);
 	    b = 0;
 	    dir = "down";
@@ -582,25 +582,25 @@ void Picgrid::draw(frame *f) {
 	
     switch (side) {
 	default:
-	case left:
+	case left_side:
 	    a = 0;
 	    b = c->map(where,y_axis);
 	    dir = "right";
 	    len = f->wid;
 	    break;
-	case right:
+	case right_side:
 	    a = 1;
 	    b = c->map(where,y_axis);
 	    dir = "left";
 	    len = f->wid;
 	    break;
-	case top:
+	case top_side:
 	    a = c->map(where,x_axis);
 	    b = 1;
 	    dir = "down";
 	    len = f->ht;
 	    break;
-	case bottom:
+	case bottom_side:
 	    a  = c->map(where,x_axis);
 	    b = 0;
 	    dir = "up";

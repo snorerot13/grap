@@ -91,7 +91,7 @@ public:
 	for_each(shift.begin(), shift.end(), sc);
 
 	the_graph->base->tks.push_back(t);
-	if ( t->side == top || t->side == bottom )
+	if ( t->side == top_side || t->side == bottom_side )
 	    t->c->newx(t->where);
 	else 
 	    t->c->newy(t->where);
@@ -350,7 +350,7 @@ void next_statement(string *ident, point *p, linedesc* ld) {
 // current ticklist (which we're creating as we go).  If no such list
 // exists, create it.
 ticklist *ticklist_elem(double d, string *fmt, ticklist *tl) {
-    tick *t = new tick(d,0,top,0, (shiftlist *) 0, 0);
+    tick *t = new tick(d,0,top_side,0, (shiftlist *) 0, 0);
     string *s;
 
     if ( fmt ) {
@@ -391,7 +391,7 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, string *rfmt) {
 		
     idx = from;
     while ( (idx - to) *dir  < EPSILON ) {
-	t = new tick(idx, 0, top, 0, (shiftlist *) 0, 0);
+	t = new tick(idx, 0, top_side, 0, (shiftlist *) 0, 0);
 	t->c = c;
 
 	s = dblString(idx,fmt);
@@ -500,7 +500,7 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 		g->prt = 0;
 	    }
 	    the_graph->base->gds.push_back(g);
-	    if ( g->side == top || g->side == bottom )
+	    if ( g->side == top_side || g->side == bottom_side )
 		g->c->newx(g->where);
 	    else 
 		g->c->newy(g->where);
@@ -739,11 +739,11 @@ void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
     point *p1, *p2;		// The defining points of the box
 
     switch (dir) {
-	case right:
+	case right_side:
 	    p1 = new point(base, offset + wid/2, c);
 	    p2 = new point(base + ht, offset - wid/2, c);
 	    break;
-	case top:
+	case top_side:
 	default:
 	    p1 = new point(offset + wid/2, base, c);
 	    p2 = new point(offset - wid/2, base + ht, c);

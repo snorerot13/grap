@@ -10,13 +10,13 @@
 #ifndef STDC_HEADERS
 extern "C" {
 #ifndef __GNUC__
-    int strlen(const char*);
+    size_t strlen(const char*);
     char *strcpy(char *, const char *);
-    int strcmp(const char *, const char *);
+    size_t strcmp(const char *, const char *);
 #endif
     char *strcat(char *, const char *);
-    char *strncpy(char *, const char *, const int);
-    int strncmp(const char *, const char *, const int);
+    char *strncpy(char *, const char *, const size_t);
+    size_t strncmp(const char *, const char *, const size_t);
 };
 #endif
 
@@ -46,8 +46,11 @@ inline int snprintf(char *s, int lim, const char *fmt, double d) {
 }
 #endif
 
+using namespace std;
+
 #include <string>
 #include <list>
+#include <algorithm>
 
 class DisplayString;
 class line;
@@ -61,6 +64,7 @@ class shiftdesc;
 
 
 #ifndef HAVE_HASH_MAP
+#include <map>
 typedef less<string> Strcmp;
 
 typedef map<string, double *, Strcmp> doubleDictionary;

@@ -1233,7 +1233,7 @@ out of memory.
 .Sh AUTHOR
 This implementation was done by
 .An Ted Faber Ao faber@lunabase.org Ac .
-.An Bruce Lilley Ao blilly@erols.com Ac
+.An Bruce Lilly Ao blilly@erols.com Ac
 contributed many bug fixes, including a considerable revamp of the
 error reporting code.  If you can actually find an error in your  
 .Nm

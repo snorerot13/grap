@@ -12,7 +12,7 @@ extern "C" {
     void free(void*);
 };
 #endif
-#include <ostream.h>
+#include <iostream>
 #include <sys/param.h>
 #include "grap.h"
 #include "grap_data.h"
@@ -512,7 +512,7 @@ atan2|min|max		{
     } else yyterminate();
 }
 %%
-bool include_file(string *s, int rs=0, bool usepath=true) {
+bool include_file(string *s, int rs, bool usepath) {
     FILE *f=0;
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
@@ -577,8 +577,8 @@ void lex_end_coord() {
 	DEBUG("<COORD> lex_end_coord_param\n",0);
 }
 
-int include_string(string *s, struct for_descriptor *f=0,
-		   grap_input it=GMACRO) {
+int include_string(string *s, struct for_descriptor *f /* =0 */,
+    grap_input it /*=GMACRO */) {
 	char *cbuf;
         int len;
 	grap_buffer_state *g;
@@ -635,7 +635,7 @@ void macro_args(macro *m) {
     tokenpos++;
 }
 
-void lex_begin_copy(string *s=0) {
+void lex_begin_copy(string *s /* =0 */) {
     DEBUG("COPYSTATE (lex_begin_copy)\n",0);
     BEGIN(COPYSTATE);
     copystate = 1;

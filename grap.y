@@ -93,8 +93,8 @@ int in_copy=0;
 double grap_random() {  return double(random()) / (pow(2,32)-1); }
 double pow10(double x) { return pow(10,x); }
 double toint(double x) { return (double) int(x); }
-double grap_min(double a, double b) { return min(a,b); } 
-double grap_max(double a, double b) { return max(a,b); } 
+double grap_min(double a, double b) { return (a<b) ? a : b; } 
+double grap_max(double a, double b) { return (a>b) ? a : b; } 
  
 typedef double (*function0)();
 typedef double (*function1)(double);
@@ -548,13 +548,13 @@ size:
 
 side:
 	TOP
-	    { $$ = top;}
+	    { $$ = top_side;}
 |	BOTTOM
-	    { $$= bottom;}
+	    { $$= bottom_side;}
 |	LEFT
-	    { $$ = left;}
+	    { $$ = left_side;}
 |	RIGHT
-	    { $$ = right; }
+	    { $$ = right_side; }
 ;
 
 final_size:
@@ -615,13 +615,13 @@ frame_statement:
 
 shift:
 	UP expr
-            { $$ = new shiftdesc(top, $2);}
+            { $$ = new shiftdesc(top_side, $2);}
 |	DOWN expr
-            { $$ = new shiftdesc(bottom, $2);}
+            { $$ = new shiftdesc(bottom_side, $2);}
 |	LEFT expr
-            { $$ = new shiftdesc(left, $2);}
+            { $$ = new shiftdesc(left_side, $2);}
 |	RIGHT expr
-            { $$ = new shiftdesc(right, $2);}
+            { $$ = new shiftdesc(right_side, $2);}
 ;
 
 tickdir:
@@ -1033,9 +1033,9 @@ troff_line:
 
 bar_dir:
         RIGHT
-            { $$ = right; } 
+            { $$ = right_side; } 
 |       UP
-             { $$ = top; } 
+             { $$ = top_side; } 
 ;
 bar_base:
 	BASE expr
@@ -1046,7 +1046,7 @@ bar_base:
 
 opt_wid:
 	WID expr
-            { $$=$2; }
+            { $$ = $2; }
 |
             { $$ = 1; }
 ;

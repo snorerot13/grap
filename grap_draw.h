@@ -4,8 +4,8 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
-// Names for the sides of graphs
-typedef enum { top=0, bottom,left, right} sides;
+// Names for the sides of graphs (_side because of globals left(), right())
+typedef enum { top_side=0, bottom_side ,left_side, right_side} sides;
 
 // Styles of drawing lines
 typedef enum { solid, dotted, dashed, invis, def } linetype;
@@ -108,7 +108,7 @@ public:
     sides dir;		// Direction to shift this label
     double param;	// Amount to shift
 
-    shiftdesc(sides s=top, double p=0) : dir(s), param(p) { }
+    shiftdesc(sides s=top_side, double p=0) : dir(s), param(p) { }
     
     shiftdesc(shiftdesc *sh ) {
 	if ( sh ) {
@@ -116,7 +116,7 @@ public:
 	    param = sh->param;
 	}
 	else {
-	    dir = top;
+	    dir = top_side;
 	    param = 0;
 	}
     }
@@ -226,7 +226,7 @@ public:
     shiftlist shift;	// Shift information, to fine tune position of prt
     coord *c;		// The coordinate scale that the tick is in
     
-    tick() : where(0), size(0), side(top), prt(0), shift(), c(0) { }
+    tick() : where(0), size(0), side(top_side), prt(0), shift(), c(0) { }
     tick(tick& t) :
 	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
 	shiftcpy sc(&shift);
@@ -285,7 +285,8 @@ public:
     shiftlist shift;	// Shift info for the label
     coord *c;		// Coordinate system for this line
     
-    grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(), c(0) { }
+    grid() : where(0), desc(dotted,0,0), side(top_side), prt(0), shift(),
+	c(0) { }
 
     grid(double w, linedesc *l, sides sd, string *p, shiftlist *sh,
 	 coord *co) :
@@ -392,8 +393,9 @@ public:
 	    desc[i] = linedesc(def,0,0);
 	    label[i] = new stringlist;
 	    lshift[i] = new shiftlist;
-	    griddef[i] = grid(0.0,desc+i,top,&g,lshift[i],0);
-	    tickdef[i] = tick(0.0,((i== bottom || i == left ) ? 0.125 : 0),
+	    griddef[i] = grid(0.0, desc+i, top_side, &g, lshift[i], 0);
+	    tickdef[i] = tick(0.0,((i== bottom_side || i == left_side ) ?
+				   0.125 : 0),
 			      (sides) i, &g, lshift[i], 0);
 	}
     }
