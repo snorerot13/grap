@@ -24,6 +24,8 @@ TVF_PROG_INSTALL_D
 TVF_PROG_MKDEP
 TVF_OS_VERSION
 
+AC_SUBST(INSTALL_DOCS)
+
 dnl Checks for libraries.
 
 dnl Checks for header files.
@@ -79,8 +81,8 @@ dnl optimization, use their decision, otherwise optimization has already
 dnl been suppressed above
 AC_MSG_CHECKING(whether to optimize grap_tokenizer)
 AC_ARG_ENABLE(optimize-grap_tokenizer, 
---enable-optimize-grap_tokenizer   do not prevent optimization of the 
-                                   grap_tokenize.cc file, 
+[  --enable-optimize-grap_tokenizer   do not prevent optimization of the 
+                                     grap_tokenize.cc file], 
 ac_cv_grap_opt_tok="yes",
 AC_CACHE_VAL(ac_cv_grap_opt_tok, ac_cv_grap_opt_tok="no"))
 AC_MSG_RESULT($ac_cv_grap_opt_tok)
@@ -88,6 +90,19 @@ AC_MSG_RESULT($ac_cv_grap_opt_tok)
 if test "$ac_cv_grap_opt_tok" = "yes" ; then 
 	SUPPRESS_OPT=""
 fi
+
+AC_MSG_CHECKING(whether configure called from a FreeBSD port)
+AC_ARG_WITH(freebsd-ports,
+[  --with-freebsd-ports    configure called by a FreeBSD ports makefile],
+ac_cv_grap_opt_port="yes",  
+AC_CACHE_VAL(ac_cv_grap_opt_port, ac_cv_grap_opt_port="no"))
+AC_MSG_RESULT($ac_cv_grap_opt_port)
+if test $ac_cv_grap_opt_port = "no" ; then
+	INSTALL_DEPS="all grap.defines grap.1 install-docs"
+else
+	INSTALL_DEPS="all grap.defines grap.1"
+fi
+AC_SUBST(INSTALL_DEPS)
 
 TVF_CREATE_DOT_DEPEND
 AC_OUTPUT(examples/Makefile Makefile)

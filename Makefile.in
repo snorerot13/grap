@@ -6,6 +6,7 @@ exec_prefix = @exec_prefix@
 
 BINDIR = @bindir@
 DEFINESDIR = @datadir@/grap
+EXAMPLEDIR = @datadir@/examples/grap
 DOCDIR = @datadir@/doc/grap
 MANDIR = @mandir@/man1
 
@@ -28,7 +29,7 @@ MKDEP= 	@MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.22pre1
+VERSION=1.22pre2
 DISTDIR=grap-${VERSION}
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
@@ -90,26 +91,31 @@ grap.1:	grap.doc
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
-install:	grap grap.defines grap.1
+install:	@INSTALL_DEPS@
 	strip grap || true
 	${INSTALL} -d ${BINDIR} || true
 	${INSTALL} -d ${MANDIR} || true
 	${INSTALL} -d ${DEFINESDIR} || true
-	${INSTALL} -d ${DOCDIR}/examples || true
+	${INSTALL} -d ${EXAMPLEDIR} || true
 	${INSTALL_PROGRAM} grap ${BINDIR}
 	${INSTALL_DATA} grap.1 ${MANDIR}
 	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
-	${INSTALL_DATA} grap*.defines README CHANGES COPYRIGHT grap.man ${DOCDIR}
-	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${DOCDIR}/examples
+	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${EXAMPLEDIR}
+
+#BSD prots may not want these installed
+install-docs:
+	${INSTALL} -d ${DOCDIR} || true
+	${INSTALL_DATA} README CHANGES COPYRIGHT grap.man ${DOCDIR}
 
 deinstall:
 	${RM} ${BINDIR}/grap
 	${RM} ${MANDIR}/grap.1
 	${RM} ${DEFINESDIR}/grap*.defines ${DOCDIR}/README ${DOCDIR}/CHANGES ${DOCDIR}/COPYRIGHT ${DOCDIR}/grap.man
-	${RM} ${DOCDIR}/examples/*.d ${DOCDIR}/examples/*.ms ${DOCDIR}/examples/Makefile ${DOCDIR}/examples/*result
+	${RM} ${EXAMPLEDIR}/*.d ${EXAMPLEDIR}/*.ms ${EXAMPLEDIR}/*result
 	${RMDIR} ${DOCDIR}/examples
 	${RMDIR} ${DOCDIR}
 	${RMDIR} ${DEFINESDIR}
+	${RMDIR} ${EXAMPLEDIR}
 
 check:	grap grap.defines examples/example.ms
 	cd examples && \
