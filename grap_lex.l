@@ -84,9 +84,10 @@ void newline();
 char *strdup(const char *);
 #endif 
 
+char *vf1names[NVF1] = { "srand" };
 char *f0names[NF0] = { "rand" };
 char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
-		       "eexp","ln", "srand" };
+		       "eexp","ln" };
 char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
@@ -418,22 +419,27 @@ at			{
 			      REJECT;
 			  }
 			}
+srand			{
+			debug("VFUNC1");
+			for ( int i = 0 ; i < NVF1; i++ ) 
+				if ( !strcmp(yytext,vf1names[i]) )
+					yylval.val = i;
+			tokenpos += yyleng;
+			BEGIN(GRAP);
+ 			return VFUNC1;
+			}
 rand			{
-			int i;
-
 			debug("FUNC0");
-			for ( i = 0 ; i < NF0; i++ ) 
+			for ( int i = 0 ; i < NF0; i++ ) 
 				if ( !strcmp(yytext,f0names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;
 			BEGIN(GRAP);
  			return FUNC0;
 			}
-log|exp|int|sin|cos|sqrt|srand|eexp|ln	{
-			int i;
-
+log|exp|int|sin|cos|sqrt|eexp|ln	{
 			debug("FUNC1");
-			for ( i = 0 ; i < NF1; i++ ) 
+			for ( int i = 0 ; i < NF1; i++ ) 
 				if ( !strcmp(yytext,f1names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;
@@ -441,10 +447,8 @@ log|exp|int|sin|cos|sqrt|srand|eexp|ln	{
  			return FUNC1;
 			}
 atan2|min|max		{
-			int i;
-
 			debug("FUNC2");
-			for ( i = 0 ; i < NF2; i++ ) 
+			for ( int i = 0 ; i < NF2; i++ ) 
 				if ( !strcmp(yytext,f2names[i]) )
 					yylval.val = i;
 			tokenpos += yyleng;

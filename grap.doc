@@ -1101,11 +1101,10 @@ works just like
 .Xr atan2 3 .
 The random number generater can be seeded by calling 
 .Ic srand
-with a single parameter (converted internally to an integer).  Despite
-the fact that its return value is of no use, you must use 
+with a single parameter (converted internally to an integer).  Because
+its return value is of no use, you must use 
 .Ic srand
-in a valid expression.  Assigning its return value to an unused
-variable is the usual way to do this.
+as a separate statement, it is not part of a valid expression.
 .Ic srand
 is not portable.
 .Pp

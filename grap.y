@@ -11,6 +11,10 @@
 #include <math.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
+#include <limits.h>
+#else
+// Best guess, really - limits should exist
+#define LONG_MAX        0x7fffffffL
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -85,20 +89,23 @@ extern void bar_statement(coord *, sides, double, double, double,
 void init_dict(); 
 
 // adapters to return complex (complex-ish) functions
-double grap_random() {  return double(random()) / (pow(2,31)-1); }
-double grap_srandom(double x) { srandom((unsigned int) x); return 3.0; }
+void grap_srandom(double x) { srandom(static_cast<unsigned int>(x)); }
+double grap_random() {
+    return static_cast<double>(random()) / static_cast<double>(LONG_MAX);
+}
 double pow10(double x) { return pow(10,x); }
-double toint(double x) { return (double) int(x); }
+double toint(double x) { return static_cast<double>(int(x)); }
 double grap_min(double a, double b) { return (a<b) ? a : b; } 
 double grap_max(double a, double b) { return (a>b) ? a : b; } 
  
+typedef void (*vfunction1)(double);
 typedef double (*function0)();
 typedef double (*function1)(double);
 typedef double (*function2)(double, double);
 // jump tables for dispatching internal functions
+vfunction1 jtvf1[NVF1] = { grap_srandom };
 function0 jtf0[NF0] = { grap_random };
-function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp,
-			log, grap_srandom };
+function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
 %token NUMBER START END IDENT COPY SEP STRING COORD_NAME UNDEFINE
@@ -109,7 +116,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON LHS
+%token BASE ON LHS VFUNC1
 %start graphs
 %union {
     int val;
@@ -139,8 +146,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <stringmod> strmod
 %type <String> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <String> START string LHS
-%type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
-%type <val>  line_token
+%type <val>  VFUNC1 FUNC0 FUNC1 FUNC2 tickdir opt_tick_off line_token
 %type <coordptr> opt_coordname COORD_NAME autotick
 %type <side>  side  bar_dir
 %type <frameptr> sides size size_elem final_size
@@ -240,6 +246,8 @@ statement:
 |	pic_statement
 	    { first_line = false;}
 |	troff_line
+	    { first_line = false;}
+|	void_function
 	    { first_line = false;}
 |	SEP
 ;
@@ -1097,5 +1105,10 @@ bar_statement:
 |	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base
             opt_linedesc SEP
            { bar_statement($2, $3, $4, $6, $7, $8, $9); }
+;
+
+void_function:
+	VFUNC1 LPAREN expr RPAREN
+ 	    { if ( $1 >=0 && $1 < NVF1 ) jtvf1[$1]($3); }
 ;
 %%
