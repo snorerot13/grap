@@ -335,7 +335,7 @@ delim off
 \&ticks bot at 80 "1980", 100 "2000"
 \&ticks bot from 85 to 95 by 5 "' %g"
 \&ticks left 
-\&label left "Millions of Hosts" left .75 
+\&label left "Millions of Hosts"
 \&label bot "Year"
 \&draw solid
 \&copy "internet.d" thru { next at $1, $2/1e6; }
@@ -350,7 +350,7 @@ coord x 80,100 y 1e-4, 30 log y
 ticks bot at 80 "1980", 100 "2000"
 ticks bot from 85 to 95 by 5 "' %g"
 ticks left 
-label left "Millions of Hosts" left .75 
+label left "Millions of Hosts"
 label bot "Year"
 draw solid
 copy "internet.d" thru { next at $1, $2/1e6; }
@@ -590,7 +590,7 @@ delim off
 .DS
 .ft CW
 \&.G1
-\&label left "Winning Time" left .8
+\&label left "Winning Time" left .3
 \&label bot "Olympics Men's 400 m"
 \&bestsofar = 1000
 \&anchor = 0
@@ -611,7 +611,7 @@ delim off
 delim $$
 .EN
 .G1
-label left "Winning Time" left .8
+label left "Winning Time" left .3
 label bot "Olympics Men's 400 m"
 bestsofar = 1000
 anchor = 0
@@ -643,16 +643,16 @@ delim off
 \&.G1
 \&graph Linear
 \&coord x 1785, 1955 y 0, 160
-\&label left "Population in Millions"
-\&label right "Linear Scale" unaligned "Linear Fit" right .8
+\&label left "Population in Millions" left .3
+\&label right "Linear Scale" unaligned "Linear Fit" right .4
 \&ticks bot off
 \&copy "usapop.d"
 \&define fit { 35 + 1.4 * ($1-1870) }
 \&line from 1850, fit(1850) to 1950,fit(1950)
 \&graph Exponential with .Frame.n at Linear.Frame.s - (0, .05)
 \&coord x 1785, 1955 y 3, 160 log y
-\&label left "Population in Millions"
-\&label right "Logarithmic Scale" unaligned "Exponential Fit" right .8
+\&label left "Population in Millions" left .3
+\&label right "Logarithmic Scale" unaligned "Exponential Fit" right .4
 \&copy "usapop.d"
 \&define fit { exp(.75 + .012 * ($1-1800)) }
 \&line from 1790, fit(1790) to 1920,fit(1920)
@@ -665,16 +665,16 @@ delim $$
 .G1
 graph Linear
 coord x 1785, 1955 y 0, 160
-label left "Population in Millions"
-label right "Linear Scale" unaligned "Linear Fit" right .8
+label left "Population in Millions" left .3
+label right "Linear Scale" unaligned "Linear Fit" right .4
 ticks bot off
 copy "usapop.d"
 define fit { 35 + 1.4 * ($1-1870) }
 line from 1850, fit(1850) to 1950,fit(1950)
 graph Exponential with .Frame.n at Linear.Frame.s - (0, .05)
 coord x 1785, 1955 y 3, 160 log y
-label left "Population in Millions"
-label right "Logarithmic Scale" unaligned "Exponential Fit" right .8
+label left "Population in Millions" left .3
+label right "Logarithmic Scale" unaligned "Exponential Fit" right .4
 copy "usapop.d"
 define fit { exp(.75 + .012 * ($1-1800)) }
 line from 1790, fit(1790) to 1920,fit(1920)
@@ -694,8 +694,8 @@ delim off
 .DS
 .ft CW
 \&.G1
-\&label left "Population in Millions" left .5
-\&label right "$x$ re-expressed as" unaligned "" "$space 0 left ( { date -1600 } over 100 right ) sup 7$" right 1.2
+\&label left "Population in Millions" left .3
+\&label right "$x$ re-expressed as" unaligned "" "$space 0 left ( { date -1600 } over 100 right ) sup 7$" right .4
 \&define newx { exp(7*(log(($1-1600)/100))) }
 \&ticks bot out at newx(1800) "1800", newx(1850) "1850", \
 \&	newx(1900) "1900"
@@ -709,8 +709,8 @@ delim off
 delim $$
 .EN
 .G1
-label left "Population in Millions" left .5
-label right "$x$ re-expressed as" unaligned "" "$space 0 left ( { date -1600 } over 100 right ) sup 7$" right 1.2
+label left "Population in Millions" left .3
+label right "$x$ re-expressed as" unaligned "" "$space 0 left ( { date -1600 } over 100 right ) sup 7$" right .4
 define newx { exp(7*(log(($1-1600)/100))) }
 ticks bot out at newx(1800) "1800", newx(1850) "1850", \
 	newx(1900) "1900"
