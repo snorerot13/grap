@@ -1,0 +1,217 @@
+.TH GRAP 1 local
+.SH NAME
+grap - Kernighan and Bentley's langauge for typesetting graphs
+.SH SYNOPSIS
+.B grap 
+.RB [ -d
+.IR defines_file ]
+.RB [ -D ]
+.RI [ filename
+.IR ... ]
+.SH DESCRIPTION
+.B grap
+is an implementation of Kernighan and Bentley's language for
+typesetting graphs, as described in ``Grap-A Language for Typesetting
+Graphs, Tutorial and User Manual,'' by Jon L. Bentley and Brian W.
+Kernighan, revised May 1991, which is the primary source for
+information on how to use
+.BR grap .
+As of this writing, it is available electronically at 
+.IR http://www.kohala.com/~rstevens/troff/cstr114.ps .
+.PP
+This version is a black box implementation of 
+.BR grap ,
+and some inconsistencies are to be expected.  The remainder of this
+manual page will briefly outline the
+.B grap
+language as implemented here.
+.PP
+.B grap
+is a pic(1) pre-processor.  It takes commands embedded in a troff(1)
+source file which are surrounded by 
+.B .G1
+and
+.B .G2
+macros, and rewrites them into pic commands to display the graph.
+Other lines are copied.  Output is always to the standard output,
+which is usually reidrected.  Input is from the given
+.IR filename s,
+which are read in the order given.  A 
+.I filename 
+of - is the standard input.
+If no 
+.IR filename s
+are given, input is read from the standard input.
+.PP
+Because
+.B grap
+is a pic preprocessor, and gnu pic will output TeX, it is possible to
+use 
+.B grap
+with TeX.
+.PP
+The 
+.B -d
+option specifies a file of macro definitions to be read at startup,
+and defaults to DEFINES.
+The
+.B -D
+option inhibits the reading of any initial macros file.
+.PP
+All
+.B grap
+commands are included between 
+.B .G1
+and
+.B .G2
+macros, which are consumed by 
+.BR grap .
+The output contains pic between
+.B .PS
+and
+.B .PE
+macros.  Any arguments to the
+.B .G1
+macro in the input are arguments to the
+.B .PS
+macro in the output, so graphs can be scaled just like pic diagrams.
+.PP
+The 
+.B grap
+commands are sketched below.  Refer to Kernighan and Bentley's paper
+for the details.
+.SH COMMANDS
+.HP
+.B frame 
+.RI [ line_description ]
+.RB [ ht 
+.I height
+|
+.B wid 
+.IR width ]
+.RB [ top | bottom | left | right 
+.IR line_description ]
+\&...
+.IP
+This describes how the axes for the graph are drawn. A
+.I line_description 
+is a pic line description, e.g., dashed 0.5, or the literal
+.BR solid .
+If the first 
+.I line_description 
+is given, the frame is drawn with that style.  The default is 
+.BR solid .
+The height and width of the frame can also be specified in inches.
+The default line style can be over-ridden for sides of the frame by
+specifying additional parameters to
+.BR frame .
+.HP
+.B draw
+.RI [ line_name ]
+.RI [ line_description ]
+.RI [ plot_string ]
+.IP
+The
+.B draw
+command defines the style with which a given line will be plotted.  If
+.I line_name 
+is given, the style is associated with that name, otherwise the
+default style is set.  
+.I line_description
+is a pic line description, and the optional
+.I plot_string
+is a string to be centered at each point.  The default line
+description is
+.BR invis ,
+and the default plotting string is a centered bullet, so by default
+each point is a filled cricle, and they are unconnected.
+If points are being connected, each
+.B draw
+command ends any current line and begins a new one.
+.IP
+.B new
+is a synonym for 
+.BR draw .
+.HP
+.B next
+.RI [ line_name ]
+.B at
+.RI [ coordinates_name ]
+.IR expr ", " expr
+.RI [ line_description ]
+.IP
+The 
+.B next
+command plots the given point using the line style given by
+.IR line_name ,
+or the default if none is given.  If
+.I line_name
+is given, it should have been defined by an earlier
+.B draw
+command, if not a new line style with that name is created,
+initialized the same way as the default style.  The two expressions give the point's x and y values,
+relative to the optional coordinate system.  That system should have
+been defined by an earlier
+.B coord
+command, if not, grap will exit.  If the optional
+.I line_description
+is given, it overrides the style's default line description.  You
+cannot over-ride the plotting string.  To use a different plotting
+string use the 
+.B plot
+command.
+.IP
+The x and y values may optionally be enclosed in parentheses: 
+.RI ( x ", " y )
+.HP
+.IR quoted_string 
+.RI [ string_modifiers ]
+.RI "[, " quoted_string 
+.RI [ string_modifiers ]]...
+.B at
+.RI [ coordinates_name ]
+.IR expr ", " expr
+.HP
+.B plot 
+.I expr
+.RI [ format_string ]
+.B at
+.RI [ coordinates_name ]
+.IR expr ", " expr
+.IP
+These commands both plot a string at the given point.  In the first
+case the literal strings are stacked above each other.  The string
+modifiers include the pic justification modifiers, and absolute and
+relative
+.B size
+modifiers.
+.IP
+.B size
+.I expr
+sets the string size to 
+.I expr
+points.  If 
+.I expr
+is preceded by a + or -, the size is increased or decreased by that
+many points.
+.IP
+In the second version, the 
+.I expr
+is converted to a string and placed on the graph.  
+.I format_string 
+is a printf(3) format string.  Only formatting escapes for printing
+floating point numbers make sense.
+.IP
+points are specified the same way as for 
+.B next
+commands, with the same consequences for undefined coordinate systems.
+.IP
+The second form of this command is completely unnecessary because the
+first form can be used with a 
+.B grap
+.B sprintf
+experssion.
+.SH FILES
+.SH SEE ALSO
+.SH DIAGNOSTICS
+.SH BUGS
