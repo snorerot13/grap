@@ -1,4 +1,4 @@
-# This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
+# This file is (c) 2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 # for the full copyright and limitations of liabilities.
 
 prefix = @prefix@
@@ -24,7 +24,7 @@ PERL=@PERL@
 MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
-DISTDIR=grap-1.20pre4
+DISTDIR=grap-1.20pre5
 SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
