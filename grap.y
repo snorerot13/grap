@@ -29,10 +29,7 @@ graph *the_graph =0;
 lexStack lexstack;
 macroDictionary macros;
 stringSequence path;
-#ifndef __GNUC__
-const int macro::numargs=32;
-#endif 
-int first_line;
+bool first_line;
 bool unaligned_default = false;	// Should strings be unaligned by default 
 
 extern int lex_expand_macro;
@@ -183,7 +180,7 @@ graph :
 		    the_graph = initial_graph();
 		the_graph->init();
 		init_dict();
-		first_line = 1;
+		first_line = true;
 		the_graph->begin_block($1);
 	    } prog END
             {
@@ -198,53 +195,53 @@ prog :
 ;
 statement:
 	assignment_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	num_list
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	frame_statement
 	    {
-		first_line = 0;
+		first_line = false;
 		the_graph->queue_frame();
 		the_graph->is_visible(true);
 	    }
 |	draw_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	next_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	plot_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	ticks_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	grid_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	label_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	circle_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	bar_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	line_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	coord_statement
-	    { first_line = 0; the_graph->is_visible(true);}
+	    { first_line = false; the_graph->is_visible(true);}
 |	copy_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	define_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	if_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	for_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	graph_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	print_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	sh_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	pic_statement
-	    { first_line = 0;}
+	    { first_line = false;}
 |	troff_line
-	    { first_line = 0;}
+	    { first_line = false;}
 |	SEP
 ;
 

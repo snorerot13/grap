@@ -127,7 +127,7 @@ void coord::addmargin(double mf) {
 
 
 double coord::map(double v, axis ax ) {
-// map the cooridinate from data space to [0,1]. 1 is the top of the axis,
+// map the coordinate from data space to [0,1]. 1 is the top of the axis,
 // 0 the bottom.  Do it right for logscale or cartesian coordinates
     switch ( ax ) {
 	case x_axis:
@@ -178,5 +178,3 @@ linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
     
     ll->lastplotted(&to);
 }
-
-    

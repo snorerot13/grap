@@ -149,7 +149,7 @@ void draw_statement(string *ident, linedesc *ld, string *plot) {
 	    macro *m;
 	    string *s;
 	
-	    // We need to create a new line with default perameters.
+	    // We need to create a new line with default parameters.
 	    // Initialize the line to be invisible with a bullet
 	    // plotting string.
 	    if ( ( md = macros.find("bullet")) != macros.end()) {

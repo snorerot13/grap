@@ -7,6 +7,7 @@
 #endif
 #ifdef STDC_HEADERS
 #include <stdlib.h>
+#include <errno.h>
 #else
 extern "C" {
     void free(void*);
@@ -1025,7 +1026,7 @@ bar			{
                           if (active.count(BAR) ) {
 			      tokenpos += yyleng;
 			      // BAR needs to see HT/WID, UP, RIGHT,
-			      // BASE an dline descriptors
+			      // BASE and line descriptors
 			      active.clear();
 			      active.insert(HT);
 			      active.insert(WID);
@@ -1249,9 +1250,9 @@ atan2|min|max		{
 
 			debug("ident: ", yytext);
 			id = new string(yytext);
+			tokenpos += yyleng;
 			if ( lex_expand_macro &&
 			     ( mi = macros.find(*id)) != macros.end() ) {
-                                tokenpos+= yyleng;
 			        m = (*mi).second;
 				delete id;
 				ch = yyinput();
@@ -1266,7 +1267,6 @@ atan2|min|max		{
 			        tokenpos += yyleng;
 			}
 			else {
-			    tokenpos += yyleng;
 			    ci = the_graph->coords.find(*id);
 			    if ( ci != the_graph->coords.end()) {
 				c = (*ci).second;
@@ -1497,8 +1497,7 @@ bool include_file(string *s, int rs, bool usepath) {
             else f = fopen(s->c_str(),"r");
 
             if ( !f ) {
-                cerr << "Can't open " << *s << " ";
-		perror(0);
+                cerr << "Can't open " << *s << " " << strerror(errno) << endl;
 		return 0;
 	    }
 	    g->yy = yy_create_buffer(f,YY_BUF_SIZE);
@@ -1506,7 +1505,7 @@ bool include_file(string *s, int rs, bool usepath) {
 	}
 	else {
 	    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
-	    g->name = new string("stdin");
+	    g->name = new string("- <stdin>");
 	}
 	lexstack.push_front(g);
 	yy_switch_to_buffer(g->yy);
@@ -1657,11 +1656,18 @@ int yywrap() {
     yy_delete_buffer(g->yy);
     delete g;
 
-    if ( lexstack.empty() ) return 1;
+    if ( lexstack.empty() ) {
+	// groff line marker
+	cout << ".lf " << g->line << endl;
+	return 1;
+    }
     else {
 	g = lexstack.front();
         tokenpos = g->tokenpos;
 	yy_switch_to_buffer(g->yy);
+	// groff line marker
+	cout << ".lf " << g->line << " " <<
+	    ((g->name ) ? *g->name : "" ) << endl;
     }
 
     return copystate ? 1 : 0;
