@@ -1634,3 +1634,326 @@ bar (1,1), (0,0) fill 0.25
 circle at 0.5,0.5 rad 0.5 dashed 0.05 fill 0.5
 .G2
 .KE
+.KS
+This is a more complex example of nested macros from Anindo Banerjea's
+thesis.  This originally caught errors in the use of multiple
+positioning commands for labels.  I don't know what the data are, but
+a full explanation is in his Ph.D thesis.  Inline data 
+and the groff for the caption are elided.  Two lines present in the
+real graph are missing from this one.
+.DS
+.ft CW
+.ps 8
+.vs 10
+\&.ds ** \\v'+.2m'\\fB*\\fP\\v'-.2m'
+\&.PE
+\&scale = 1.3
+\&.PE
+\&.vs 10
+\&.G1
+\&define myplot % # (symbol)
+\&next linename at $1,$2
+\&symb at $1,$2
+\&%
+\&graph A
+\&frame invis ht 1.667 wid 2.0 left solid bot solid
+\&coord y 0,70
+\&label bot "delay (ms)" "\\fIi)\\fP" down 0.3
+\&label left "load" unaligned "index" up .9
+\&label right "Xmin =  2: \\(bu" unaligned ljust size -3 "Xmin =  4:\\(sq" \
+\&	"Xmin =  8:\\(ci" "Xmin = 16: \\*(**" left 1.4 up 0.5
+\&draw a solid
+\&define symb % bullet %
+\&define linename { a }
+\&copy until "XXX" thru myplot 
+\&50  42.000
+\&...
+\&XXX
+\&draw b solid
+\&define symb % square %
+\&define linename { b }
+\&copy until "XX1" thru myplot 
+\&50  22.000
+\&...
+\&XX1
+\&.G2
+.ft
+.ps 10
+.vs 12
+.DE
+.ds ** \v'+.2m'\fB*\fP\v'-.2m'
+.PS
+scale = 1.3
+.PE
+.vs 10
+.G1
+define myplot % # (symbol)
+next linename at $1,$2
+symb at $1,$2
+%
+graph A
+frame invis ht 1.667 wid 2.0 left solid bot solid
+coord y 0,70
+label bot "delay (ms)" "\fIi)\fP" down 0.3
+label left "load" unaligned "index" up .9
+label right "Xmin =  2: \(bu" unaligned ljust size -3 "Xmin =  4:\(sq" \
+	"Xmin =  8:\(ci" "Xmin = 16: \*(**" left 1.4 up 0.5
+draw a solid
+define symb % bullet %
+define linename { a }
+copy until "XXX" thru myplot 
+50  42.000
+60  41.800
+70  41.400
+80  40.000
+90  39.000
+100  37.800
+110  36.400
+120  33.000
+130  31.000
+140  28.800
+150  26.400
+160  21.000
+170  18.000
+180  14.800
+190  11.400
+200   4.000
+210   4.000
+220   4.000
+XXX
+draw b solid
+define symb % square %
+define linename { b }
+copy until "XX1" thru myplot 
+50  22.000
+60  21.800
+70  21.600
+80  20.800
+90  20.200
+100  19.600
+110  18.800
+120  17.000
+130  16.000
+140  14.800
+150  13.600
+160  10.800
+170   9.200
+180   7.600
+190   5.800
+200   2.000
+210   2.000
+220   2.000
+XX1
+.G2
+.LP
+\fB Figure 1.\fP Queueing Delay index vs. other load indices: Graph
+\fIi)\fP shows that the proposed load index is monotonically decreasing
+as a function of delay if all other factors are constant. Graph
+\fIii)\fP shows that it is linear in bandwidth and graph \fIiii)\fP
+shows that it is linear in the path length of the route provided the
+delay requirement per hop remains constant.
+.vs 12
+.KE
+.KS
+.PP
+This graph is pretty brutal all around.  Nested macros and constructed
+filenames produce a bar graph (some of the components separated by
+dots in the included filenames were originally pathname components).
+This source is also from Anindo Banerjea, and caught bugs related to
+.CW if
+and 
+.CW for 
+statements.  Anindo wrote this to display a graph for
+his thesis, not to demonstrate perfect
+.CW grap 
+programming form.  His graphs are used with his permission, I've made
+minor tweaks to his code to make them more pretty under this version
+of 
+.CW grap .
+.DS
+.ft CW
+.ps 8
+.vs 10
+\&.PS
+\&scale = 1.9
+\&.PE
+\&.G1
+\&define write_name % #(code,X,Y)
+\&  if ($1 == 1) then {
+\&    "\\s-2G\\s+2" above at $2,$3 
+\&  }
+\&  if ($1 == 2) then {
+\&    "\\s-2H\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 3) then {
+\&    "\\s-2L\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 4) then {
+\&    "\\s-2I\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 5) then {
+\&    "\\s-2R1\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 6) then {
+\&    "\\s-2R2\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 7) then {
+\&    "\\s-2R3\\s+2" above at $2,$3
+\&  }
+\&  if ($1 == 8) then {
+\&    "\\s-2S\\s+2" above at $2,$3 
+\&  }
+\&%   
+\&define dashedbar % #(X,Y)
+\&  line from $1,0 to $1,$2 dashed
+\&  line from $1,$2 to $1+9,$2 dashed
+\&  line from $1+9,$2 to $1+9,0 dashed
+\&%
+\&define abar % #(X,Y)
+\&  line from $1,0 to $1,$2
+\&  line from $1,$2 to $1+9,$2
+\&  line from $1+9,$2 to $1+9,0
+\&%
+\&define bar_succ % #(load,y,junk)
+\&  abar(curx,$2)
+\&  write_name(name,curx+5,$2)
+\&  curx = curx + jump
+\&  if (Maxy < $2) then { Maxy = $2 }
+\&%
+\&define bar_goodness % #(load,y,junk)
+\&  abar(curx,$3-100)
+\&  write_name(name,curx+5,$3-100)
+\&  curx = curx + jump
+\&  if (Maxy < ($3-100) ) then { Maxy = $3-100 }
+\&%
+\&define bar_avmax % #(load,average,max)
+\&  abar(curx,$2)
+\&  dashedbar(curx,$3)
+\&  write_name(name,curx+5,$3)
+\&  curx = curx+jump
+\&  if (Maxy < $3) then { Maxy = $3 }
+\&%
+\&define bar_set % #(filename,jump,startX,name,function)
+\&  jump = $2
+\&  curx = $3
+\&  name = $4
+\&  copy $1 thru bar_$5
+\&%
+\&define setload % #(load, junk, junk
+\&  ticks bot in 0.0 at ((2*count+1)*jump-gap/2)/2 "$1"
+\&  count = count + 1
+\&%
+\&define mkgraphTiming % #(Timing,Name,file,function,number,ylabel,dir,toplable)
+\&  Maxy = 0.0
+\&  Nbars = 3
+\&  start = 1
+\&  gap = 15 
+\&  jump = Nbars * 10 + gap
+\&  bar_set("$7.Global.$1.$3.result",jump,start,1,$4)
+\&  bar_set("$7.Hybrid.$1.$3.result",jump,start + 10,2,$4)
+\&  bar_set("$7.Local.$1.$3.result",jump,start + 2*10,3,$4)
+\&  line from 0,0 to jump*4-gap,0
+\&  count = 0
+\&  copy "$7.Local.$1.$3.result" through setload
+\&  label top "\\fI$5)\\fP Timing = $2, $8" up .2
+\&  label left $6 unaligned up 1.8 right .2
+\&  label bot "load"  
+\&  frame invis ht 3 wid 3 left solid bot solid
+\&%
+\&graph A
+\&   mkgraphTiming(Random1500,Random-1500 ms,succ,succ,i,"SR (%)",result.SQ_MESH.Fail1.S3.R0,Square mesh)
+\&.G2
+.ft
+.ps 10
+.vs 12
+.DE
+.PS
+scale = 1.9
+.PE
+.G1
+define write_name % #(code,X,Y)
+  if ($1 == 1) then {
+    "\s-2G\s+2" above at $2,$3 
+  }
+  if ($1 == 2) then {
+    "\s-2H\s+2" above at $2,$3
+  }
+  if ($1 == 3) then {
+    "\s-2L\s+2" above at $2,$3
+  }
+  if ($1 == 4) then {
+    "\s-2I\s+2" above at $2,$3
+  }
+  if ($1 == 5) then {
+    "\s-2R1\s+2" above at $2,$3
+  }
+  if ($1 == 6) then {
+    "\s-2R2\s+2" above at $2,$3
+  }
+  if ($1 == 7) then {
+    "\s-2R3\s+2" above at $2,$3
+  }
+  if ($1 == 8) then {
+    "\s-2S\s+2" above at $2,$3 
+  }
+%   
+define dashedbar % #(X,Y)
+  line from $1,0 to $1,$2 dashed
+  line from $1,$2 to $1+9,$2 dashed
+  line from $1+9,$2 to $1+9,0 dashed
+%
+define abar % #(X,Y)
+  line from $1,0 to $1,$2
+  line from $1,$2 to $1+9,$2
+  line from $1+9,$2 to $1+9,0
+%
+define bar_succ % #(load,y,junk)
+  abar(curx,$2)
+  write_name(name,curx+5,$2)
+  curx = curx + jump
+  if (Maxy < $2) then { Maxy = $2 }
+%
+define bar_goodness % #(load,y,junk)
+  abar(curx,$3-100)
+  write_name(name,curx+5,$3-100)
+  curx = curx + jump
+  if (Maxy < ($3-100) ) then { Maxy = $3-100 }
+%
+define bar_avmax % #(load,average,max)
+  abar(curx,$2)
+  dashedbar(curx,$3)
+  write_name(name,curx+5,$3)
+  curx = curx+jump
+  if (Maxy < $3) then { Maxy = $3 }
+%
+define bar_set % #(filename,jump,startX,name,function)
+  jump = $2
+  curx = $3
+  name = $4
+  copy $1 thru bar_$5
+%
+define setload % #(load, junk, junk
+  ticks bot in 0.0 at ((2*count+1)*jump-gap/2)/2 "$1"
+  count = count + 1
+%
+define mkgraphTiming % #(Timing,Name,file,function,number,ylabel,dir,toplable)
+  Maxy = 0.0
+  Nbars = 3
+  start = 1
+  gap = 15 
+  jump = Nbars * 10 + gap
+  bar_set("$7.Global.$1.$3.result",jump,start,1,$4)
+  bar_set("$7.Hybrid.$1.$3.result",jump,start + 10,2,$4)
+  bar_set("$7.Local.$1.$3.result",jump,start + 2*10,3,$4)
+  line from 0,0 to jump*4-gap,0
+  count = 0
+  copy "$7.Local.$1.$3.result" through setload
+  label top "\fI$5)\fP Timing = $2, $8" up .2
+  label left $6 unaligned up 1.8 right .2
+  label bot "load"  
+  frame invis ht 3 wid 3 left solid bot solid
+%
+graph A
+   mkgraphTiming(Random1500,Random-1500 ms,succ,succ,i,"SR (%)",result.SQ_MESH.Fail1.S3.R0,Square mesh)
+.G2
+.KE
