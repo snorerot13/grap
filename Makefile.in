@@ -23,7 +23,7 @@ PERL=@PERL@
 DISTDIR=grap-1.05
 SOURCES=grap.cc grap_lex.cc *.cc
 
-CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+CXXFLAGS += @GXXFLAGS@ @DEFS@ -g -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
 # solaris make uses these as defaults:
 
@@ -43,7 +43,7 @@ grap:	$(OBJS)
 	if test -f grap.exe ; then mv -f grap.exe grap; fi
 
 y.tab.h grap.cc:	grap.y
-	$(YACC) -dr grap.y
+	$(YACC) -d grap.y
 	mv y.tab.c grap.cc
 
 grap_lex.cc:	grap_lex.l y.tab.h
