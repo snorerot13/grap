@@ -2,6 +2,7 @@
 #include <iostream.h>
 #include <math.h>
 #include "grap.h"
+// This file is (c) 1998 Ted Faber (faber@lunabase.org)
 
 void coord::newpt(double x, double y) {
 // Add apoint to a coordinate system

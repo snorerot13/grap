@@ -3,6 +3,7 @@
 #include <math.h>
 #include "grap.h"
 #include "grap_pic.h"
+// This file is (c) 1998 Ted Faber (faber@lunabase.org)
 
 // Lots of functors to output, convert aand delete list elements
 

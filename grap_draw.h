@@ -1,5 +1,6 @@
 #ifndef GRAP_DRAW_H
 #define GRAP_DRAW_H
+// This file is (c) 1998 Ted Faber (faber@lunabase.org)
 #include <iostream.h>
 #include <stl.h>
 

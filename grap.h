@@ -1,5 +1,6 @@
 #ifndef GRAP_H
 #define GRAP_H
+// This file is (c) 1998 Ted Faber (faber@lunabase.org)
 
 // No, I don't know why...
 #define UnaryFunction unary_function

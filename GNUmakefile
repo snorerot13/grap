@@ -1,3 +1,4 @@
+# This file is (c) 1998 Ted Faber (faber@lunabase.org)
 BINDIR=/usr/local/bin
 DEFINESDIR=/usr/share/grap
 MANDIR=/usr/local/man/man1
@@ -8,6 +9,7 @@ MKDIR=mkdir
 LEX=flex
 
 .y.cc:
+# Linux : no defines
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
 

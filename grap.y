@@ -1,4 +1,5 @@
 %{
+/* This code is (c) 1998 Ted Faber (faber@lunabase.org) */
 #include <stdio.h>
 #include <iostream.h>
 #include <math.h>

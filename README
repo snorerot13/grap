@@ -1,0 +1,51 @@
+This is grap, an implementation of Kernigan and Bentley's grap
+language for typesetting graphs.  I got sick of groff not having a
+version of grap, so I built one.
+
+You're welcome to use grap and give it to anyone you like, as long as
+I get what little credit there is to be had from writing it.  You may
+*not* sell it for a profit without my permission, even if you add code
+to it.  You may, however, distribute it in collections of free
+software or shareware, even if a small fee is charged for such a
+collection.  Specifically, you may distribute it with free operating
+system distributions like FreeBSD or Linux.
+
+I'm not a lawyer.  I want this software to be available to people who
+want to use it.  I don't want people selling it for profit.
+
+The code was all written by me, based on K&B's _Grap-A Language for
+Typesetting Graphs, Tutorial and User Manual_ by Jon L. Bentley and
+Brian W. Kernighan, revised May 1991.  That paper is available from
+http://www.kohala.com/~rstevens/troff/troff.html as
+http://www.kohala.com/~rstevens/troff/cstr114.ps .  You should check
+out the paper for a complete understanding of grap's power.  grap is a
+pic preprocessor, so any typesetting language that can use pic can use
+grap.  I believe that TeX can use pic, but I wouldn't be surprised if
+grap.defines needs to be fooled with.  If you use TeX and find a set
+of grap.defines that work, please let me know.
+
+Check out the examples in the examples directory.
+
+So far I've compiled the code on Sunos 4.1.3, Solaris 5.5.1, FreeBSD
+2.2.7-3.0, and an unknown version of RedHat Linux.  It may run under
+other systems, and your c++ compiler and yacc/lex versions are
+probably more important than the type of Unix you run.  Flex 2.5.4 and
+the yacc on FreeBSD 2.2.7 are known to work as well as later versions
+of bison.  g++ 2.7.2.1 and 2.8.1 have both worked.  grap used the
+standard template library, so that may also be a factor.  The STL
+included with g++ works.
+
+Edit GNUMakefile to suit your system and run gnu make.  Makefile is a
+BSD makefile, and is probably less portable than GNUMakefile.  If
+you're running on a BSD system you may prefer the Makefile.  If you're
+running FreeBSD I suggest using the port which will hopefully be
+available from the ports collection soon or from the web page below.
+
+If you try to compile grap on a new system and have problems, let me
+know and I'll try to help.  If you succeed, let me know.
+
+Bug reports or other correspondance to faber@lunabase.org.  This
+program is a hobby, so understand that bug reports will be handled as
+I have time.  The most recent version should always be available at
+http://www.lunabase.org/~faber/Vault/software/grap/ .
+

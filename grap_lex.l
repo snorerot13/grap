@@ -1,4 +1,5 @@
 %{
+/* This code is (c) 1998 Ted Faber */
 #include <stdlib.h>
 #include <ostream.h>
 #include <sys/param.h>

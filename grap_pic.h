@@ -1,6 +1,7 @@
 #ifndef GRAP_PIC_H
 #define GRAP_PIC_H
 #include <iostream.h>
+// This file is (c) 1998 Ted Faber (faber@lunabase.org)
 
 class PicDisplayString : public DisplayString, public drawable {
 public:
