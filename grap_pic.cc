@@ -37,11 +37,10 @@ void Picgraph::init(string *n /* =0 */, string* p /* =0 */ ) {
     // Start a new graph, but maybe not a new block.
     
     if ( frame_queued ) base = 0;
-    graph::init();	// clear the base classes parameters
+    graph::init(n, p);	// clear the base classes parameters
 
     if ( !base ) 
 	base = pframe = new Picframe;
-    if ( n ) name = new string(*n);
     if ( p ) pos = new string(*p);
     frame_queued = false;
 }
@@ -62,11 +61,8 @@ void Picgraph::draw(frame *) {
 	}
 
 	// if we have a name, use it
-	if ( name ) {
+	if ( name ) 
 	    cout << *name << ": ";
-	    delete name;
-	    name = 0;
-	}
 
 	// The graph itself
 	cout << "[" << endl;
@@ -76,7 +72,7 @@ void Picgraph::draw(frame *) {
 	for (coordinateDictionary::iterator ci = coords.begin();
 	     ci != coords.end();
 	     ci++) {
-	    Piccoord pc(*(*ci).second);
+	    Piccoord pc(*(*ci).second, name);
 	    displayer(&pc);
 	}
 	for_each(objs.begin(), objs.end(), displayer);

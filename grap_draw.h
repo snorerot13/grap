@@ -644,13 +644,24 @@ public:
     coordinateDictionary coords;// The coodrinate systems defined
     lineDictionary lines;	// The lines being defined for this graph
     frame *base;		// The frame surrounding this graph
+    string *name;		// The name of the graph
     bool visible;		// is this graph visible?
     
-    graph() : objs(), coords(), lines(), base(0), visible(0) { }
-    virtual ~graph() { init();}
+    graph() : objs(), coords(), lines(), base(0), name(0), visible(false) { }
+    virtual ~graph() {
+	init();
+    }
+
+    void setname(string *n=0) {
+	if ( n ) name = new string(*n);
+	else {
+	    delete name;
+	    name = 0;
+	}
+    }
 
     // This clears graph parameters
-    virtual void init(string * =0, string* =0 ) {
+    virtual void init(string *n =0, string* =0 ) {
 	objlist::iterator o;
 	coordinateDictionary::iterator c;
 	lineDictionary::iterator l;
@@ -672,10 +683,12 @@ public:
 	delete base;
 	base =0;
 
+	setname(n);
     }
 
     bool is_visible() { return visible; }
     bool is_visible(bool v) { return visible = v; }
+
 
     // Called when a .G1 is encountered
     

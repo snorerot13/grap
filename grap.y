@@ -131,7 +131,6 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     axis axisname;
     strmod stringmod;
     copydesc *copyd;
-    coordid *coordident;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
 %type <num> opt_wid assignment_statement lexpr pure_lexpr right_hand_side
@@ -156,7 +155,6 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <line_list> COPYTEXT
 %type <macro_val> MACRO
 %type <copyd> until_clause
-%type <coordident> ident_or_coord
 %left OR AND
 %right NOT
 %left EQ NEQ LT GT LTE GTE
@@ -820,19 +818,11 @@ log_desc:
 	    { $$ = both; }
 ;
 
-ident_or_coord:
-            { $$ = new coordid((coord *) 0, (string *) 0); }
-|       IDENT
-            { $$ = new coordid((coord *) 0,$1); }
-;
 
 coord_statement:
-	COORD ident_or_coord x_axis_desc y_axis_desc log_list SEP
+	COORD opt_ident x_axis_desc y_axis_desc log_list SEP
 	    {
-		if ( $2->first ) 
-		    coord_statement($2->first, $3, $4, $5);
-		else
-		    coord_statement($2->second, $3, $4, $5);
+		coord_statement($2, $3, $4, $5);
 		delete $2;
 	    }
 ;
@@ -1031,11 +1021,13 @@ graph_statement:
 		    // things like coordinate spaces before the graph
 		    // itself is named.  This is a compatibility
 		    // feature for DWB grap.
-		    if ( the_graph->visible ) {
+		    if ( the_graph->is_visible() ) {
 			the_graph->draw(0);
 			the_graph->init($3, $5);
+			init_dict();
 		    }
-		    init_dict();
+		    else
+			the_graph->setname($3);
 		}
 		else {
 		    the_graph->init($3, $5);

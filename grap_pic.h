@@ -127,7 +127,6 @@ public:
 
 class Picgraph : public graph {
     string *ps_param;		// The params to .G1
-    string *name;		// The name of the graph
     string *pos;		// the position of the graph (in pic)
     int graphs;			// the number of graphs drawn this block
     bool frame_queued;		// The frame is on the object list
@@ -136,8 +135,7 @@ class Picgraph : public graph {
 public:
     // regular member functions 
     Picgraph() :
-	graph(), ps_param(0), name(0), pos(0), graphs(0), pframe(0)
-	{ }
+	graph(), ps_param(0), pos(0), graphs(0), pframe(0) { }
     
     
     ~Picgraph() {
@@ -145,9 +143,6 @@ public:
 	// It will be deallocated by graph::init.
 	delete ps_param;
 	ps_param = 0;
-
-	delete name;
-	name = 0;
 
 	delete pos;
 	pos = 0;
@@ -205,15 +200,19 @@ public:
 };
 
 class Piccoord: public coord, public drawable {
+    string *gn;
 public:
-    Piccoord(const coord& c) : coord(c) { }
+    Piccoord(const coord& c, string *n) : coord(c), gn(n) { }
     ~Piccoord() { }
     void draw(frame *f) {
 	const string& nm = (name != "") ? name : "gg";
-	
-	cout << "define x_"<< nm << " { ( Frame.Origin.x + ( ( $1 - " << xmin
+	const string& graph_name = (gn) ? (*gn + ".") : "";
+
+	cout << "define x_"<< nm << " { ( "
+	     << graph_name << "Frame.Origin.x + ( ( $1 - " << xmin
 	     << ") / " << xmax-xmin << ") * " << f->wid << " ) }" << endl;
-	cout << "define y_"<< nm << " { ( Frame.Origin.y + ( ( $1 - " << ymin
+	cout << "define y_"<< nm << " { ( "
+	     << graph_name << "Frame.Origin.y + ( ( $1 - " << ymin
 	     << ") / " << ymax-ymin << ") * " << f->ht << " ) }" << endl;
 	cout << "define xy_" << nm << " { x_" << nm << "($1), "
 	     << "y_"<< nm << "($2) }" << endl; 

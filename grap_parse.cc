@@ -570,7 +570,6 @@ void coord_statement(string *ident, axisdesc& xa, axisdesc& ya, axis log) {
     if (ident) {
 	c = new coord(*ident);
 	the_graph->coords[*ident] = c;
-	delete ident;
     } else 
 	c = defcoord;
 
