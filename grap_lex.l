@@ -718,7 +718,7 @@ bool include_file(string *s, int rs, bool usepath) {
 	}
 	else {
 	    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
-	    g->name = new string("- <stdin>");
+	    g->name = new string("-");
 	}
 	lexstack.push_front(g);
 	yy_switch_to_buffer(g->yy);
