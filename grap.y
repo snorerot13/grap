@@ -195,7 +195,7 @@ public:
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME
 %type <side>  side  bar_dir
-%type <frameptr> sides size 
+%type <frameptr> sides size size_elem final_size
 %type <lined> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
 %type <double_list> num_line expr_list
@@ -739,36 +739,36 @@ next_statement:
 	    }
 ;
 
-size:
+size_elem:
 	HT expr
             {
 		$$ = new frame;
 		$$->ht = $2;
+		$$->wid = 0;
 	    }
 |	WID expr
             {
 		$$ = new frame;
 		$$->wid = $2;
-	    }
-|	size HT expr
-	    {
-		if ( !$1 ) 
-		    $$ = new frame;
-		else 
-		    $$ = $1;
-		
-		$$->ht = $3;
-	    }
-|	size WID expr
-	    {
-		if ( !$1 ) 
-		    $$ = new frame;
-		else 
-		    $$ = $1;
-		
-		$$->wid = $3;
+		$$->ht = 0;
 	    }
 ;
+
+size:
+	size_elem
+            {
+		$$ = $1;
+	    }
+|	size size_elem
+	    {
+		$$ = $1;
+		// Fill in non-default ht/wid
+		
+		if ( $2->ht != 0 ) $$->ht = $2->ht;
+		if ( $2->wid != 0 ) $$->wid = $2->wid;
+	    }
+;
+
 side:
 	TOP
 	    { $$ = top;}
@@ -779,6 +779,24 @@ side:
 |	RIGHT
 	    { $$ = right; }
 ;
+
+final_size:
+	size
+            {
+		// This rule combines the explicit size settings with
+		// the defaults. We create a new frame to have access
+		// to the default sizes without needing to code them
+		// explicitly (they're always implicit in a default
+		// frame). N. B. that frames created by size (and
+		// size_elem) use 0 to indicate no change to the ht or
+		// wid.
+		
+		$$ = new frame;
+
+		if ( $1->ht != 0) $$->ht = $1->ht;
+		if ( $1->wid != 0) $$->wid = $1->wid;
+		delete $1;
+	    }
 sides:
 	side linedesc {
 		$$ = new frame;
@@ -800,21 +818,21 @@ frame_statement:
 	    { process_frame(0, 0, 0); }
 |	FRAME linedesc SEP
 	    { process_frame($2, 0, 0); }
-|	FRAME size SEP
+|	FRAME final_size SEP
 	    { process_frame(0, $2, 0); }
 |	FRAME sides SEP
 	    { process_frame(0, 0, $2); }
-|	FRAME size sides SEP
+|	FRAME final_size sides SEP
 	    { process_frame(0, $2, $3); }
 |	FRAME linedesc sides SEP
 	    { process_frame($2, 0, $3); }
-|	FRAME linedesc size SEP
+|	FRAME linedesc final_size SEP
 	    { process_frame($2, $3, 0); }
-|	FRAME size linedesc SEP
+|	FRAME final_size linedesc SEP
 	    { process_frame($3, $2, 0); }
-|	FRAME linedesc size sides SEP
-	    { process_frame($2, $3, $4); }
-|	FRAME size linedesc sides SEP
+|	FRAME linedesc final_size sides SEP
+	    { process_frame($2, $3, $4);}
+|	FRAME final_size linedesc sides SEP
 	    { process_frame($3, $2, $4); }
 ;
 
@@ -1525,7 +1543,8 @@ void process_frame(linedesc* d, frame *f, frame *s) {
     // as one yacc rule, so I wrote the three rules explicitly and
     // extracted the action here.  The three arugments are the default
     // frame linedesc (d), the size of the frame (f), and individual
-    // descriptions of the linedescs (s) of the sides.
+    // descriptions of the linedescs (s) of the sides.  Note that d,
+    // f, and s are freed by this routine.
     
     int i;	// Scratch
 
