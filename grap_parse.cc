@@ -529,7 +529,8 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 		    point *p2, linedesc *ld2 ) {
     line *l;
     lineDictionary::iterator li;
-    linedesc des;
+    // This constructor combines the two linedescs
+    linedesc des(ld1, ld2);
 
     // Basically this should never fail...
     li = the_graph->lines.find("grap.internal");
@@ -540,16 +541,6 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
     }
     else { l = (*li).second; } 
 
-    // des will be acombination of the information in ld1 and ld2 if
-    // any.
-    
-    if ( ld1 ) des = *ld1;
-    if ( ld2 && ld2->ld != def ) {
-	des.ld = ld2->ld;
-	des.param = ld2->param;
-    }
-    if ( ld2 && ld2->color ) des.color = new String(*ld2->color);
-		    
     l->initial = 1;
 
     if ( des.ld != def || des.color) {

@@ -72,6 +72,17 @@ public:
 	    if ( ldc.color ) color = new String(*ldc.color);
 	    if ( ldc.fillcolor ) fillcolor = new String(*ldc.fillcolor);
     }
+    // Make a new linedescriptor that combines the properites in ld1 and
+    // ld2.
+    linedesc(const linedesc* ld1, const linedesc* ld2) :
+	ld(def), param(0), fill(0), color(0), fillcolor(0) {
+	if ( ld1 ) *this = *ld1;
+	if ( ld2 && ld2->ld != def ) {
+	    ld = ld2->ld;
+	    param = ld2->param;
+	}
+	if ( ld2 && ld2->color ) color = new String(*ld2->color);
+    }
 
     ~linedesc() {
 	if ( color ) { delete color; color = 0; }
