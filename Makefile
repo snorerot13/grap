@@ -1,8 +1,12 @@
 .NULL: .out
 
-BINDIR=/usr/local/bin
-DEFINESDIR=/usr/share/grap
-MANDIR=/usr/local/man/man1
+.ifndef PREFIX
+PREFIX=/usr/local/
+.endif
+
+BINDIR=${PREFIX}/bin
+DEFINESDIR=${PREFIX}/share/grap
+MANDIR=${PREFIX}/man/man1
 INSTALL=install
 RM=rm
 RMDIR=rmdir
@@ -12,8 +16,7 @@ LEX=flex
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
 
-CXXFLAGS=-g
-#CXXFLAGS += -DLEX_DEBUG
+#CXXFLAGS =-g
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 #CXXFLAGS += -DNO_SNPRINTF
 #CXXFLAGS += -DNO_RANDOM
@@ -51,6 +54,7 @@ clean:
 	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1
 
 install:	grap grap.defines grap.1
+	strip grap
 	$(INSTALL) -c -g bin -o root -m 755 grap $(BINDIR)
 	$(INSTALL) -c -g bin -o root -m 644 grap.1 $(MANDIR)
 	$(INSTALL) -d -g bin -o root -m 755 $(DEFINESDIR)
