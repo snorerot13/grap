@@ -28,7 +28,10 @@ doubleDictionary vars;
 graph *the_graph =0;
 lexStack lexstack;
 macroDictionary macros;
-stringSequence path; 
+stringSequence path;
+#ifndef __GNUC__
+const int macro::numargs=32;
+#endif 
 int first_line;
 bool unaligned_default = false;	// Should strings be unaligned by default 
 

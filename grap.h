@@ -12,11 +12,11 @@ extern "C" {
 #ifndef __GNUC__
     size_t strlen(const char*);
     char *strcpy(char *, const char *);
-    size_t strcmp(const char *, const char *);
+    int strcmp(const char *, const char *);
 #endif
     char *strcat(char *, const char *);
     char *strncpy(char *, const char *, const size_t);
-    size_t strncmp(const char *, const char *, const size_t);
+    int strncmp(const char *, const char *, const size_t);
 };
 #endif
 
