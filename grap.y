@@ -64,6 +64,7 @@ void init_graph();
 // some code redundancy.
 extern graph *initial_graph(); 
 extern linedesc* combine_linedesc(linedesc *, linedesc*);
+extern axis combine_logs(axis, axis);
 extern void draw_statement(String *, linedesc *, String *);
 void num_list(doublelist *);
 double assignment_statement(String *, double);
@@ -81,6 +82,9 @@ void coord_statement(String *, axisdesc&, axisdesc&, axis);
 void coord_statement(coord *, axisdesc&, axisdesc&, axis);
 void for_statement(String *, double, double, bydesc, String *);
 void process_frame(linedesc *, frame *, frame *);
+void define_macro(String *, String*);
+void bar_statement(coord *, sides, double, double, double,
+		   double, linedesc *); 
 void init_dict(); 
 
 int nlines;
@@ -101,7 +105,7 @@ function0 jtf0[NF0] = { grap_random };
 function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
-%token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
+%token NUMBER START END IDENT COPY SEP STRING COORD_NAME
 %token SOLID INVIS DOTTED DASHED DRAW LPAREN RPAREN FUNC0 FUNC1 FUNC2 COMMA
 %token LINE PLOT FROM TO AT NEXT FRAME LEFT RIGHT TOP BOTTOM UP DOWN HT WID
 %token IN OUT TICKS OFF BY GRID LJUST RJUST ABOVE BELOW ALIGNED
@@ -136,7 +140,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     coordid *coordident;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
-%type <num> opt_wid assignment_statement if_expr
+%type <num> opt_wid assignment_statement lexpr pure_lexpr
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <string> START string
@@ -386,24 +390,6 @@ expr:
 	    { $$ = pow($1,$3);}
 |	MINUS expr %prec CARAT
 	    { $$ = - $2;}
-|	expr EQ expr
-            { $$ = ($1 == $3); }
-|	expr NEQ expr
-            { $$ = ($1 != $3); }
-|	expr LT expr
-            { $$ = ($1 < $3); }
-|	expr GT expr
-            { $$ = ($1 > $3); }
-|	expr LTE expr
-            { $$ = ($1 <= $3); }
-|	expr GTE expr
-            { $$ = ($1 >= $3); }
-|	expr AND expr
-            { $$ = ($1 && $3); }
-|	expr OR expr
-            { $$ = ($1 || $3); }
-|	NOT expr %prec PLUS
-            { $$ = ! ( (int) $2); }
 |	FUNC0 LPAREN RPAREN
 	    { $$ = ( $1 >=0 && $1 < NF0 ) ? jtf0[$1]() : 0; }
 |	FUNC1 LPAREN expr RPAREN
@@ -416,9 +402,8 @@ expr:
  	    {
 		doubleDictionary::iterator di;
 		
-		if ( (di = vars.find(*$1)) != vars.end()) {
+		if ( (di = vars.find(*$1)) != vars.end())
 		    $$ = *(*di).second;
-		}
 		else {
 		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
 		    $$ = 0.0;
@@ -430,65 +415,38 @@ expr:
 	    { $$ = $1; }
 ;
 
-if_expr:
-	if_expr PLUS if_expr
-	    { $$ = $1 + $3; }
-|	if_expr MINUS if_expr
-            { $$ = $1 - $3; }
-|	if_expr TIMES if_expr
-	    { $$ = $1 * $3; }
-|	if_expr DIV if_expr
-	    { $$ = $1 / $3; }
-|	if_expr CARAT if_expr
-	    { $$ = pow($1,$3);}
-|	MINUS if_expr %prec CARAT
-	    { $$ = - $2;}
-|	if_expr EQ if_expr
-            { $$ = ($1 == $3); }
-|	if_expr NEQ if_expr
-            { $$ = ($1 != $3); }
-|	if_expr LT if_expr
-            { $$ = ($1 < $3); }
-|	if_expr GT if_expr
-            { $$ = ($1 > $3); }
-|	if_expr LTE if_expr
-            { $$ = ($1 <= $3); }
-|	if_expr GTE if_expr
-            { $$ = ($1 >= $3); }
-|	if_expr AND if_expr
-            { $$ = ($1 && $3); }
-|	if_expr OR if_expr
-            { $$ = ($1 || $3); }
-|	NOT if_expr %prec PLUS
-            { $$ = ! ( (int) $2); }
-|	FUNC0 LPAREN RPAREN
-	    { $$ = ( $1 >=0 && $1 < NF0 ) ? jtf0[$1]() : 0; }
-|	FUNC1 LPAREN expr RPAREN
- 	    { $$ = ( $1 >=0 && $1 < NF1 ) ? jtf1[$1]($3) : 0; }
-|	FUNC2 LPAREN expr COMMA expr RPAREN
-	    { $$ = ( $1 >=0 && $1 < NF2 ) ? jtf2[$1]($3, $5) : 0; }
-|	LPAREN if_expr RPAREN
- 	    { $$ = $2; }
-|	IDENT
- 	    {
-		doubleDictionary::iterator di;
-		
-		if ( (di = vars.find(*$1)) != vars.end()) {
-		    $$ = *(*di).second;
-		}
-		else {
-		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
-		    $$ = 0.0;
-		}
+lexpr:
+	expr
+            { $$ = $1; }
+|	LPAREN pure_lexpr RPAREN
+            { $$ = $2; }
+|	pure_lexpr
+            { $$ = $1; }
+;
 
-		delete $1;
-	     }
-|	NUMBER
-	    { $$ = $1; }
+pure_lexpr:
+	lexpr EQ lexpr
+            { $$ = ($1 == $3); }
+|	lexpr NEQ lexpr
+            { $$ = ($1 != $3); }
+|	lexpr LT lexpr
+            { $$ = ($1 < $3); }
+|	lexpr GT lexpr
+            { $$ = ($1 > $3); }
+|	lexpr LTE lexpr
+            { $$ = ($1 <= $3); }
+|	lexpr GTE lexpr
+            { $$ = ($1 >= $3); }
+|	lexpr AND lexpr
+            { $$ = ($1 && $3); }
+|	lexpr OR lexpr
+            { $$ = ($1 || $3); }
+|	NOT lexpr %prec PLUS
+            { $$ = ! ( (int) $2); }
 |	string EQ string
-            { $$ = (*$1 == *$3); }
+            { $$ = (*$1 == *$3); delete $1; delete $3; }
 |	string NEQ string
-            { $$ = (*$1 != *$3); }
+            { $$ = (*$1 != *$3); delete $1; delete $3; }
 ;
 
 assignment_statement:
@@ -809,38 +767,7 @@ y_axis_desc:
 
 log_list:
         log_list log_desc
-            {
-		switch ($1) {
-		    case none:
-			$$ = $2;
-			break;
-		    case x_axis:
-			switch ($2) {
-			    case x_axis:
-			    case none:
-				$$ = x_axis;
-			    case y_axis:
-			    case both:
-			    default:
-				$$ = both;
-			}
-			break;
-		    case y_axis:
-			switch ($2) {
-			    case y_axis:
-			    case none:
-				$$ = y_axis;
-			    case x_axis:
-			    case both:
-			    default:
-				$$ = both;
-			}
-			break;
-		    case both:
-			$$ = both;
-			break;
-		}
-	    }
+            { $$ = combine_logs($1, $2); }
 |
             { $$ = none; }
 
@@ -979,8 +906,7 @@ copy_statement:
 		    t = $5->invoke();
 		    *expand += *t;
 		    // "here" macros should end with a SEP.  If the user
-		    // hasn't done so, we add a SEP for them.  XXX this
-		    // may be configuarble later
+		    // hasn't done so, we add a SEP for them.
 
 		    end = (*expand)[expand->length()-1];
 
@@ -1000,21 +926,7 @@ copy_statement:
 ;
 
 define_statement:
-	DEFINE { lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP
-	    {
-		macro *m;
-		macroDictionary::iterator mi;
-		if ( ( mi = macros.find(*$3)) != macros.end() ) {
-		    m = (*mi).second;
-		    if ( m->text ) {
-			delete m->text;
-			m->text = $5;
-		    }
-		} else {
-		    m = new macro($5,$3);
-		    macros[*$3] = m;
-		}
-	    }
+	DEFINE { lex_expand_macro = 0;} IDENT { lex_begin_macro_text(); } TEXT SEP { define_macro($3, $5); }
 ;
 
 sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
@@ -1045,7 +957,7 @@ else_clause:
 ;
 
 if_statement:
-	IF if_expr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
+	IF lexpr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
 	    {
 		// force all if blocks to be terminated by a SEP
 		*$5 += ';';
@@ -1131,29 +1043,6 @@ bar_statement:
 		delete b;
 	    }
 |	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base opt_linedesc SEP
-            {
-		point *p1, *p2;		// The defining points of the box
-		box *b;			// The new box
-
-		switch ($3) {
-		    case right:
-			p1 = new point($8, $4 + $7/2, $2);
-			p2 = new point($8 + $6, $4 - $7/2, $2);
-			break;
-		    case top:
-		    default:
-			p1 = new point($4 + $7/2, $8, $2);
-			p2 = new point($4 - $7/2, $8 + $6, $2);
-			break;
-		}
-		
-		$2->newpt(p1->x,p1->y);
-		$2->newpt(p2->x,p2->y);
-		
-		b = new box(p1, p2, $9);
-		the_graph->add_box(*b);
-		delete p1; delete p2; delete $9;
-		delete b;
-	    }
+           { bar_statement($2, $3, $4, $6, $7, $8, $9); }
 ;
 %%

@@ -688,6 +688,83 @@ void process_frame(linedesc* d, frame *f, frame *s) {
 	delete s;
     }
 }
+// Combine two log descriptions in a log list.  Old is the accumulated
+// log state so far, and n is the latest state to merge.  Return the
+// new combined state.  The new state is created by making the n axis
+// a log axis if it is not already in that list.
+axis combine_logs(axis old, axis n) {
+    switch (old) {
+	default:
+	case none:
+	    return n;
+	case x_axis:
+	    switch (n) {
+		case x_axis:
+		case none:
+		    return x_axis;
+		case y_axis:
+		case both:
+		default:
+		    return both;
+	    }
+	case y_axis:
+	    switch (n) {
+		case y_axis:
+		case none:
+		    return y_axis;
+		case x_axis:
+		case both:
+		default:
+		    return both;
+	    }
+	case both:
+	    return both;
+    }
+}
+// If a macro with the given name is defined, redefine it to be text,
+// otherwise create a new macro and define it to be text.
+void define_macro(String *name, String *text) {
+    macro *m;				// The new macro
+    macroDictionary::iterator mi;	// To search defined macros
+    
+    if ( ( mi = macros.find(*name)) != macros.end() ) {
+	m = (*mi).second;
+	delete m->text;
+	m->text = text;
+    } else {
+	m = new macro(text, name);
+	macros[*name] = m;
+    }
+}
+
+// Create a new bar with the given parameters and add it to the graph.
+void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
+		   double base, linedesc *ld) {
+    point *p1, *p2;		// The defining points of the box
+    box *b;			// The new box
+
+    switch (dir) {
+	case right:
+	    p1 = new point(base, offset + wid/2, c);
+	    p2 = new point(base + ht, offset - wid/2, c);
+	    break;
+	case top:
+	default:
+	    p1 = new point(offset + wid/2, base, c);
+	    p2 = new point(offset - wid/2, base + ht, c);
+	    break;
+    }
+		
+    c->newpt(p1->x,p1->y);
+    c->newpt(p2->x,p2->y);
+		
+    b = new box(p1, p2, ld);
+    the_graph->add_box(*b);
+    delete p1; delete p2; delete ld;
+    delete b;
+}
+
+
 
 // Perhaps a misnomer.  Initialize the current frame default lines and
 // coordinate systems.  The default line is initialized to be

@@ -23,6 +23,9 @@ Tried to streamline the use of for_each and functors by removing
 trivial calls to for_each.  Still trying to move code out of grap.y to
 make it shorter to compile.
 
+Simplified expression grammar by disallowing logical expressions
+outside if statements.  I also caught another memory leak here.
+
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.
 

@@ -984,11 +984,17 @@ can be used in place of
 .Pp
 .Nm
 supports a most standard arithmatic operators: + - / * ^.  The carat
-(^) is exponentiation.  It also supports the C logical operators ==, !=,
-&&, || and unary !.  == and != are overloaded for the comparison of
+(^) is exponentiation.  In an 
+.Ic if
+statement
+.Nm
+also supports the C logical operators ==, !=,
+&&, || and unary !.  Also in an
+.Ic if ,
+== and != are overloaded for the comparison of
 quoted strings.  Parentheses are used for grouping.  
 .Pp
-Assignment is not allowed in an expression.
+Assignment is not allowed in an expression in any context.
 .Pp
 .Nm
 supports the following functions that take one argument:
