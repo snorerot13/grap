@@ -259,17 +259,17 @@ atan2|min|max		{
 					DEBUG("<GRAP>End: %s\n",yytext);
 					BEGIN(INITIAL);
 					/* discard whitespace (including newline) */
-					{ int c;
-						while ((c=yyinput())) {
-							if (c == EOF)
-								break;
-							if (isspace(c))
-								continue;
-							/* not whitespace or EOF */
-							unput(c);
-							break;
-						}
-					}
+//  					{ int c;
+//  						while ((c=yyinput())) {
+//  							if (c == EOF)
+//  								break;
+//  							if (isspace(c))
+//  								continue;
+//  							/* not whitespace or EOF */
+//  							unput(c);
+//  							break;
+//  						}
+//  					}
 					return END;
 				    }
 				    else YY_BREAK;
