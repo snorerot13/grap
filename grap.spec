@@ -1,13 +1,13 @@
-Summary: grap, a grapher for groff
+Summary: grap, typesets graphs for groff
 Name: grap
-Version: 1.01
+Version: 1.02
 Release: 1
 Copyright: BSD
 Group: Applications/Publishing
-Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-0.95b.tar.gz
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-1.02.tar.gz
 
 %description
-This is grap, an implementation of Kernigan and Bentley's grap
+This is grap, an implementation of Kernigan and Bentley\'s grap
 language for typesetting graphs.  I got sick of groff not having a
 version of grap, so I built one.
 
@@ -16,13 +16,12 @@ version of grap, so I built one.
 %setup
 
 %build
-MYCFLAGS="$RPM_OPT_FLAGS"
-
-CFLAGS="$MYCFLAGS" ./configure --prefix=%prefix
+./configure --prefix=/usr/local
+make depend
+make 
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make prefix=$RPM_BUILD_ROOT%{prefix} install
+make install
 
 
 %files
@@ -32,10 +31,10 @@ make prefix=$RPM_BUILD_ROOT%{prefix} install
 %doc COPYRIGHT
 %doc CHANGES
 
-%{prefix}/bin/grap
-%{prefix}/man/man1/grap.1
-%{prefix}/share/grap/examples
-%{prefix}/share/grap/grap.defines
-%{prefix}/share/grap/README
-%{prefix}/share/grap/COPYRIGHT
-%{prefix}/share/grap/CHANGES
+/usr/local/bin/grap
+/usr/local/man/man1/grap.1
+/usr/local/share/grap/examples
+/usr/local/share/grap/grap.defines
+/usr/local/share/grap/README
+/usr/local/share/grap/COPYRIGHT
+/usr/local/share/grap/CHANGES
