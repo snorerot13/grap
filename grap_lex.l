@@ -205,7 +205,7 @@ atan2|min|max		{
 					yylval.val = i;
 			return FUNC2;
 			}
-([0-9]*\.?[0-9]+)|([0-9]*\.?[0-9]+e(\+|\-)?[0-9]+)	{ 
+([0-9]*\.?[0-9]+)|([0-9]*\.?[0-9]+[eE](\+|\-)?[0-9]+)	{ 
 			DEBUG("Number: %s\n",yytext);
 			yylval.num = atof(yytext);
 			return NUMBER;
