@@ -388,7 +388,7 @@ public:
     }
     
     line(linedesc *l) :  plotstr(0), desc(l), pts(), initial(1) { }
-    line(line& l) : desc(l.desc),  initial(l.initial) {
+    line(line& l) : plotstr(0), desc(l.desc),  pts(), initial(l.initial) {
 	list<linepoint*>::iterator lpi;
 	
 	if ( l.plotstr ) {
@@ -404,6 +404,20 @@ public:
 	}
 	    
     }
+    ~line() {
+	linepoint* lp;
+	if ( plotstr ) {
+	    delete plotstr;
+	    plotstr = 0;
+	}
+	while ( !pts.empty() ) {
+	    lp = pts.front();
+	    pts.pop_front();
+	    if ( lp ) 
+		delete lp;
+	}
+    }
+    
     void addpoint(double x, double y, coord* c, String *s=0,
 		  linedesc *l=0) {
 	linepoint *lp;
@@ -428,7 +442,38 @@ public:
     point* loc;		// The location to put them at
     
     plot(stringlist *s = 0, point *p =0) : strs(s), loc(p) { }
-    plot( plot& p ) : strs(p.strs), loc(p.loc) { }
+    // copy constructors have to copy ...
+    plot( plot& p ) : strs(0), loc(0) {
+	if (p.loc) loc = new point(p.loc);
+
+	if ( p.strs ) {
+	    stringlist::iterator dsi;
+	    strs = new stringlist();
+	    
+	    for ( dsi = p.strs->begin(); dsi != p.strs->end(); dsi++ ) {
+		DisplayString *ds = *dsi;
+		DisplayString *nds = new DisplayString(*ds);
+
+		strs->push_back(nds);
+	    }
+	}
+    }
+    ~plot() {
+	if ( strs ) {
+	    DisplayString *ds;
+	    while ( !strs->empty()) {
+		ds = strs->front();
+		strs->pop_front();
+		delete ds;
+	    }
+	    delete strs;
+	    strs = 0;
+	}
+	if ( loc ) {
+	    delete loc ;
+	    loc = 0;
+	}
+    }
 };
 
 class circle {

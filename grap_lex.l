@@ -578,7 +578,13 @@ int yywrap() {
 
 
     yy_delete_buffer(g->yy);
-    if ( g->f ) delete g->f;
+    if ( g->f ) {
+	if ( g->f->anything ) {
+	    delete g->f->anything;
+	    g->f->anything = 0;
+	}
+	delete g->f;
+    }
     if ( g->name ) delete g->name;
     delete g;
 

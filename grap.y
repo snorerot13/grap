@@ -1250,6 +1250,7 @@ copy_statement:
 		    t = $6->invoke();
 		    *expand += t;
 		    delete t;
+		    delete s;
 		}
 		include_string(expand,0,GMACRO);
 		delete expand;

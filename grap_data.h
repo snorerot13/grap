@@ -372,6 +372,18 @@ public:
 	for ( int i = 0; i < numargs ; i++ )
 	    arg[i] = 0;
     }
+    ~macro() {
+	if ( text ) {
+	    delete text;
+	    text = 0;
+	}
+	for ( int i = 0; i < numargs ; i++ )
+	    if ( arg[i] ) {
+		delete arg[i];
+		arg[i] = 0;
+	    }
+	
+    }
     int add_arg(String *s ) {
 	if ( next_arg < numargs ) {
 	    if ( arg[next_arg] ) delete arg[next_arg];
