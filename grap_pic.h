@@ -172,7 +172,6 @@ public:
 	Picplot *pl = new Picplot(s, p);
 	queue_frame();
 	if ( pl ) objs.push_back(pl);
-
 	return pl;
     }
     virtual circle *new_circle(point *p, double r, linedesc *l=0) {

@@ -376,6 +376,7 @@ public:
     point(point *p) : x(p->x), y(p->y), c(p->c) {
 	if ( c ) c->newpt(x, y);
     }
+    point(const point& p) : x(p.x), y(p.x), c(p.c) { }
     point& operator=(point &p) {
 	x = p.x; y = p.y; c = p.c;
 	return *this;

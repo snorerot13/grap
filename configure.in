@@ -104,5 +104,15 @@ else
 fi
 AC_SUBST(INSTALL_DEPS)
 
+AC_MSG_CHECKING(whether to force safe mode)
+AC_ARG_WITH(safe-mode,
+[  --with-safe-mode        disable sprintf to avoid attacks],
+ac_cv_grap_safe_mode="yes",  
+AC_CACHE_VAL(ac_cv_grap_safe_mode, ac_cv_grap_safe_mode="no"))
+AC_MSG_RESULT($ac_cv_grap_safe_mode)
+if test $ac_cv_grap_safe_mode = "yes" ; then
+	AC_DEFINE(GRAP_SAFER)
+fi
+
 TVF_CREATE_DOT_DEPEND
 AC_OUTPUT(examples/Makefile Makefile)

@@ -337,6 +337,8 @@ log[ \t]+(x|y|log)	{
 			   coordinateDictionary::iterator ci;
 			   coord *c;
 			   
+			   debug("testing: ",yytext);
+			   debug("count ", active.count(yytext));
                            if ( is_macro(yytext) ) 
 			       REJECT;
 
@@ -379,12 +381,12 @@ log[ \t]+(x|y|log)	{
 				   const keyword& k = (*ki).second;
 			       
 				   if ( k.clear ) active.clear();
-				   for ( i = 0; i < k.add.size(); i++ )
-				       active.insert(k.add[i]);
-				   for ( i = 0; i < k.remove.size(); i++)
+				   for ( i = 0; i < k.add.size(); i++ ) 
+				       debug("added", k.add[i]);
+				   for ( i = 0; i < k.remove.size(); i++) 
 				       active.erase(k.remove[i]);
 
-				   debug(yytext);
+				   debug("keyword: ", yytext);
 				   tokenpos += yyleng;
 				   BEGIN(GRAP);
 				   return(k.token);

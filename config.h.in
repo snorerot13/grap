@@ -19,6 +19,7 @@
 #undef RANDOM_DECLARED
 #undef OPTARG_DEFINED
 #undef SPRINTF_NOT_INT
+#undef GRAP_SAFER
 
 #undef DEFINES 
 

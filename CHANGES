@@ -1,5 +1,11 @@
 Change log
 
+1.23: made it possible to disable sprintf which is a potential security hole.  Still to do:
+
+fix plot
+
+disable plot formatting
+
 1.22: John Heidemann caught a bug with respect to large sizes and size
 changes in titles.  Those large szie changes are now supported.  Generally
 the groff [] syntax is now used for the embedded \s commans that size

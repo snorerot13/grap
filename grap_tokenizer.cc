@@ -152,7 +152,7 @@ void init_only_once() {
 
     temp.clear();
     temp.push_back("at");
-    keywords["plot"] = keyword(empty, temp, true, PLOT);
+    keywords["plot"] = keyword(temp, empty, true, PLOT);
 }
 
 // These all signal the start of a command

@@ -147,6 +147,31 @@ flag prints a brief help message and exist.
 is a synonym for
 .Fl h .
 .Pp
+It is possible for someone to cause 
+.Nm
+to fail by passing a bad format string and data to the
+.Ic sprintf
+command.  If 
+.Nm
+is integrated as part of the printing system, this could conceivably
+provided a path to breaching security on the machine.  If you choose to
+use 
+.Nm
+as part of a printing system run by the super-user, you should disable
+.Ic sprintf 
+commands.  This can be done by calling 
+.Nm
+with the 
+.Fl S
+flag, setting the
+.Ev GRAP_SAFER
+environment variable, or compiling with the GRAP_SAFER preprocessor
+symbol defined.  (The GNU configure script included with
+.Nm
+will define that preprocessor symbol if the
+.Fl -with-grap-safe
+option is given.)
+.Pp
 The 
 .Nm
 commands are sketched below.  Refer to Kernighan and Bentley's paper
@@ -1153,7 +1178,20 @@ string valued function exists:
 ).  It operates like
 .Xr sprintf 3 ,
 except returning the value.  It can be used anywhere a quoted string
-is used.
+is used.  If 
+.Nm
+is run with 
+.Fl S ,
+the environment variable
+.Ev GRAP_SAFER
+is defined, or 
+.Nm
+has been compiled for safer operation, the 
+.Ic sprintf
+command will return the format string.  This mode of operation is only
+intended to be used only if
+.Nm
+is being used as part of a super-user enabled print system.
 .Ss Macros
 .Nm
 has a simple but powerful macro facility.  Macros are defined using
@@ -1276,6 +1314,14 @@ overridden by the
 or
 .Fl D
 flags.
+.Pp
+If
+.Ev GRAP_SAFER
+is set, 
+.Ic sprintf
+is disabled to prevent forcing 
+.Nm
+to core dump or smash the stack.
 .Sh FILES
 .Pa DEFINES_FILE
 .Sh SEE ALSO

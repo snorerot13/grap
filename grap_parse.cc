@@ -36,8 +36,12 @@ extern bool print_lex_debug;
 
 extern line* defline;
 extern coord *defcoord;
-//string version = ; 
 bool compat_mode=false;			//  Compatibility mode
+#ifdef GRAP_SAFER
+bool do_sprintf = false;		//  Allow sprintf
+#else
+bool do_sprintf = true;			//  Allow sprintf
+#endif
 
 // defined in grap_lex.l
 extern int include_string(string *,struct for_descriptor *f=0,
@@ -835,6 +839,8 @@ int main(int argc, char** argv) {
 
     if (getenv("GRAP_DEFINES"))
 	defines = getenv("GRAP_DEFINES");
+    if ( getenv("GRAP_SAFER") )
+	do_sprintf = false;
 
     // Either of these long options are recognized to make the GNU folks
     // happier.
@@ -874,6 +880,9 @@ int main(int argc, char** argv) {
 		break;
 	    case 'C':
 		compat_mode = true;
+		break;
+	    case 'S':
+		do_sprintf = false;
 		break;
 	    case 'h':
 	    case '?':

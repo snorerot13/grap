@@ -36,6 +36,7 @@ macroDictionary macros;
 stringSequence path;
 bool first_line;
 bool unaligned_default = false;	// Should strings be unaligned by default 
+extern bool do_sprintf;		// true if it's acceptable to parse sprintf
 
 line* defline;
 coord *defcoord;
@@ -287,64 +288,68 @@ string:
              { $$ = $1; }
 |       SPRINTF LPAREN STRING COMMA expr_list RPAREN
              {
-		 const int len = $3->length() < 128 ? 256 : 2*$3->length();
-		 char *buf = new char[len];
+		 if ( do_sprintf ) {
+		     const int len = $3->length() < 128 ? 256 : 2*$3->length();
+		     char *buf = new char[len];
 
-		 // I really dislike this, but I dislike trying to do it
-		 // incrementally more.
-		 switch ($5->size()) {
-		    case 0:
-			snprintf(buf, len, $3->c_str());
-			break;
-		    case 1:
-			snprintf(buf, len, $3->c_str(), (*$5)[0]);
-			break;
-		    case 2:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1]);
-			break;
-		    case 3:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2]);
-			break;
-		    case 4:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3]);
-			break;
-		    case 5:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4]);
-			break;
-		    case 6:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5]);
-			break;
-		    case 7:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6]);
-			break;
-		    case 8:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
-			    (*$5)[7]);
-			break;
-		    case 9:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
-			    (*$5)[7], (*$5)[8]);
-			break;
-		    default:
-			cerr << "more that 10 arguments to sprintf.  " << 
-			    "Ignoring more than 10." << endl;
-		    case 10:
-			snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
-			    (*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], (*$5)[6],
-			    (*$5)[7], (*$5)[8], (*$5)[9]);
-			break;
+		     // I really dislike this, but I dislike trying to do it
+		     // incrementally more.
+		     switch ($5->size()) {
+			case 0:
+			    snprintf(buf, len, $3->c_str());
+			    break;
+			case 1:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0]);
+			    break;
+			case 2:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1]);
+			    break;
+			case 3:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2]);
+			    break;
+			case 4:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3]);
+			    break;
+			case 5:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4]);
+			    break;
+			case 6:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5]);
+			    break;
+			case 7:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], 
+				(*$5)[6]);
+			    break;
+			case 8:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], 
+				(*$5)[6], (*$5)[7]);
+			    break;
+			case 9:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], 
+				(*$5)[6], (*$5)[7], (*$5)[8]);
+			    break;
+			default:
+			    cerr << "more that 10 arguments to sprintf.  " << 
+				"Ignoring more than 10." << endl;
+			case 10:
+			    snprintf(buf, len, $3->c_str(), (*$5)[0], (*$5)[1], 
+				(*$5)[2], (*$5)[3], (*$5)[4], (*$5)[5], 
+				(*$5)[6], (*$5)[7], (*$5)[8], (*$5)[9]);
+			    break;
+		     }
+		     delete $5; delete $3;
+
+		     $$ = new string(buf);
+		     delete[] buf;
 		 }
-		 delete $5; delete $3;
-
-		 $$ = new string(buf);
-		 delete[] buf;
+		 else $$ = $3;
 	     }
 ;
 
