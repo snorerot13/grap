@@ -3,8 +3,25 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
+// The following are set by configure
+
+#undef STDC_HEADERS
+#undef HAVE_UNISTD_H
+#undef HAVE_HASH_MAP
+#undef USE_STD_STRING
+#undef HAVE_SNPRINTF
+#undef HAVE_RANDOM
+#undef HAVE_RAND
+#undef HAVE_STRDUP
+#undef RANDOM_DECLARED
+// end configure stuff
+
+#ifndef DEFINES
+#define DEFINES "/usr/share/grap/grap.defines"
+#endif
+
 #ifdef __GNUC__
-// No, I don't know why...
+// I worked from the online docs which use UnaryFunction
 #define UnaryFunction unary_function
 #endif
 
@@ -38,8 +55,15 @@ inline int snprintf(char *s, int lim, char *fmt, double d) {
 }
 #endif
 
-#include "grap_data.h"
+#include <stl.h>
 #include <hash_map>
+#ifdef USE_STD_STRING
+#include <string>
+typedef string String;
+#else
+class String;
+#endif
+
 class DisplayString;
 class line;
 class coord;
@@ -86,10 +110,6 @@ typedef list<struct grap_buffer_state*> lexStack;
 typedef list<DisplayString *> stringlist;
 typedef list<shiftdesc *> shiftlist;
 
-#include "grap_draw.h"
-#include "grap_pic.h"
-
-
 #define RAND 0
 
 #define LOGFCN 0
@@ -106,25 +126,12 @@ typedef list<shiftdesc *> shiftlist;
 
 enum size { ht = 0, wid};
 
-// These can stay structs
 typedef struct {
     int op;
     double expr;
 } bydesc;
 
-typedef struct {
-    axis which;
-    double min;
-    double max;
-} axisdesc;
-
-typedef struct {
-    double size;
-    int rel;
-    int just;
-} strmod;
-
-// this is comples enough to need a constructor/destructor
+// this is complex enough to need a constructor/destructor
 class for_descriptor {
  public:
     double *loop_var;
@@ -177,5 +184,23 @@ class grap_buffer_state {
 extern lexStack lexstack;
 
 #define EPSILON	1e-6
+
+
+#ifdef HAVE_RANDOM
+#ifdef RANDOM_DECLARED
+extern "C" {
+    long random();
+}
+#endif
+#else 
+#ifdef HAVE_RAND
+#define random rand
+#ifndef RAND_DECLARED
+extern "C" {
+    long rand();
+}
+#endif
+#endif 
+#endif
 
 #endif

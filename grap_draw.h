@@ -19,6 +19,18 @@ typedef enum { none = 0, x_axis = 1, y_axis = 2, both=3} axis;
 typedef enum { ljust = 1, rjust = 2, above = 4, below = 8, aligned = 16,
 	       unaligned=32} just;
 
+typedef struct {
+    axis which;
+    double min;
+    double max;
+} axisdesc;
+
+typedef struct {
+    double size;
+    int rel;
+    int just;
+} strmod;
+
 class linedesc  {
     // Basic class features for line descriptions: constructors,
     // destructor, and assignment

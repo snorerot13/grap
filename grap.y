@@ -15,34 +15,15 @@
 #else
 extern "C" {
     extern char *optarg;
-    extern int optind, opterr, optopt;
+    extern int optind;
     int getopt(int, char * const [], const char *);
 }
 #endif
 
-
-#ifdef HAVE_RANDOM
-#ifdef RANDOM_DECLARED
-extern "C" {
-    long random();
-}
-#endif
-#else 
-#ifdef HAVE_RAND
-#define random rand
-#ifndef RAND_DECLARED
-extern "C" {
-    long rand();
-}
-#endif
-#endif 
-#endif
-
 #include "grap.h"
-
-#ifndef DEFINES
-#define DEFINES "/usr/share/grap/grap.defines"
-#endif
+#include "grap_data.h"
+#include "grap_draw.h"
+#include "grap_pic.h" 
 
 doubleDictionary vars;
 graph *the_graph =0;
@@ -81,11 +62,8 @@ void init_graph();
 int nlines;
 int in_copy=0;
 
-extern char *optarg;
-extern int optind;
-extern int optopt;
-extern int opterr;
-extern int optreset;
+//  extern char *optarg;
+//  extern int optind;
 
 const char *opts = "d:Dvu";
 

@@ -6,6 +6,11 @@ compiling under egcs halves the run time.  This is roughly half due to
 better egcs compilation and half due to the better performance of the
 standard string class.
 
+Moved to a config.h style grap.h.  Smoothed out the header files to
+confine as much conditional compilation as possible to grap.h.
+
+The code now uses hash_maps if they're available.
+
 0.95b: bug fix: deleting grap_buffer_state contents twice on error, allow 
 more than one shift description on ticks, grids, and labels.  Thanks to
 Anindo Banerjea at ISI for spotting my misimplementation.

@@ -4,13 +4,6 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-# By default these are relative to PREFIX.  You can override them on the 
-# command line
-
-#BINDIR = $(PREFIX)/bin
-#DEFINESDIR = $(PREFIX)/share/grap
-#MANDIR = $(PREFIX)/man/man1
-
 BINDIR = @bindir@
 DEFINESDIR = @datadir@/grap
 MANDIR = @mandir@/man1

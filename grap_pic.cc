@@ -2,7 +2,10 @@
 #include <iostream.h>
 #include <math.h>
 #include "grap.h"
+#include "grap_data.h"
+#include "grap_draw.h"
 #include "grap_pic.h"
+
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
