@@ -18,9 +18,8 @@ AC_HEADER_STDC
 
 if test $ac_cv_header_stdc = yes; then
 	echo $ac_n "checking for declaration of random() in stdlib.h... "
-	AC_EGREP_HEADER(random,/usr/include/stdlib.h,echo "yes";cat >> confdefs.h <<\EOF
-#define RANDOM_DECLARED 1
-EOF
+	AC_EGREP_HEADER(random,/usr/include/stdlib.h,echo "yes";
+AC_DEFINE(RANDOM_DECLARED)
 ac_random_declared="yes",echo "no")
 fi
 
@@ -28,9 +27,8 @@ fi
 
 if test $ac_random_declared = no; then
 	echo $ac_n "checking for declaration of random() in math.h... "
-	AC_EGREP_HEADER(random,/usr/include/math.h,echo "yes";cat >> confdefs.h <<\EOF
-#define RANDOM_DECLARED 1
-EOF
+	AC_EGREP_HEADER(random,/usr/include/math.h,echo "yes";
+AC_DEFINE(RANDOM_DECLARED)
 ac_random_declared="yes",echo "no")
 fi
 AC_CHECK_HEADERS(unistd.h)
