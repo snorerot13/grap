@@ -17,7 +17,7 @@ LEX=flex
 # Solaris : NO_RANDOM, NO_SNPRINTF
 # SunOS  : NO_RANDOM, NO_GETOPT, NO_SNPRINTF
 
-#CXXFLAGS =-g -pipe
+#CXXFLAGS +=-g 
 CXXFLAGS += -Wall
 #CXXFLAGS += -DLEX_DEBUG
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
@@ -51,6 +51,9 @@ grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
 
 y.output:	grap.y
 	$(YACC) -v $(.ALLSRC)
+
+grap.an:	grap.doc
+	groff -Tascii -mdoc grap.doc | rman -f roff > grap.an
 
 grap.1:	grap.doc
 	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1

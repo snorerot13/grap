@@ -1429,3 +1429,183 @@ square at 2,4
 delta at 2,5
 .G2
 .KE
+.KS
+.PP
+We saw this graph earlier using line drawing commands.  This version
+uses the 
+.CW bar
+extension.  Bars are centered, so the 0.5 unit fudge factor is used.
+If I were graphing this from scratch, I would rewrite the 
+.I awk
+script to place the bars correctly.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&frame invis bot solid
+\&label bot "Populations (in Millions) of the 50 States"
+\&label left "Number of States"
+\&ticks bot out from 0 to 35 by 5
+\&coord x 0, 35 y 0, 13
+\&copy "states2.d" thru {
+\&	bar up $1+0.5 ht $2 fill 0.125
+\&}
+\&.G2
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+frame invis bot solid
+label bot "Populations (in Millions) of the 50 States"
+label left "Number of States"
+ticks bot out from 0 to 35 by 5
+coord x 0, 35 y 0, 13
+copy "states2.d" thru {
+	bar up $1+0.5 ht $2 fill 0.125
+}
+.G2
+.KE
+.KS
+.PP
+The same graph with bars extending in the x direction.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&frame invis bot solid
+\&label left "Populations (in Millions) of the 50 States"
+\&label bot "Number of States"
+\&ticks left out from 0 to 35 by 5
+\&coord x 0, 13  y -0, 35 
+\&copy "states2.d" thru {
+\&	bar right $1+0.5 ht $2 fill 0.125
+\&}
+\&.G2
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+frame invis bot solid
+label left "Populations (in Millions) of the 50 States"
+label bot "Number of States"
+ticks left out from 0 to 35 by 5
+coord x 0, 13  y 0, 35 
+copy "states2.d" thru {
+	bar right $1+0.5 ht $2 fill 0.125
+}
+.G2
+.KE
+.KS
+.PP
+Demonstration of negative bar heights.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&frame invis bot solid
+\&copy until "DONE" thru {
+\&	bar up $1 ht $2
+\&}
+\&1 -2
+\&2 -1
+\&3 0
+\&4 1
+\&5 2
+\&DONE
+\&.G2
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+frame invis bot solid
+copy until "DONE" thru {
+	bar up $1 ht $2
+}
+1 -2
+2 -1
+3 0
+4 1
+5 2
+DONE
+.G2
+.KE
+.KS
+.PP
+A display of two timing measurements and the componenets thereof.  The
+data is fabricated, I just wanted to show the format, including both
+formats of 
+.CW bar
+statement.
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&frame invis bot solid left solid
+\&ticks bottom off
+\&grid bottom invis at 1 "OS 1", 2 "OS2"
+\&coord y 0, 10
+\&copy until "DONE" thru {
+\&	bar up $1 ht $2 wid 0.5 base $3 fill $4
+\&}
+\&1 3 0 0.25
+\&1 1 3 0.5
+\&1 4 4 0.9
+\&2 1 0 0.25
+\&2 4 1 0.5
+\&2 2 5 0.9
+\&DONE
+\&copy until "DONE" thru {
+\&	bar 1.5,$1, 1.75, $1+0.2 fill $2
+\&	$3 size -2 ljust at 1.8,$1+0.1
+\&}
+\&10 0.25 "Copying"
+\&9.5 0.5 "Initialization"
+\&9  0.9 "Checksum"
+\&DONE
+\&bar 1.45,10.35, 2.25, 8.85 dashed
+\&.G2
+.ft
+.DE
+.EQ
+delim $$
+.EN
+.G1
+frame invis bot solid left solid
+ticks bottom off
+grid bottom invis at 1 "OS 1", 2 "OS2"
+coord y 0, 10
+copy until "DONE" thru {
+	bar up $1 ht $2 wid 0.5 base $3 fill $4
+}
+1 3 0 0.25
+1 1 3 0.5
+1 4 4 0.9
+2 1 0 0.25
+2 4 1 0.5
+2 2 5 0.9
+DONE
+copy until "DONE" thru {
+	bar 1.5,$1, 1.75, $1+0.2 fill $2
+	$3 size -2 ljust at 1.8,$1+0.1
+}
+10 0.25 "Copying"
+9.5 0.5 "Initialization"
+9  0.9 "Checksum"
+DONE
+bar 1.45,10.35, 2.25, 8.85 dashed
+.G2
+.KE

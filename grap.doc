@@ -769,6 +769,59 @@ is illegal.
 Assignment creates a variable if it does not exist.  Variables presist
 across graphs.
 .Ed
+.Pp
+.Ic bar 
+.Sm off
+.No ( Cm up No \(or Cm right )
+.Sm on
+.Op Ar coordinates_name
+.Ar offset
+.Cm ht
+.Ar height
+.Op Cm wid Ar width
+.Op Cm base Ar base_offset
+.Op Ar line_description
+.Pp
+.Ic bar
+.Op Ar coordinates_name
+.Ar expr , expr ,
+.Op Ar coordinates_name
+.Ar expr , expr ,
+.Op Ar line_description
+.Bd -filled -offset indent
+The 
+.Ic bar
+command facilitates drawing bar graphs.  The first form of the
+command describes the bar somewhat generally and has 
+.Nm
+place it.
+The bar may extend up or to the right, is centered on 
+.Ar offset
+and extends up or right 
+.Ar height 
+units (in the given coordinate system).  For example
+.Bd -literal -offset indent-two
+bar up 3 ht 2
+.Ed
+.Pp
+draws a 2 unit high bar sitting on the x axis, centered on x=3.  By
+default bars are 1 unit wide, but this can be changed with the 
+.Ic wid
+keyword.  By default bars sit on the base axis, i.e., bars directed up
+will extend from y=0.  That may be overriden by the 
+.Ic base
+keyword.  (The bar described above has corners (2.5, 0) and (3.5, 2).)
+.Pp
+The line description has been extended to include a 
+.Ic fill Ar expr
+keyword that specifies the shading inside the bar.  Bars may be drawn
+in any line style.
+.Pp
+The second form of the command draws a box with the two points as
+corners.  This can be used to draw boxes highlighting certain data as
+well as bar graphs.  Note that filled bars will cover data drawn under
+them.
+.Ed
 .Ss Control Flow
 .Pp
 .Ic if Ar expr Ic then Ar block

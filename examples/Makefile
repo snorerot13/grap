@@ -1,8 +1,5 @@
 COLOR=-mcolor
-MACROS=-ms $(COLOR)
-
-box.ex.ps:	box.ex.ms
-	../grap -d ../grap.defines box.ex.ms | groff -pe $(MACROS) > box.ex.ps
+MACROS=-ms 
 
 example.ps:	example.ms
 	grap example.ms | groff -pe $(MACROS) > example.ps

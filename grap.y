@@ -1054,13 +1054,11 @@ line_statement:
 	    {
 		line *l;
 		lineDictionary::iterator li;
-		linedescval des;
+		linedescclass des;
 
 		li = the_graph->lines.find("grap.internal");
 		if ( li == the_graph->lines.end() ) {
 		    des.ld = solid;
-		    des.param = 0;
-		    des.color = 0;
 		    l = new line(&des);
 		    the_graph->lines["grap.internal"] = l;
 		}

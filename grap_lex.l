@@ -302,10 +302,12 @@ atan2|min|max		{
 					    BEGIN(GRAP);
 					    if ( !return_macro) {
 						yylval.string = macrotext;
+						DEBUG("TEXT\n",0);
 						return TEXT;
 					    } else {
 						macro *m = new macro(macrotext);
 						yylval.macro_val = m;
+						DEBUG("MACRO\n",0);
 						return MACRO;
 					    }
 					}
@@ -446,7 +448,7 @@ bool include_file(String *s, int rs=0) {
     return 1;
 }
 	
-void lex_begin_macro_text() { 
+void lex_begin_macro_text() {
 	BEGIN(MACROTEXT);
 	lex_expand_macro = 1;
 	slashcount = 0;

@@ -35,8 +35,8 @@ Because \fBgrap\fR is a pic preprocessor, and gnu pic will output TeX, it is
 possible to use \fBgrap\fR with TeX.
 .LP
 The \fB\-d\fR option specifies a file of macro definitions to be read at startup,
-and defaults to /usr/share/grap/grap.defines. The \fB\-D\fR option inhibits
-the reading of any initial macros file.
+and defaults to DEFINES. The \fB\-D\fR option inhibits the reading of any
+initial macros file.
 .LP
 All \fBgrap\fR commands are included between \fB.G1\fR and \fB.G2\fR macros, which are consumed
 by . The output contains pic between \fB.PS\fR and \fB.PE\fR macros. Any arguments
@@ -271,7 +271,8 @@ clause is present. If so the current file is treated as the input
 file until \fIstring\fR is encountered at the beginning of the line.
 .LP
 \fBcopy\fR is one of the workhorses of \fBgrap\fR. Check out the paper and
-\fI/usr/share/grap/examples\fR for more details.
+\fIEXAMPLES\fR for more details.
+.br
 \fBprint\fR (\fIexpr|string\fR)
 .LP
 Prints its argument to the standard error.
@@ -321,6 +322,35 @@ is illegal.
 .LP
 Assignment creates a variable if it does not exist. Variables presist
 across graphs.
+.LP
+\fBbar\fR (\fBup\fR|\fBright\fR) [\fIcoordinates\fR\fB_\fR\fIname\fR] \fIoffset\fR \fBht\fR \fIheight\fR [\fBwid\fR \fIwidth\fR] [\fBbase\fR
+\fIbase\fR\fB_\fR\fIoffset\fR] [\fIline\fR\fB_\fR\fIdescription\fR]
+.LP
+\fBbar\fR [\fIcoordinates\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR, [\fIcoordinates\fR\fB_\fR\fIname\fR] \fIexpr\fR, \fIexpr\fR,
+[\fIline\fR\fB_\fR\fIdescription\fR]
+.LP
+The \fBbar\fR command facilitates drawing bar graphs. The first form of
+the command describes the bar somewhat generally and has \fBgrap\fR place
+it. The bar may extend up or to the right, is centered on \fIoffset\fR
+and extends up or right \fIheight\fR units (in the given coordinate system).
+For example
+.LP
+bar up 3 ht 2
+.LP
+draws a 2 unit high bar sitting on the x axis, centered on x=3. By
+default bars are 1 unit wide, but this can be changed with the \fBwid\fR
+keyword. By default bars sit on the base axis, i.e., bars directed
+up will extend from y=0. That may be overriden by the \fBbase\fR keyword.
+(The bar described above has corners (2.5, 0) and (3.5, 2).)
+.LP
+The line description has been extended to include a \fBfill\fR \fIexpr\fR keyword
+that specifies the shading inside the bar. Bars may be drawn
+in any line style.
+.LP
+The second form of the command draws a box with the two points as
+corners. This can be used to draw boxes highlighting certain data
+as well as bar graphs. Note that filled bars will cover data drawn
+under them.
 .LP
 \fBControl\fR \fBFlow\fR
 .LP
@@ -389,11 +419,10 @@ The following will draw a line with slope 1.
 .LP
 define foo { next at $1, $2 }
 for i from 1 to 5 { foo(i,i) }
-Macros persist across graphs. The file
-\fI/usr/share/grap/grap.defines\fR contains simple macros for plotting
-common characters.
+Macros persist across graphs. The file \fIDEFINES\fR contains simple
+macros for plotting common characters.
 .LP
-See the file \fI/usr/share/grap/examples\fR for more examples of macros.
+See the file \fIEXAMPLES\fR for more examples of macros.
 .LP
 \fBNumber\fR \fBLists\fR
 .LP
@@ -407,13 +436,13 @@ numbers are taken to be additional y values to plot at the first x value.
 4 5 6
 .LP
 Will plot points using the default line style at (1,2), (1,3),(4,5) and
-(4,6). A simple way to plot a set on numbers in a file named \fI./data\fR is:
+(4,6). A simple way to plot a set of numbers in a file named \fI./data\fR is:
 .LP
 copy \*(rq./data"
 .SH \fBFiles\fR
 
 .LP
-\fI/usr/share/grap/grap.defines\fR
+\fIDEFINES\fR
 .SH \fBSee\fR \fBAlso\fR
 
 .LP
@@ -426,7 +455,7 @@ designed and specified by Brian Kernighan and Jon Bentley.
 .SH \fBBugs\fR
 
 .LP
-There are several small incompatibilities with K&B \fBgrap\fR. They include assignments
+There are several small incompatibilities with K&R \fBgrap\fR. They include assignments
 not being treated as expressions, the \fBsh\fR command not expanding
 variables and macros, and a more strict adherence to parameter order in
 the internal commands.
