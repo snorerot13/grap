@@ -132,6 +132,27 @@ Commands are separated from one another by newlines or semicolons (;).
 .Oc
 \&...
 .Oc
+.sp
+.Ic frame 
+.Oo
+.Bk -word
+.Cm ht Ar height No \(or Cm wid Ar width
+.Ek
+.Oc
+.Op Ar line_description 
+.Oo
+.Bk -word
+.Oo
+.Sm off
+.Cm ( top No \(or Cm bottom No \(or 
+.Cm left No \(or 
+.Sm on
+.Cm right )
+.Ar line_description 
+.Ek
+.Oc
+\&...
+.Oc
 .Bd -filled -offset indent
 This describes how the axes for the graph are drawn. A
 .Ar line_description 

@@ -56,6 +56,8 @@ int yyerror(char*);
 int yylex();
 void init_dict(); 
 
+void process_frame(linedesc *, frame *, frame *);
+
 // defined in grap_lex.l
 extern bool include_file(String *, int i=0);
 extern void lex_begin_macro_text();
@@ -738,7 +740,16 @@ next_statement:
 ;
 
 size:
-	    { $$ = 0;}
+	HT expr
+            {
+		$$ = new frame;
+		$$->ht = $2;
+	    }
+|	WID expr
+            {
+		$$ = new frame;
+		$$->wid = $2;
+	    }
 |	size HT expr
 	    {
 		if ( !$1 ) 
@@ -769,8 +780,10 @@ side:
 	    { $$ = right; }
 ;
 sides:
-	    {
-		$$ = 0;
+	side linedesc {
+		$$ = new frame;
+		$$->desc[$1] = *$2;
+		delete $2;
 	    }
 |	sides side linedesc
 	    {
@@ -783,32 +796,26 @@ sides:
 ;
 
 frame_statement:
-	FRAME opt_linedesc size sides SEP
-	    {
-		int i;
-
-		if ( $2->ld != def ) {
-		    for ( i = 0 ; i < 4; i++ ) {
-			the_graph->base->desc[i] = *$2;
-		    }
-		}
-		delete $2;
-		
-		if ( $3 ) {
-		    the_graph->base->ht = $3->ht;
-		    the_graph->base->wid = $3->wid;
-		    delete $3;
-		}
-		
-		if ( $4 ) {
-		    for ( i = 0 ; i < 4; i++ ) {
-			if ( $4->desc[i].ld != def )
-			    the_graph->base->desc[i] =
-				(linedesc) $4->desc[i];
-		    }
-		    delete $4;
-		}
-	    }
+	FRAME SEP
+	    { process_frame(0, 0, 0); }
+|	FRAME linedesc SEP
+	    { process_frame($2, 0, 0); }
+|	FRAME size SEP
+	    { process_frame(0, $2, 0); }
+|	FRAME sides SEP
+	    { process_frame(0, 0, $2); }
+|	FRAME size sides SEP
+	    { process_frame(0, $2, $3); }
+|	FRAME linedesc sides SEP
+	    { process_frame($2, 0, $3); }
+|	FRAME linedesc size SEP
+	    { process_frame($2, $3, 0); }
+|	FRAME size linedesc SEP
+	    { process_frame($3, $2, 0); }
+|	FRAME linedesc size sides SEP
+	    { process_frame($2, $3, $4); }
+|	FRAME size linedesc sides SEP
+	    { process_frame($3, $2, $4); }
 ;
 
 shift:
@@ -1513,6 +1520,40 @@ int yyerror(char *s) {
     return 0;
 }
 
+void process_frame(linedesc* d, frame *f, frame *s) {
+    // it's inconvenient to write three forms of the frame statement
+    // as one yacc rule, so I wrote the three rules explicitly and
+    // extracted the action here.  The three arugments are the default
+    // frame linedesc (d), the size of the frame (f), and individual
+    // descriptions of the linedescs (s) of the sides.
+    
+    int i;	// Scratch
+
+    if ( d ) {
+	// a default linedesc is possible, but unlikely (only a fill,
+	// for example).
+	if ( d->ld != def ) {
+	    for ( i = 0 ; i < 4; i++ ) {
+		the_graph->base->desc[i] = *d;
+	    }
+	}
+	delete d;
+    }
+
+    if ( f ) {
+	the_graph->base->ht = f->ht;
+	the_graph->base->wid = f->wid;
+	delete f;
+    }
+		
+    if ( s ) {
+	for ( i = 0 ; i < 4; i++ ) {
+	    if ( s->desc[i].ld != def )
+		the_graph->base->desc[i] = (linedesc) s->desc[i];
+	}
+	delete s;
+    }
+}
 void init_dict() {
     linedesc defld(invis,0,0);
     String s = "\"\\(bu\"";

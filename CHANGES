@@ -23,6 +23,10 @@ and when the intent was to access an argument with an index greater
 than 9.  Argument expansion now only expands when a $ is followed by 1
 or more digits, and includes all the digits in the index.
 
+The frame statement will now accept the default line style before or
+after the frame size.  I still don't accept things like frame ht 3
+solid wid 3 - the specifications of the size must be contiguous.
+
 0.92a: bug fix - string equality check.  Small change to Makefile.in
 to support default Solaris behavior.  Added -v for version info.  Some
 general internals fiddling (I'd like to call it cleanup, but I think

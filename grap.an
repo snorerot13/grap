@@ -63,6 +63,9 @@ Commands are separated from one another by newlines or semicolons (;).
 \fBframe\fR [\fIline\fR\fB_\fR\fIdescription\fR] [\fBht\fR \fIheight\fR | \fBwid\fR \fIwidth\fR] [[
 (\fBtop\fR|\fBbottom\fR|\fBleft\fR|\fBright\fR) \fIline\fR\fB_\fR\fIdescription\fR] ...]
 .LP
+\fBframe\fR [\fBht\fR \fIheight\fR | \fBwid\fR \fIwidth\fR] [\fIline\fR\fB_\fR\fIdescription\fR] [[
+(\fBtop\fR|\fBbottom\fR|\fBleft\fR|\fBright\fR) \fIline\fR\fB_\fR\fIdescription\fR] ...]
+.LP
 This describes how the axes for the graph are drawn. A
 \fIline\fR\fB_\fR\fIdescription\fR is a pic line description, e.g., dashed 0.5, or
 the literal solid. If the first \fIline\fR\fB_\fR\fIdescription\fR is given, the
@@ -435,10 +438,12 @@ not span multiple lines, it should end in a semicolon to avoid
 parsing errors.
 .LP
 Macros can take parameters, too. If a macro call is followed by a
-parenthesized, comma\-separated list the values $1\-$9 will be replaced
-in the macro with the elements of the list. This parsing is
-very rudimentary, no nesting or parentheses or escaping of commas
-is allowed.
+parenthesized, comma\-separated list the values starting with $1
+will be replaced in the macro with the elements of the list. A $
+not followed by a digit is left unchanged. This parsing is very
+rudimentary, no nesting or parentheses or escaping of commas is allowed.
+Also, there is no way to say argument 1 followed by a digit
+(${1}0 in sh(1)).
 .LP
 The following will draw a line with slope 1.
 .LP
