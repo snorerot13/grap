@@ -1,9 +1,11 @@
 Change log
 
+1.11: Strings are now clipped, thanks to John Heidemann for finding the error.
+
 1.10: Cleaned up the automatic tick generation and fixed a bug in
 there, too.  
 
-Allow reassignmnet of coordinate system parameters, e.g.,
+Allow reassignment of coordinate system parameters, e.g.,
 .G1
 coord test
 copy "examples/cy_fatal.d"
@@ -53,6 +55,8 @@ Revised and (finally) spell-checked the man page.  I also stopped
 including the auto-generated manual page in an macros.  A text version
 of the man page is now installed, but the manual uses the doc macors
 exclusively.
+
+Line clipping was added in here, too.
 
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.

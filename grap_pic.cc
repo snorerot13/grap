@@ -847,10 +847,15 @@ void Picplot::draw(frame *f) {
 
     if ( !strs || !loc ) return;
 
-    for_each(strs->begin(), strs->end(), draw_string);
-
     x = f->wid * loc->c->map(loc->x,x_axis);
     y = f->ht * loc->c->map(loc->y,y_axis);
+
+    // Clip strings to lie in the graph
+    
+    if ( x < -EPSILON || x > f->wid + EPSILON ) return;
+    if ( y < -EPSILON || y > f->ht + EPSILON ) return;
+
+    for_each(strs->begin(), strs->end(), draw_string);
 
     cout << "at Frame.Origin + (" << x << ", " << y << ")" << endl;
 }

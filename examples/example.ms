@@ -2305,7 +2305,7 @@ without constants in the grap code.
 .DS
 .CW
 \&.G1
-\&define square {"\s-2\(sq\s0"}
+\&define square {"\\s-2\\(sq\\s0"}
 \&frame ht 3 wid 3.5
 \&label left "Population in Millions (Plotted as \(bu)"
 \&label bot "Rank in Population"
