@@ -1208,6 +1208,8 @@ with the name of the coordinate space.  A coordinate space named
 .Ic gg
 cannot be reliably accessed by these macros.
 .Pp
+The macros are emitted immediately before the frame is drawn.
+.Pp
 DWB
 .Nm
 may use these as part of its implemenation.  This
