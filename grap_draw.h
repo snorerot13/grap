@@ -173,12 +173,12 @@ public:
     double ht;
     double wid;
     linedescclass desc[4];
-    Sequence<DisplayString*> *label[4];
+    stringlist *label[4];
     shiftclass lshift[4];
     tick tickdef[4];
     grid griddef[4];
-    Sequence<tick *> tks;
-    Sequence<grid *> gds;
+    ticklist tks;
+    gridlist gds;
 
     frame() { clear() ; }
 
@@ -187,8 +187,8 @@ public:
 	linedescval defline = { def, 0, 0};
 	shiftdesc defshift = { top, 0 };
 	
-	tks.clear();
-	gds.clear();
+	tks.erase(tks.begin(), tks.end());
+	gds.erase(gds.begin(), gds.end());
 	ht = 2; wid = 3;
 	for ( int i =0; i < 4 ; i ++ ) {
 	    desc[i] = &defline;
@@ -237,7 +237,7 @@ public:
     
     String *plotstr;
     linedescclass desc;
-    Sequence<linepoint*> pts;
+    list<linepoint*> pts;
     int initial;
     void draw(frame *);
     void addpoint(double x, double y, coord* c, String *s=0,
@@ -245,14 +245,14 @@ public:
 	linepoint *lp;
 
 	lp = new linepoint(x,y,c,this,s,l);
-	pts.insert(lp);
+	pts.push_back(lp);
     }
     void addarrow(double x, double y, coord* c, String *s=0,
 		  linedescval *l=0) {
 	linepoint *lp;
 
 	lp = new linepoint(x,y,c,this,s,l,1);
-	pts.insert(lp);
+	pts.push_back(lp);
     }
 
 };
@@ -260,9 +260,9 @@ public:
 // Sequence is defined in grap_data.h
 class plot {
 public:
-    Sequence<DisplayString *> *strs;
+    stringlist *strs;
     point* loc;
-    plot(Sequence<DisplayString *> *s = 0, point *p =0) : strs(s), loc(p) { }
+    plot(stringlist *s = 0, point *p =0) : strs(s), loc(p) { }
     void draw(frame *);
 };
 

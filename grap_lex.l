@@ -184,7 +184,8 @@ atan2|min|max		{
                                 DEBUG("Troff: %s\n",yytext);
 				if ( !strncmp(".G1", yytext, 3) ) {
 				    if ( lexstack.empty() ||
-					 lexstack.top()->report_start == 1 ) {
+					 lexstack.front()->report_start == 1 )
+				    {
 					DEBUG("Start: %s\n",yytext); 
 					return START;
 				    }
@@ -192,7 +193,7 @@ atan2|min|max		{
 				}
 				if ( !strncmp(".G2", yytext, 3) ) {
 				    if ( lexstack.empty() ||
-					 lexstack.top()->report_start == 1) {
+					 lexstack.front()->report_start == 1) {
 
 					yyinput(); // Gobble up the newline
 					DEBUG("End: %s\n",yytext);
@@ -320,7 +321,7 @@ atan2|min|max		{
     
     if ( *copy_end != yytext && *copy_backstop != yytext ) {
 	s = new String(yytext);
-	sl->insert(s);
+	sl->push_back(s);
     }
     else {
 
@@ -416,7 +417,7 @@ bool include_file(String *s, int rs=0) {
     g->line = 1;
     g->type = GFILE;
     g->report_start=rs;
-    lexstack.push(g);
+    lexstack.push_front(g);
     yy_switch_to_buffer(g->yy);
     return 1;
 }
@@ -450,7 +451,7 @@ int include_string(String *s, struct for_descriptor *f=0,
 	g->line = 1;
 	g->type = it;
 	g->report_start = 1;
-	lexstack.push(g);
+	lexstack.push_front(g);
 	delete cbuf;
 	return 1;
 }
@@ -506,7 +507,10 @@ int yywrap() {
     struct grap_buffer_state *g;
 
     if ( lexstack.empty() ) yyterminate();
-    else g = lexstack.pop();
+    else {
+	g = lexstack.front();
+	lexstack.pop_front();
+    }
     
     if ( g->f ) {
 
@@ -553,7 +557,7 @@ int yywrap() {
 
     if ( lexstack.empty() ) return 1;
     else {
-	g = lexstack.top();
+	g = lexstack.front();
 	yy_switch_to_buffer(g->yy);
     }
     
@@ -565,7 +569,7 @@ int yywrap() {
 
 void newline() {
     if ( !lexstack.empty() ) {
-	grap_buffer_state *g = lexstack.top();
+	grap_buffer_state *g = lexstack.front();
 	g->line++;
 
     }

@@ -212,11 +212,18 @@ string:
 |       SPRINTF LPAREN STRING COMMA expr_list RPAREN
              {
 		 double d;
-		 int gotnext;
 		 grap_sprintf_String *s = new grap_sprintf_String($3);
+		 class num_to_str_f : public UnaryFunction<double,int> {
+		     grap_sprintf_String *s;
+		 public:
+		     num_to_str_f(grap_sprintf_String *ss) : s(ss) {};
+		     int operator()(double d) { s->next_number(d);}
+		 } num_to_str(s);
+		     
 
-		 for ( gotnext = $5->first(d); gotnext; gotnext= $5->next(d)) 
-		     s->next_number(d);
+		 for_each($5->begin(), $5->end(), num_to_str);
+// 		 for ( gotnext = $5->first(d); gotnext; gotnext= $5->next(d)) 
+// 		     s->next_number(d);
 		 s->finish_fmt();
 		 delete $5;
 		 delete $3;
@@ -229,12 +236,12 @@ expr_list:
 	expr
             {
 		$$ = new doublelist;
-		$$->insert($1);
+		$$->push_back($1);
 	    }
 |       expr_list COMMA expr
             {
 		$$ = $1;
-		$$->insert($3);
+		$$->push_back($3);
 	    }
 ;
 
@@ -322,18 +329,24 @@ num_list:
 	num_line SEP
 	    {
 		double x, y;
-		int gn;
 
-		gn = $1->first(x);
-		if ( !gn ) exit(20);
-		if ( !$1->next(y) ) {
+		if ( $1->empty() )
+		    exit(20);
+		else {
+		    x = $1->front();
+		    $1->pop_front();
+		}
+		
+		if ( $1->empty() ) {
 		    defline->addpoint(nlines,x,defcoord);
 		    defcoord->newpt(nlines,x);
-		} else {
-		    while ( gn ) {
+		}
+		else {
+		    while ( !$1->empty() ) {
+			y = $1->front();
+			$1->pop_front();
 			defline->addpoint(x,y,defcoord);
 			defcoord->newpt(x,y);
-			gn = $1->next(y);
 		    }
 		}
 		delete $1;
@@ -345,12 +358,12 @@ num_line:
 	NUMBER
 	    {
 		$$ = new doublelist;
-		$$->insert($1);
+		$$->push_back($1);
 	    }
 |	num_line NUMBER
 	    {
 		$$ = $1;
-		$$->insert($2);
+		$$->push_back($2);
 	    }
 ;
 
@@ -515,34 +528,41 @@ strlist:
 		s = new DisplayString($1,$2.just,$2.size, $2.rel);
 		delete $1;
 		$$ = new stringlist;
-		$$->insert(s);
+		$$->push_back(s);
 	    }
 |	strlist string strmod
 	    {
+		// This collects the modifiers for other strings in
+		// the list to construct the modifiers for this string
+		class modaccumulator :
+                      public UnaryFunction <DisplayString *, int > {
+		public:
+			  int just;
+			  double size;
+			  int rel;
+			  modaccumulator() : just(0), size(0), rel(0) {};
+			  int operator()(DisplayString* s) {
+			      just = s->j;
+			      size = s->size;
+			      rel = s->relsz;
+			  }
+		} last;
 		DisplayString *s;
-		int just;
-		double size;
-		int rel;
-		int gn;
-
-		for ( gn = $1->first(s); gn; gn = $1->next(s) ) {
-		    just = s->j;
-		    size = s->size;
-		    rel = s->relsz;
-		}
+			
+		last = for_each($1->begin(), $1->end(), modaccumulator());
 		
 		if ( $3.just != 0 )
-		    just = $3.just;
+		    last.just = $3.just;
 		
 		if ( $3.size != 0 ) {
-		    size = $3.size;
-		    rel = $3.rel;
+		    last.size = $3.size;
+		    last.rel = $3.rel;
 		}
 
-		s = new DisplayString($2,just,size,rel);
+		s = new DisplayString($2,last.just,last.size,last.rel);
 		delete $2;
 		$$ = $1;
-		$$->insert(s);
+		$$->push_back(s);
 	    }
 ;
 
@@ -550,7 +570,7 @@ plot_statement:
 	strlist AT point SEP
 	    {
 		plot *p = new plot($1,$3);
-		plots.insert(p);
+		plots.push_back(p);
 	    }
 |	PLOT expr opt_string AT point SEP
 	    {
@@ -566,10 +586,10 @@ plot_statement:
 		else s = new DisplayString($2);
 
 		s->quote();
-		seq->insert(s);
+		seq->push_back(s);
 
 		p = new plot(seq,$5);
-		plots.insert(p);
+		plots.push_back(p);
 		    
 	    }
 ;
@@ -707,7 +727,7 @@ ticklist:
 		delete $2;
 		
 		$$ = new ticklist;
-		$$->insert(t);
+		$$->push_back(t);
 	    }
 |	ticklist COMMA expr opt_string
 	    {
@@ -724,7 +744,7 @@ ticklist:
 		delete $4;
 		
 		$$ = $1;
-		$$->insert(t);
+		$$->push_back(t);
 		
 	    }
 ;
@@ -750,14 +770,17 @@ by_clause:
 tickat:
 	AT opt_coordname ticklist
 	    {
-		tick *t;
-		int gn;
+                // To assign the coordate system to all the ticks in
+                // the queue
+		class coord_to_tick : public UnaryFunction<coord *,int> {
+		public:
+		    coord *c;
+		    coord_to_tick(coord *cc) : c(cc) {};
+		    int operator() (tick *t) { t->c = c; }
+		};
 
 		$$ = $3;
-		
-		for ( gn  = $3->first(t); gn ; gn = $3->next(t)) {
-		    t->c = $2;
-		}
+		for_each($3->begin(), $3->end(), coord_to_tick($2));
 	    }
 ;
 
@@ -788,7 +811,7 @@ tickfor:
 
 		    s = new String(idx,fmt);
 		    t->prt = s;
-		    $$->insert(t);
+		    $$->push_back(t);
 
 		    switch ($6.op ) {
 			case PLUS:
@@ -822,23 +845,35 @@ ticks_statement:
 	    {
 		tick *t;
 		int gn;
+		class add_tick_f : public UnaryFunction<tick*, int> {
+		    sides side;
+		    double size;
+		    shiftdesc shift;
+		public:
+		    add_tick_f(sides sd, double sz, shiftdesc sc) :
+			side(sd), size(sz), shift(sc) {};
+		    int operator()(tick *t) {
+			t->side = $2;
+			t->size = $3;
+			t->shift = $4;
+			the_frame.tks.push_back(t);
+			if ( t->side == top || t->side == bottom )
+			    t->c->newx(t->where);
+			else 
+			    t->c->newy(t->where);
+		    }
+		} add_tick($2,$3,$4);
 
 		the_frame.tickdef[$2].side = $2;
-		the_frame.tickdef[$2].size = $3;
 		the_frame.tickdef[$2].shift = $4;
 
-		for ( gn = $5 && $5->first(t); gn ; gn = $5->next(t)) {
-		    the_frame.tickdef[$2].size = 0;
-		    t->side = $2;
-		    t->size = $3;
-		    t->shift = $4;
-		    the_frame.tks.insert(t);
-		    if ( t->side == top || t->side == bottom )
-			t->c->newx(t->where);
-		    else 
-			t->c->newy(t->where);
+		if ( $5 && $5->empty() ) the_frame.tickdef[$2].size = $3;
+		else the_frame.tickdef[$2].size = 0;
+
+		if ( $5 ) {
+		    for_each($5->begin(), $5->end(), add_tick);
+		    delete $5;
 		}
-		if ( $5 ) delete $5;
 	    }
 | 	TICKS OFF SEP
 	    {
@@ -885,32 +920,38 @@ grid_statement:
 			delete the_frame.griddef[$2].prt;
 		    the_frame.griddef[$2].prt = 0;
 		}
-		for ( gn = $6 && $6->first(t); gn ; gn = $6->next(t)) {
+		if ( $6 ) {
 		    the_frame.griddef[$2].desc.ld = def;
-		    g = new grid(t);
-		    g->side = $2;
-		    if ( $4.ld != def )
-			g->desc = $4;
-		    else {
-			defgrid.color = $4.color;
-			g->desc = defgrid;
-			defgrid.color = 0;
-		    }
+		    while (!$6->empty() ) {
+			t = $6->front();
+			$6->pop_front();
+			
+			g = new grid(t);
+			g->side = $2;
+			if ( $4.ld != def )
+			    g->desc = $4;
+			else {
+			    defgrid.color = $4.color;
+			    g->desc = defgrid;
+			    defgrid.color = 0;
+			}
 		    
-		    g->shift = $5;
+			g->shift = $5;
 
-		    if ( $3 ) {
-			if ( g->prt ) delete g->prt;
-			g->prt = 0;
+			if ( $3 ) {
+			    if ( g->prt ) delete g->prt;
+			    g->prt = 0;
+			}
+			the_frame.gds.push_back(g);
+			if ( g->side == top || g->side == bottom )
+			    g->c->newx(g->where);
+			else 
+			    g->c->newy(g->where);
+			delete t;
 		    }
-		    the_frame.gds.insert(g);
-		    if ( g->side == top || g->side == bottom )
-			g->c->newx(g->where);
-		    else 
-			g->c->newy(g->where);
-		    delete t;
+		    delete $6;
 		}
-		if ( $6) delete $6;
+		
 	    }
 ;
 
@@ -919,9 +960,15 @@ label_statement:
 	    {
 		int gn;
 		DisplayString *ds;
-
-		for ( gn = $3->first(ds); gn ; gn = $3->next(ds) )
-		    if ( ! (ds->j & unaligned) ) ds->j |= aligned;
+		class align_string :
+                      public UnaryFunction<DisplayString *,int> {
+		public:
+			  int operator() (DisplayString *ds) {
+			      if ( ! (ds->j & unaligned) ) ds->j |= aligned;
+			  }
+		} a;
+			      
+		for_each($3->begin(),  $3->end(), a);
 		
 		the_frame.label[$2] = $3;
 		if ( $4.param != 0 ) {
@@ -943,7 +990,7 @@ circle_statement:
 	CIRCLE AT point radius_spec SEP
 	    {
 		circle *c = new circle($3,$4);
-		circles.insert(c);
+		circles.push_back(c);
 	    }
 ;
 
@@ -1089,10 +1136,13 @@ copy_statement:
 		int gn;
 
 		expand = new String;
-		
-		for ( gn = $9->first(s); gn ; gn = $9->next(s) ) {
+
+		while ( $9 && !$9->empty() ) {
 		    int i = 0;
 		    t = new String;
+		    
+		    s = $9->front();
+		    $9->pop_front();
 		    
 		    while ( (*s)[i] != '\0' ) {
 			if ( (*s)[i] == ' ' || (*s)[i] == '\t' ) {
@@ -1219,11 +1269,11 @@ print_statement:
 
 pic_statement:
 	PIC { lex_begin_rest_of_line(); } REST SEP
-	    { pic.insert($3); }
+	    { pic.push_back($3); }
 ;
 troff_line:
 	TROFF SEP
-	    { troff.insert($1); }
+	    { troff.push_back($1); }
 ;
 %%
 
@@ -1231,20 +1281,21 @@ int yyerror(char *s) {
     grap_buffer_state *g = 0;
 
     while ( !lexstack.empty() ) {
-	    g = lexstack.pop();
-	    switch ( g->type) {
-		case GFILE:
-		    cerr << "At line " << g->line << " " ;
-		    if ( g->name ) cerr << "in file " << *g->name << endl;
-		    break;
-		case GMACRO:
-		    cerr << "At line " << g->line << " " ;
-		    cerr << "of macro"  << endl;
-		    break;
-	    }
-	    if ( g->f ) delete g->f;
-	    if ( g->name ) delete g->name;
-	    delete g;
+	g = lexstack.front();
+	lexstack.pop_front();
+	switch ( g->type) {
+	    case GFILE:
+		cerr << "At line " << g->line << " " ;
+		if ( g->name ) cerr << "in file " << *g->name << endl;
+		break;
+	    case GMACRO:
+		cerr << "At line " << g->line << " " ;
+		cerr << "of macro"  << endl;
+		break;
+	}
+	if ( g->f ) delete g->f;
+	if ( g->name ) delete g->name;
+	delete g;
     }
     cerr << s << endl;
     cerr << "Bailing out" << endl;
@@ -1263,6 +1314,28 @@ void draw_graph() {
     circle *cir;
     String *s;
 
+    class string_out_f : public UnaryFunction<String*, int> {
+	ostream &f;
+    public:
+	int operator()(String *s) { f << *s << endl; }
+	string_out_f(ostream& ff) : f(ff) {};
+    } string_out(cout);
+
+    class plot_out_f : public UnaryFunction<plot *,int> {
+	frame *f;
+    public:
+	plot_out_f(frame *ff) : f(ff) {};
+	int operator() (plot *p) { p->draw(f); }
+    } plot_out(&the_frame);
+	
+    class circle_out_f : public UnaryFunction<circle *,int> {
+	frame *f;
+    public:
+	circle_out_f(frame *ff) : f(ff) {};
+	int operator() (circle *c) { c->draw(f); }
+    } circle_out(&the_frame);
+	
+
     for ( gn = coordinates.first(c); gn; gn = coordinates.next(c)) 
 	c->addmargin(0.07);
     if ( !coordinates.find("grap.internal.default",c) ) {
@@ -1275,22 +1348,26 @@ void draw_graph() {
 	    if (ps_param ) cout << *ps_param;
 	    cout << endl;
 	}
-	for ( gn = troff.first(s); gn; gn = troff.next(s)) 
-	    cout << *s << endl;
+	for_each(troff.begin(), troff.end(), string_out);
+// 	for ( gn = troff.first(s); gn; gn = troff.next(s)) 
+// 	    cout << *s << endl;
 	if ( graph_name ) cout << *graph_name << ": ";
 	cout << "[" << endl;
 	the_frame.draw();
-	for ( gn = lines.first(l); gn; gn = lines.next(l))
-	    l->draw(&the_frame);
-	for ( gn = plots.first(p); gn; gn = plots.next(p))
-	    p->draw(&the_frame);
-	for ( gn = circles.first(cir); gn; gn = circles.next(cir))
-	    cir->draw(&the_frame);
+	
+	for_each(plots.begin(), plots.end(), plot_out);
+	for_each(circles.begin(), circles.end(), circle_out);
+	
+ 	for ( gn = lines.first(l); gn; gn = lines.next(l))
+ 	    l->draw(&the_frame);
+// 	for ( gn = plots.first(p); gn; gn = plots.next(p))
+// 	    p->draw(&the_frame);
+// 	for ( gn = circles.first(cir); gn; gn = circles.next(cir))
+// 	    cir->draw(&the_frame);
 	cout << "]";
 	if ( graph_pos ) cout << " " << *graph_pos << endl;
 	else cout << endl;
-	for ( gn = pic.first(s); gn; gn = pic.next(s)) 
-	    cout << *s << endl;
+	for_each(pic.begin(), pic.end(), string_out);
     }
     if ( graph_name ) {
 	delete graph_name;
@@ -1311,6 +1388,21 @@ void init_graph() {
     String *s;
     linedescval defld = { invis,0,0 };
 
+    class del_str_f : public UnaryFunction<String *, int> {
+    public:
+	int operator() (String *s) { delete s; }
+    } del_str;
+
+    class del_plot_f : public UnaryFunction<plot *, int> {
+    public:
+	int operator() (plot *p) { delete p; }
+    } del_plot;
+
+    class del_circle_f : public UnaryFunction<circle *, int> {
+    public:
+	int operator() (circle *c) { delete c; }
+    } del_circle;
+
     visible = 0;
 
     for ( gotnext = coordinates.first(c); gotnext ;
@@ -1318,21 +1410,26 @@ void init_graph() {
 	delete c;
     for ( gotnext = lines.first(l); gotnext; gotnext = lines.next(l))
 	delete l;
-    for ( gotnext = plots.first(p); gotnext; gotnext = plots.next(p))
-	delete p;
-    for ( gotnext = circles.first(cir); gotnext; gotnext = circles.next(cir))
-	delete cir;
-    for ( gotnext = pic.first(s); gotnext; gotnext= pic.next(s))
-	delete s;
-    for ( gotnext = troff.first(s); gotnext; gotnext= troff.next(s))
-	delete s;
-
+    for_each(plots.begin(), plots.end(), del_plot);
+    for_each(circles.begin(), circles.end(), del_circle);
+    for_each(troff.begin(), troff.end(), del_str);
+    for_each(pic.begin(), pic.end(), del_str);
+    
+//     for ( gotnext = plots.first(p); gotnext; gotnext = plots.next(p))
+// 	delete p;
+//     for ( gotnext = circles.first(cir); gotnext; gotnext = circles.next(cir))
+// 	delete cir;
+//     for ( gotnext = pic.first(s); gotnext; gotnext= pic.next(s))
+// 	delete s;
+//     for ( gotnext = troff.first(s); gotnext; gotnext= troff.next(s))
+// 	delete s;
+    
     coordinates.clear();
     lines.clear();
-    plots.clear();
-    circles.clear();
-    pic.clear();
-    troff.clear();
+    plots.erase(plots.begin(), plots.end());
+    circles.erase(circles.begin(), circles.end());
+    pic.erase(pic.begin(), pic.end());
+    troff.erase(troff.begin(), troff.end());
     the_frame.clear();
 		
     defcoord = new coord;

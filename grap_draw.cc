@@ -181,32 +181,41 @@ void frame::frame_line(double x2, double y2, sides s) {
 void frame::label_line(sides s) {
     int gn;
     DisplayString *str;
+    // XXX this should be a member function of Display String
+
+    class displaystring : public UnaryFunction<DisplayString*, int> {
+    public:
+	int operator() (DisplayString *str) {
+	    if ( str->size ) {
+		if (str->size > 0.0 )  {
+		    cout << "\"\\s+" << str->size;
+		}
+		else {
+		    cout << "\"\\s" << str->size;
+		}
+	    }
+	    else cout << '"';
+
+	    str->unquote();
+	    cout << *str;
+
+	    if ( str->size ) cout << "\\s" << 0 << "\" ";
+	    else cout << "\" ";
+
+	    if ( str->j & (int) ljust ) cout << "ljust ";
+	    if ( str->j & (int) rjust ) cout << "rjust ";
+	    if ( str->j & (int) above ) cout << "above ";
+	    if ( str->j & (int) below ) cout << "below ";
+	    if ( str->j & (int) aligned ) cout << "aligned ";
+	}
+    } display;
+	    
+	
 
     cout << "line invis ";
-    for ( gn = label[s]->first(str); gn ; gn = label[s]->next(str)) {
-	if ( str->size ) {
-	    if (str->size > 0.0 )  {
-		cout << "\"\\s+" << str->size;
-	    }
-	    else {
-		cout << "\"\\s" << str->size;
-	    }
-	}
-	else cout << '"';
 
-	str->unquote();
-	cout << *str;
+    for_each(label[s]->begin(), label[s]->end(), display);
 
-	if ( str->size ) cout << "\\s" << 0 << "\" ";
-	else cout << "\" ";
-
-	if ( str->j & (int) ljust ) cout << "ljust ";
-	if ( str->j & (int) rjust ) cout << "rjust ";
-	if ( str->j & (int) above ) cout << "above ";
-	if ( str->j & (int) below ) cout << "below ";
-	if ( str->j & (int) aligned ) cout << "aligned ";
-	    
-    }
     cout << "from Frame.";
     switch (lshift[s].dir) {
 	case left:
@@ -280,7 +289,7 @@ void frame::addautoticks(sides sd) {
 		     tickdef[sd].c);
 	if ( tickdef[sd].prt)
 	    t->prt = new String(idx,tickdef[sd].prt);
-	tks.insert(t);
+	tks.push_back(t);
 	if ( ls ) idx *= 10;
 	else idx += ts;
     }
@@ -325,16 +334,26 @@ void frame::addautogrids(sides sd) {
 		     &griddef[sd].shift, griddef[sd].c);
 	if ( griddef[sd].prt)
 	    g->prt = new String(idx,griddef[sd].prt);
-	gds.insert(g);
+	gds.push_back(g);
 	if ( ls ) idx *= 10;
 	else idx += ts;
     }
 }    
 
 void frame::draw() {
-    tick *t;
-    grid *g;
-    int gn;
+    class draw_tick_f : public UnaryFunction<tick *, int> {
+	frame *f;
+    public:
+	draw_tick_f(frame *fr) : f(fr) {};
+	int operator()(tick* t) { t->draw(f); }
+    } draw_tick(this);
+
+    class draw_grid_f : public UnaryFunction<grid *, int> {
+	frame *f;
+    public:
+	draw_grid_f(frame *fr) : f(fr) {};
+	int operator()(grid* t) { t->draw(f); }
+    } draw_grid(this);
 
     cout << "Frame: [" << endl;
     cout << "Origin: " << endl;
@@ -350,19 +369,18 @@ void frame::draw() {
 	addautoticks((sides)i);
 	addautogrids((sides)i);
     }
-    
-    for ( gn = tks.first(t); gn ; gn = tks.next(t) )
-	t->draw(this);
-    for ( gn = gds.first(g); gn ; gn = gds.next(g) )
-	g->draw(this);
+
+    for_each(tks.begin(), tks.end(), draw_tick);
+    for_each(gds.begin(), gds.end(), draw_grid);
 }
 
 void line::draw(frame *f) {
+    list<line::linepoint*>::iterator lpi;
     linepoint *lp;
     double x,y;
-    int gn;
-	
-    for ( gn = pts.first(lp); gn ; gn = pts.next(lp) ) {
+
+    for ( lpi = pts.begin(); lpi != pts.end(); lpi++ ) {
+	lp = *lpi;
 	x = lp->c->map(lp->x,x_axis);
 	y = lp->c->map(lp->y,y_axis);
 	if ( x > 1+EPSILON || x < 0-EPSILON ) {
@@ -627,36 +645,44 @@ void plot::draw(frame *f) {
     double x, y;
     int gn;
 
+    // XXX again, this should be a member of Display String
+
+    class displaystring : public UnaryFunction<DisplayString*, int> {
+    public:
+	void operator() (DisplayString *s) {
+	    if ( s->size ) {
+		if ( s->relsz ) {
+		    if (s->size > 0.0 )  {
+			cout << "\"\\s+" << s->size;
+		    }
+		    else {
+			cout << "\"\\s" << s->size;
+		    }
+		}
+		else cout << "\"\\s" << s->size;
+	    }
+	    else cout << '"';
+
+	    s->unquote();
+	    cout << *s;
+
+	    if ( s->size ) cout << "\\s" << 0 << "\" ";
+	    else cout << "\" ";
+
+	    if ( s->j & (int) ljust ) cout << "ljust ";
+	    if ( s->j & (int) rjust ) cout << "rjust ";
+	    if ( s->j & (int) above ) cout << "above ";
+	    if ( s->j & (int) below ) cout << "below ";
+	    if ( s->j & (int) aligned ) cout << "aligned ";
+	}
+    } display;
+
     if ( !strs || !loc ) return;
 
-    for ( gn = strs->first(s); gn ; gn = strs->next(s)) {
-	if ( s->size ) {
-	    if ( s->relsz ) {
-		if (s->size > 0.0 )  {
-		    cout << "\"\\s+" << s->size;
-		}
-		else {
-		    cout << "\"\\s" << s->size;
-		}
-	    }
-	    else cout << "\"\\s" << s->size;
-	}
-	else cout << '"';
+    for_each(strs->begin(), strs->end(), display);
 
-	s->unquote();
-	cout << *s;
-
-	if ( s->size ) cout << "\\s" << 0 << "\" ";
-	else cout << "\" ";
-
-	if ( s->j & (int) ljust ) cout << "ljust ";
-	if ( s->j & (int) rjust ) cout << "rjust ";
-	if ( s->j & (int) above ) cout << "above ";
-	if ( s->j & (int) below ) cout << "below ";
-	if ( s->j & (int) aligned ) cout << "aligned ";
-	    
-    }
     x = f->wid * loc->c->map(loc->x,x_axis);
     y = f->ht * loc->c->map(loc->y,y_axis);
+
     cout << "at Frame.Origin + (" << x << ", " << y << ")" << endl;
 }

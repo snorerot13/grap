@@ -1,21 +1,35 @@
 #ifndef GRAP_H
 #define GRAP_H
 
+// No, I don't know why...
+#define UnaryFunction unary_function
+
 #include "grap_data.h"
-#include "grap_draw.h"
+class DisplayString;
+class line;
+class coord;
+class macro;
+class plot;
+class tick;
+class grid;
+class circle;
 
 typedef Dictionary<double *> doubleDictionary;
 typedef Dictionary<coord *> coordinateDictionary;
 typedef Dictionary<line *> lineDictionary;
 typedef Dictionary<macro *> macroDictionary;
-typedef Sequence<plot *> plotSequence;
-typedef Sequence<double> doublelist;
-typedef Sequence<tick *> ticklist;
-typedef Sequence<DisplayString *> stringlist;
-typedef Sequence<String *> linelist;
-typedef Sequence<String *> stringSequence;
-typedef Sequence<circle *> circleSequence;
-typedef Stack<struct grap_buffer_state*> lexStack;
+typedef list<plot *> plotSequence;
+typedef list<double> doublelist;
+typedef list<tick *> ticklist;
+typedef list<grid *> gridlist;
+typedef list<String *> linelist;
+typedef list<String *> stringSequence;
+typedef list<circle *> circleSequence;
+typedef list<struct grap_buffer_state*> lexStack;
+typedef list<DisplayString *> stringlist;
+
+#include "grap_draw.h"
+
 
 
 #define RAND 0

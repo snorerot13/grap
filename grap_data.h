@@ -2,6 +2,8 @@
 #define GRAP_DATA_H
 #include <string.h>
 
+#include <stl.h>
+
 
 const static int strchunk = 256;
 
@@ -89,19 +91,19 @@ public:
 	return *this;
     }
 
-    int operator==(const String &s) {
+    int operator==(const String &s) const {
 	return !strcmp(str,s.str);
     }
 
-    int operator==(const char *s) {
+    int operator==(const char *s) const {
 	return !strcmp(str,s);
     }
 
-    int operator!=(const String &s) {
+    int operator!=(const String &s) const {
 	return strcmp(str,s.str);
     }
 
-    int operator!=(const char *s) {
+    int operator!=(const char *s) const {
 	return strcmp(str,s);
     }
     friend ostream& operator<<(ostream&, String&);
@@ -256,7 +258,7 @@ protected:
     node *list;
     node *it;
 };
-
+/*
 template <class objtype>
 class Sequence {
 public:
@@ -347,7 +349,7 @@ public:
 	return i;
     }
 };
-
+*/
 class macro {
 public:
     macro(String *t=0) : text(t), next_arg(0) {
