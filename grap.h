@@ -3,8 +3,23 @@
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
+#ifdef __GNUC__
 // No, I don't know why...
 #define UnaryFunction unary_function
+#endif
+
+#ifndef STDC_HEADERS
+extern "C" {
+#ifndef __GNUC__
+    int strlen(const char*);
+    char *strcpy(char *, const char *);
+    int strcmp(const char *, const char *);
+#endif
+    char *strcat(char *, const char *);
+    char *strncpy(char *, const char *, const int);
+    int strncmp(const char *, const char *, const int);
+};
+#endif
 
 #include "grap_data.h"
 class DisplayString;

@@ -2,7 +2,9 @@
 #define GRAP_DATA_H
 // This file is (c) 1998 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
+#ifdef STDC_HEADERS
 #include <string.h>
+#endif
 
 #include <stl.h>
 
@@ -15,13 +17,13 @@ static const int strchunk = 256;
 class String {
 protected:
     
-#ifdef NO_SNPRINTF
-    inline void snprintf(char *s, int l, char *f, double d) {
-	::sprintf(s,f,d);
-    }
-#else 
+#ifdef HAVE_SNPRINTF
     inline void snprintf(char *s, int l, char *f, double d) {
 	::snprintf(s,l,f,d);
+    }
+#else 
+    inline void snprintf(char *s, int, char *f, double d) {
+	::sprintf(s,f,d);
     }
 #endif
     

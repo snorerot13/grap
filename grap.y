@@ -3,19 +3,26 @@
 /* This code is (c) 1998 Ted Faber (faber@lunabase.org) see the
    COPYRIGHT file for the full copyright and limitations of
    liabilities. */
+#ifndef HAVE_RANDOM
+#define random rand
+#endif
+
 #include <stdio.h>
 #include <iostream.h>
 #include <math.h>
+#ifdef STDC_HEADERS
 #include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-
-#ifdef NO_RANDOM
-extern "C" { long random(); }
-#endif
-
-#ifdef NO_GETOPT
-extern "C" { int getopt(int, char * const *, const char *); }
-#endif
+#else
+extern "C" {
+    extern char *optarg;
+    extern int optind, opterr, optopt;
+    int getopt(int, char * const [], const char *);
+    long random();
+}
+#endif 
 
 #include "grap.h"
 
@@ -36,6 +43,11 @@ coord *defcoord;
 String *graph_name;
 String *graph_pos;
 String *ps_param;
+
+// bison wants these defined....
+int yyerror(char*);
+int yylex();
+void init_dict(); 
 
 // defined in grap_lex.l
 extern bool include_file(String *, int i=0);
@@ -1442,11 +1454,6 @@ int yyerror(char *s) {
     cerr << "Bailing out" << endl;
     return 0;
 }
-
-int yyparse();
-
-extern int yylex();
-
 
 void init_dict() {
     linedesc defld(invis,0,0);

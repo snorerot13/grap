@@ -3,7 +3,7 @@
 COLOR=-mcolor
 MACROS=-ms 
 
-.include "${HOME}/lib/mk/makefile.groff"
+.include "${HOME}/lib/mk/makefile.groff.html"
 
 example.ps:	example.ms
 	grap example.ms | groff -pe $(MACROS) > example.ps
