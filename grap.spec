@@ -16,7 +16,7 @@ version of grap, so I built one.
 %setup
 
 %build
-./configure --prefix=/usr/local
+./configure --prefix=/usr/
 make depend
 make 
 
@@ -31,6 +31,6 @@ make install
 %doc COPYRIGHT
 %doc CHANGES
 
-/usr/local/bin/grap
-/usr/local/man/man1/grap.1
-/usr/local/share/grap/
+/usr/bin/grap
+/usr/man/man1/grap.1
+/usr/share/grap/
