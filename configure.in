@@ -47,7 +47,7 @@ AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(snprintf random rand)
-AC_REPLACE_FUNCS(strdup)
+AC_REPLACE_FUNCS(strdup strerror)
 
 if test $ac_cv_func_snprintf = "yes" ; then
 	AC_CACHE_CHECK(for declaration of snprintf,grap_cv_decl_snprintf,
@@ -56,6 +56,17 @@ if test $ac_cv_func_snprintf = "yes" ; then
 ,grap_cv_decl_snprintf="yes",grap_cv_decl_snprintf="no"))
 	if test $grap_cv_decl_snprintf = "yes"; then
 		AC_DEFINE(SNPRINTF_DECLARED)
+	fi
+fi
+
+if test $ac_cv_func_strerror = "yes" ; then
+	AC_CACHE_CHECK(for declaration of strerror,grap_cv_decl_strerror,
+		AC_EGREP_CPP(strerror,
+#include <stdio.h>
+#include <string.h>
+,grap_cv_decl_strerror="yes",grap_cv_decl_strerror="no"))
+	if test $grap_cv_decl_strerror = "yes"; then
+		AC_DEFINE(STRERROR_DECLARED)
 	fi
 fi
 

@@ -7,7 +7,8 @@
 #endif
 #ifdef STDC_HEADERS
 #include <stdlib.h>
-#include <errno.h>
+#include <string.h>
+extern int errno;
 #else
 extern "C" {
     void free(void*);
@@ -20,6 +21,16 @@ extern "C" {
 #include "grap_data.h"
 #include "grap_draw.h" 
 #include "y.tab.h"
+
+#ifndef STRERROR_DECLARED
+#if HAVE_STRERROR 
+extern "C" { 
+     char *strerror(int errnum);
+}
+#else
+extern char *strerror(int errnum);
+#endif
+#endif 
 
 // Templates for debugging.  Print the parameters to cerr.  
 
