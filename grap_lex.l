@@ -428,7 +428,7 @@ atan2|min|max		{
 bool include_file(String *s, int rs=0) {
     FILE *f;
     char file[MAXPATHLEN];
-    struct grap_buffer_state *g = new (struct grap_buffer_state);
+    struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
 
     if ( *s != "-" ) {
 	s->strncpy(file,MAXPATHLEN);
@@ -444,10 +444,6 @@ bool include_file(String *s, int rs=0) {
 	g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
 	g->name = new String("stdin");
     }
-    g->f = 0;
-    g->line = 1;
-    g->type = GFILE;
-    g->report_start=rs;
     lexstack.push_front(g);
     yy_switch_to_buffer(g->yy);
     return 1;
@@ -470,17 +466,12 @@ int include_string(String *s, struct for_descriptor *f=0,
 	int len;
 	grap_buffer_state *g;
 
-	g = new grap_buffer_state;
+	g = new grap_buffer_state(0, f, 0, 1, 1, it);
 	cbuf = new char[len = s->strlen()+1];
 
 	s->strncpy(cbuf,len-1);
 	cbuf[len-1] = '\0';
 	g->yy = yy_scan_string(cbuf);
-	g->f = f;
-	g->name = 0;
-	g->line = 1;
-	g->type = it;
-	g->report_start = 1;
 	lexstack.push_front(g);
 	delete cbuf;
 	return 1;
@@ -571,8 +562,8 @@ int yywrap() {
 
 	    // *do not delete g->f because include string will attach
 	    // it to the new grap_buffer_state that it allocates.
+	    g->f = 0;
 	    
-	    if ( g->name ) delete g->name;
 	    delete g;
 	    include_string(f->anything, f);
 	    return 0;
@@ -582,30 +573,15 @@ int yywrap() {
 
 
     yy_delete_buffer(g->yy);
-    if ( g->f ) {
-	if ( g->f->anything ) {
-	    delete g->f->anything;
-	    g->f->anything = 0;
-	}
-	delete g->f;
-    }
-    if ( g->name ) delete g->name;
     delete g;
 
-    if ( lexstack.empty() ) {
-	return 1;
-    }
+    if ( lexstack.empty() ) return 1;
     else {
 	g = lexstack.front();
 	yy_switch_to_buffer(g->yy);
     }
     
-    if ( copystate ) {
-	return 1;
-    }
-    else {
-	return 0;
-    }
+    return copystate ? 1 : 0;
 }
 
 void newline() {

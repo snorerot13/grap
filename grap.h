@@ -67,7 +67,7 @@ typedef list<DisplayString *> stringlist;
 
 enum size { ht = 0, wid};
 
-
+// These can stay structs
 typedef struct {
     int op;
     double expr;
@@ -85,24 +85,53 @@ typedef struct {
     int just;
 } strmod;
 
-struct for_descriptor {
+// this is comples enough to need a constructor/destructor
+class for_descriptor {
+ public:
     double *loop_var;
     int dir;
     double limit;
     double by;
     int by_op;
     String *anything;
+    for_descriptor() : 
+	loop_var(0), dir(0), limit(0.0), by(0.0), by_op(0), anything(0) { }
+    for_descriptor(double *lv, int d, double l, int b, int bo, String *a) :
+	loop_var(lv), dir(d), limit(l), by(b), by_op(bo), anything(a) { }
+    ~for_descriptor() {
+	if ( anything) {
+	    delete anything;
+	    anything = 0;
+	}
+    }
 };
 
 typedef enum { GFILE=1,  GMACRO, GINTERNAL } grap_input;
 
-struct grap_buffer_state {
+class grap_buffer_state {
+ public:
     struct yy_buffer_state *yy;
-    struct for_descriptor *f;
+    for_descriptor *f;
     String *name;
     int line;
     int report_start;
     grap_input type;
+    grap_buffer_state() :
+	yy(0), f(0), name(0), line(0), report_start(0), type(GFILE) { }
+    grap_buffer_state(struct yy_buffer_state *yyb, for_descriptor *fo,
+		      String *n, int l, int rs, grap_input t) :
+	yy(yyb), f(fo), name(n), line(l), report_start(rs), type(t) { }
+    // this does *not* call yy_delete_buffer
+    ~grap_buffer_state() {
+        if ( f ) {
+	    delete f;
+	    f = 0;
+	}
+	if ( name ) {
+	    delete name;
+	    name = 0;
+	}
+    }
 };
 
 

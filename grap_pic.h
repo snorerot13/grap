@@ -51,7 +51,7 @@ public:
 class Picplot: public plot, public drawable {
 public:
     Picplot(plot& p) : plot(p) { }
-    ~Picplot() { cerr << "pic plot destructor" << endl; }
+    ~Picplot() { }
     void draw(frame *);
 };
 

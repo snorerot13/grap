@@ -1317,7 +1317,7 @@ for_statement:
 		doubleDictionary::iterator di;
 		double *d;
 		
-		f = new (struct for_descriptor);
+		f = new for_descriptor;
 
 		if ( ( di = vars.find($2)) != vars.end() ) {
 		    d = (*di).second;

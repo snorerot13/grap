@@ -111,7 +111,7 @@ class drawable {
 public:
     virtual void draw(frame *) = 0;
     // So we get the right size to delete (ick)
-    virtual ~drawable() { cerr << "drawable destructor" << endl; }
+    virtual ~drawable() { }
 };
 
 typedef list<drawable *> objlist;
@@ -450,7 +450,6 @@ public:
 	}
     }
     ~plot() {
-	cerr << "plot destructor" << endl;
 	if ( strs ) {
 	    DisplayString *ds;
 	    while ( !strs->empty()) {
@@ -509,7 +508,6 @@ protected:
     class obj_freer_f : public UnaryFunction<drawable *, int> {
     public:
 	int operator()(drawable *d) {
-	    cerr << "deleting drawable " << endl;
 	    delete d;
 	    return 0;
 	}
