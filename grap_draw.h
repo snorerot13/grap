@@ -112,15 +112,6 @@ public:
     virtual void draw(frame *) = 0;
     // So we get the right size to delete (ick)
     virtual ~drawable() { }
-
-    // Allocation functions that ensure we delete what we allocated
-    void *operator new(size_t s) {
-	void *p = (void *) ::new char [s];
-	return p;
-    }
-    void operator delete(void *p, size_t ) {
-	::delete [] (char *)p;
-    }
 };
 
 typedef list<drawable *> objlist;
