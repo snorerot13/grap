@@ -489,10 +489,8 @@ atan2|min|max		{
 			return STRING;
 			}
 {identifier}		{ 
-			macro *m;
 			macroDictionary::iterator mi;
 			string *id;
-			char ch;
 
 			debug("ident: ", yytext);
 			id = new string(yytext);
