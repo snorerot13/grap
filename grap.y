@@ -416,10 +416,10 @@ draw_statement:
 		String s = "\"\\(bu\"";
 
 		if ( $2 ) {
-		    li = the_graph->lines.find($2);
+		    li = the_graph->lines.find(*$2);
 		    if ( li == the_graph->lines.end() ) {
 			l = new line(&defld,&s);
-			the_graph->lines[$2] = l;
+			the_graph->lines[*$2] = l;
 		    }
 		    else {
 			l = (*li).second;
@@ -430,7 +430,7 @@ draw_statement:
 
 		if ( $4 ) {
 		    if ( l->plotstr ) *l->plotstr = *$4;
-		    else l->plotstr = new String($4);
+		    else l->plotstr = new String(*$4);
 		    delete $4;
 		}
 		else {
@@ -586,7 +586,7 @@ expr:
 		double *d;
 		doubleDictionary::iterator di;
 		
-		if ( (di = vars.find($1)) != vars.end()) {
+		if ( (di = vars.find(*$1)) != vars.end()) {
 		    d = (*di).second;
 		    $$ = *d;
 		}
@@ -607,13 +607,13 @@ assignment_statement:
 		double *d;
 		doubleDictionary::iterator di;
 		
-		if ( ( di = vars.find($1)) != vars.end() ) {
+		if ( ( di = vars.find(*$1)) != vars.end() ) {
 		    d = (*di).second;
 		    *d = $3;
 		}
 		else {
 		    d = new double($3);
-		    vars[$1] = d;
+		    vars[*$1] = d;
 		}
 	    }
 
@@ -659,7 +659,7 @@ strlist:
 	    {
 		DisplayString *s;
 
-		s = new DisplayString($1,$2.just,$2.size, $2.rel);
+		s = new DisplayString(*$1,$2.just,$2.size, $2.rel);
 		delete $1;
 		$$ = new stringlist;
 		$$->push_back(s);
@@ -684,7 +684,7 @@ strlist:
 		    last.rel = $3.rel;
 		}
 
-		s = new DisplayString($2,last.just,last.size,last.rel);
+		s = new DisplayString(*$2,last.just,last.size,last.rel);
 		delete $2;
 		$$ = $1;
 		$$->push_back(s);
@@ -705,13 +705,13 @@ plot_statement:
 		plot *p;
 
 		if ( $3 ) {
-		    $3->unquote();
+		    unquote($3);
 		    s = new DisplayString($2,$3);
 		    delete $3;
 		}
 		else s = new DisplayString($2);
 
-		s->quote();
+		quote(s);
 		seq->push_back(s);
 
 		p = new plot(seq,$5);
@@ -728,10 +728,10 @@ next_statement:
 		String s = "\"\\(bu\"";
 
 		if ( $2 ) {
-		    li = the_graph->lines.find($2);
+		    li = the_graph->lines.find(*$2);
 		    if ( li == the_graph->lines.end() ) {
 			l = new line((linedesc *)0, &s );
-			the_graph->lines[$2] = l;
+			the_graph->lines[*$2] = l;
 		    }
 		    else { l = (*li).second; }
 		} else l = defline;
@@ -877,10 +877,10 @@ ticklist:
  		String *s;
 
 		if ( $2 ) {
-		    $2->unquote();
-		    s = new String($1,$2);
+		    unquote($2);
+		    s = dblString($1,$2);
 		}
-		else s = new String($1);
+		else s = dblString($1);
 
 		t->prt = s;
 		delete $2;
@@ -894,10 +894,10 @@ ticklist:
  		String *s;
 
 		if ( $4 ) {
-		    $4->unquote();
-		    s = new String($3,$4);
+		    unquote($4);
+		    s = dblString($3,$4);
 		}
-		else s = new String($3);
+		else s = dblString($3);
 
 		t->prt = s;
 		delete $4;
@@ -946,8 +946,8 @@ tickfor:
 
 		$$ = new ticklist;
 		if ( $7 ) {
-		    $7->unquote();
-		    fmt = new String($7);
+		    unquote($7);
+		    fmt = new String(*$7);
 		    delete $7;
 		} else
 		    fmt = new String("%g");
@@ -960,7 +960,7 @@ tickfor:
 		    t = new tick(idx, 0, top, 0, (shiftlist *) 0, 0);
 		    t->c = $2;
 
-		    s = new String(idx,fmt);
+		    s = dblString(idx,fmt);
 		    t->prt = s;
 		    $$->push_back(t);
 
@@ -1182,7 +1182,7 @@ line_statement:
 		    des.param = $7->param;
 		}
 
-		if ( $7->color ) des.color = new String($7->color);
+		if ( $7->color ) des.color = new String(*$7->color);
 		    
 		l->initial = 1;
 
@@ -1243,11 +1243,11 @@ coord_statement:
 		coordinateDictionary::iterator ci;
 
 		if ($2) {
-		    ci = the_graph->coords.find($2);
+		    ci = the_graph->coords.find(*$2);
 		    
 		    if (  ci == the_graph->coords.end()) {
 			c = new coord;
-			the_graph->coords[$2] = c;
+			the_graph->coords[*$2] = c;
 		    }
 		    else { c = (*ci).second; }
 		    delete $2;
@@ -1272,7 +1272,7 @@ until_clause:
 	    { $$ = 0; }
 |	UNTIL string
 	    {
-		$2->unquote();
+		unquote($2);
 		$$ = $2;
 	    }
 ;
@@ -1280,7 +1280,7 @@ until_clause:
 copy_statement:
 	COPY string SEP
 	    {
-		$2->unquote();
+		unquote($2);
 		if (!include_file($2)) return 0;
 	    }
 |	COPY opt_string until_clause THRU { lex_hunt_macro(); } MACRO SEP
@@ -1290,7 +1290,7 @@ copy_statement:
 		}
 		lex_begin_copy($3);
 		if ( $2 ) {
-		    $2->unquote();
+		    unquote($2);
 		    include_file($2);
 		    delete $2;
 		}
@@ -1300,6 +1300,7 @@ copy_statement:
 		String *s;
 		String *t;
 		String *expand;
+		int lim;
 
 		expand = new String;
 
@@ -1309,20 +1310,21 @@ copy_statement:
 		    
 		    s = $9->front();
 		    $9->pop_front();
+		    lim = s->length();
 		    
-		    while ( (*s)[i] != '\0' ) {
+		    while ( i < lim ) {
 			if ( (*s)[i] == ' ' || (*s)[i] == '\t' ) {
-			    if ( t->strlen() ) {
+			    if ( t->length() ) {
 				if ( $6->add_arg(t)) 
 				    t = new String;
 			    }
 			} else *t += (*s)[i];
 			i++;
 		    }
-		    if ( t->strlen() ) $6->add_arg(t);
+		    if ( t->length() ) $6->add_arg(t);
 		    else if (t) delete t;
 		    t = $6->invoke();
-		    *expand += t;
+		    *expand += *t;
 		    delete t;
 		    delete s;
 		}
@@ -1340,7 +1342,7 @@ define_statement:
 	    {
 		macro *m;
 		macroDictionary::iterator mi;
-		if ( ( mi = macros.find($3)) != macros.end() ) {
+		if ( ( mi = macros.find(*$3)) != macros.end() ) {
 		    m = (*mi).second;
 		    if ( m->text ) {
 			delete m->text;
@@ -1348,14 +1350,14 @@ define_statement:
 		    }
 		} else {
 		    m = new macro($5,$3);
-		    macros[$3] = m;
+		    macros[*$3] = m;
 		}
 	    }
 ;
 
 sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
             {
-		int len = $3->strlen()+1 ;
+		int len = $3->length()+1 ;
 		char *sys = new char [len];
 		int i=0;
 
@@ -1401,13 +1403,13 @@ for_statement:
 		
 		f = new for_descriptor;
 
-		if ( ( di = vars.find($2)) != vars.end() ) {
+		if ( ( di = vars.find(*$2)) != vars.end() ) {
 		    d = (*di).second;
 		    *d = $4;
 		}
 		else {
 		    d = new double($4);
-		    vars[$2] = d;
+		    vars[*$2] = d;
 		}
 		f->loop_var = d;
 		if ( $6 -$4 > 0 ) f->dir = 1;
@@ -1444,7 +1446,7 @@ graph_statement:
 print_statement:
 	PRINT string SEP
 	    {
-		$2->unquote();
+		unquote($2);
 		cerr <<  *$2 << endl;
 	    }
 |	PRINT expr SEP
@@ -1542,6 +1544,7 @@ int yyerror(char *s) {
     }
     cerr << s << endl;
     cerr << "Bailing out" << endl;
+    abort();
     return 0;
 }
 

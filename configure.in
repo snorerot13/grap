@@ -16,6 +16,15 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(unistd.h)
 
+echo "$ac_n" "checking if stl.h and string are compatible ... "
+AC_TRY_COMPILE(
+#include <stl.h>
+#include <string>
+,
+list<string> ls;
+,AC_DEFINE(USE_STD_STRING)
+echo "yes",echo "no")
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 

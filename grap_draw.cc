@@ -165,7 +165,7 @@ line::linepoint::linepoint(double xx, double yy, coord* cc, line *ll,
 	desc.param = l->param;
 	
 	if ( l-> color ) 
-	    desc.color = new String(l->color);
+	    desc.color = new String(*l->color);
 	else
 	    desc.color = 0;
 	

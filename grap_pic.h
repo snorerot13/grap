@@ -159,13 +159,19 @@ public:
     void begin_block(String *param) { graphs = 0; ps_param = param; }
     void end_block() { if ( graphs ) cout << ".PE" << endl; }
     void troff_string(String *s) {
-	String *t = new String(s);
-	troff.push_back(t);
+	String *t;
+	if ( s ) {
+	    t = new String(*s);
+	    troff.push_back(t);
+	}
     }
 	
     void pic_string(String *s) {
-	String *p = new String(s);
-	pic.push_back(p);
+	String *p;
+	if ( s ) {
+	    p = new String(*s);
+	    pic.push_back(p);
+	}
     }
 	
     void add_line(line &l) {

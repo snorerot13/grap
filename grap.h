@@ -21,6 +21,23 @@ extern "C" {
 };
 #endif
 
+#ifndef HAVE_SNPRINTF
+// This is the only signature that snprintf is called with in grap.
+// It's concievable that someone could smash the stack here, but
+// there' snot much privlege to gain, and I'd be impressed enough if
+// you could print a float that caused a stack overflow and error that
+// you can break the code.
+inline int snprintf(char *s, int lim, char *fmt, double d) {
+    int tot;
+    
+    if ( (tot = sprintf(s,fmt,d)) > lim ) {
+	cerr << "Bad format to internal sprintf crashed the stack" << endl;
+	abort();
+    }
+    return tot;
+}
+#endif
+
 #include "grap_data.h"
 class DisplayString;
 class line;

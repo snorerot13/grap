@@ -79,8 +79,8 @@ void Picgraph::init(String *n=0, String* p=0) {
 
     if ( !base ) 
 	base = pframe = new Picframe;
-    if ( n ) name = new String(n);
-    if ( p ) pos = new String(p);
+    if ( n ) name = new String(*n);
+    if ( p ) pos = new String(*p);
 }
 	
 void Picgraph::draw(frame *) {
@@ -179,8 +179,13 @@ void PicDisplayString::draw(frame *) {
     }
     else cout << '"';
 
+#ifdef USE_STD_STRING
+    unquote(this);
+#else
     unquote();
-    cout << str;
+#endif
+    
+    cout << *(String*)this;
 
     if ( size ) cout << "\\s" << 0 << "\" ";
     else cout << "\" ";
@@ -197,7 +202,7 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 // straightforward line drawing of one frame line
 
     if ( desc[s].color ) {
-	desc[s].color->unquote();
+	unquote(desc[s].color);
 	cout << ".grap_color " << *desc[s].color << endl;
     }
     switch (s) {
@@ -366,7 +371,7 @@ void Picframe::addautoticks(sides sd) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
 		     tickdef[sd].c);
 	if ( tickdef[sd].prt)
-	    t->prt = new String(idx,tickdef[sd].prt);
+	    t->prt = dblString(idx,tickdef[sd].prt);
 	tks.push_back(t);
 	if ( ls ) idx *= 10;
 	else idx += ts;
@@ -389,7 +394,7 @@ void Picframe::addautogrids(sides sd) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,
 		     &griddef[sd].shift, griddef[sd].c);
 	if ( griddef[sd].prt)
-	    g->prt = new String(idx,griddef[sd].prt);
+	    g->prt = dblString(idx,griddef[sd].prt);
 	gds.push_back(g);
 	if ( ls ) idx *= 10;
 	else idx += ts;
@@ -454,7 +459,7 @@ void Picline::draw(frame *f) {
 	x *= f->wid;
 	y *= f->ht;
 	if ( lp->desc.color ) {
-	    lp->desc.color->unquote();
+	    unquote(lp->desc.color);
 	    cout << ".grap_color " << *lp->desc.color << endl;
 	}
 	if ( lp->initial ) cout << "move ";
@@ -545,7 +550,7 @@ void Pictick::draw(frame *f) {
 
 	for_each(shift.begin(), shift.end(), sd);
 
-	prt->quote();
+	quote(prt);
 	cout << *prt << " " << just << " at Here" << endl;
     }
 }
@@ -589,7 +594,7 @@ void Picgrid::draw(frame *f) {
     if ( b < 0 || b > 1 ) return;
     else b *= f->ht;
     if ( desc.color ) {
-	desc.color->unquote();
+	unquote(desc.color);
 	cout << ".grap_color " << *desc.color << endl;
     }
     cout << "line ";
@@ -622,7 +627,7 @@ void Picgrid::draw(frame *f) {
 
 	for_each(shift.begin(), shift.end(), sd);
 
-	prt->quote();
+	quote(prt);
 	cout << *prt << " at Here" << endl;
     }
 }
@@ -652,7 +657,7 @@ void Piccircle::draw(frame *f) {
 	// second unfilled one in color (black is none specified)
 
 	ld.fill = 0;
-	ld.fillcolor->unquote();
+	unquote(ld.fillcolor);
 	cout << ".grap_color " << *ld.fillcolor << endl;
 	cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
 	cout << " rad " << rad << " invis fill 10" << endl;
@@ -661,7 +666,7 @@ void Piccircle::draw(frame *f) {
 
     // Draw the circle with appropriate line style, fill, and color
     if ( ld.color ) {
-	ld.color->unquote();
+	unquote(ld.color);
 	cout << ".grap_color " << *ld.color << endl;
     }
     cout << "circle at Frame.Origin + (" << x << ", " << y << ")";
@@ -715,7 +720,7 @@ void Picbox::draw(frame *f) {
 	// second unfilled one in color (black is none specified)
 
 	ld.fill = 0;
-	ld.fillcolor->unquote();
+	unquote(ld.fillcolor);
 	cout << ".grap_color " << *ld.fillcolor << endl;
 	cout << "box ht " << ht << " wid " << wid ;
 	cout << " with .ne at Frame.Origin + (" << x1 << ", " << y1 << ")";
@@ -724,7 +729,7 @@ void Picbox::draw(frame *f) {
     }	
 
     if ( ld.color ) {
-	ld.color->unquote();
+	unquote(ld.color);
 	cout << ".grap_color " << *ld.color << endl;
     }
     cout << "box ht " << ht << " wid " << wid ;

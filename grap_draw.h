@@ -32,8 +32,8 @@ public:
     linedesc(linetype l=def, double p=0, String *c=0, double f=0,
 		  String *fc=0) :
 	ld(l), param(p), fill(f), color(0), fillcolor(0) {
-	    if ( c ) color = new String(c);
-	    if ( fc ) fillcolor = new String(fc);
+	    if ( c ) color = new String(*c);
+	    if ( fc ) fillcolor = new String(*fc);
     }
 
     linedesc(linedesc *l) {
@@ -41,9 +41,9 @@ public:
 	    ld = l->ld;
 	    param = l->param;
 	    fill = l->fill;
-	    if ( l->color ) color = new String(l->color);
+	    if ( l->color ) color = new String(*l->color);
 	    else color = 0;
-	    if ( l->fillcolor ) fillcolor = new String(l->fillcolor);
+	    if ( l->fillcolor ) fillcolor = new String(*l->fillcolor);
 	    else fillcolor = 0;
 	}
 	else {
@@ -57,8 +57,8 @@ public:
 
     linedesc(const linedesc& ldc) :
 	ld(ldc.ld), param(ldc.param), fill(ldc.fill), color(0), fillcolor(0) {
-	    if ( ldc.color ) color = new String(ldc.color);
-	    if ( ldc.fillcolor ) fillcolor = new String(ldc.fillcolor);
+	    if ( ldc.color ) color = new String(*ldc.color);
+	    if ( ldc.fillcolor ) fillcolor = new String(*ldc.fillcolor);
     }
 
     ~linedesc() {
@@ -71,9 +71,9 @@ public:
 	param= l.param;
 	fill = l.fill;
 	if ( color ) { delete color; color = 0;}
-	if ( l.color ) color = new String(l.color);
+	if ( l.color ) color = new String(*l.color);
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
-	if ( l.fillcolor ) fillcolor = new String(l.fillcolor);
+	if ( l.fillcolor ) fillcolor = new String(*l.fillcolor);
 	return *this;
     }
     
@@ -144,9 +144,22 @@ public:
     DisplayString(String s, int ju=0, double sz=0, int rsz=0 ) :
 	String(s), j(ju), size(sz), relsz(rsz) { }
     DisplayString(DisplayString& ds) :
-	String(ds.str), j(ds.j), size(ds.size), relsz(ds.relsz) { }
-    DisplayString(double e, const String *fmt) :
-	String(e,fmt), j(0), size(0), relsz(0) { }
+	String(ds), j(ds.j), size(ds.size), relsz(ds.relsz) { }
+    DisplayString(double e, const String *fmt=0) :
+	j(0), size(0), relsz(0) {
+	char *c = new char[64];
+	int delf =0;
+
+	if ( !fmt) {
+	    fmt = new String("%g");
+	    delf = 1;
+	}
+
+	snprintf(c,64,fmt->c_str(),e);
+	*(String*)this = c;
+	delete[] c;
+	if ( delf ) delete fmt;
+    }
 };
 
 // A grap coordinate system
@@ -195,7 +208,7 @@ public:
 	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
 	shiftcpy sc(&shift);
 	
-	if ( t.prt ) prt = new String(t.prt);
+	if ( t.prt ) prt = new String(*t.prt);
 	else prt =0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
     }
@@ -203,7 +216,7 @@ public:
 	 coord *co) : where(w), size(s), side(sd), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new String(p);
+	if ( p ) prt = new String(*p);
 	else prt =0;
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
@@ -232,7 +245,7 @@ public:
 	shift = t.shift;
 	c = t.c;
 	if ( prt ) { delete prt; }
-	if ( t.prt ) prt = new String(t.prt);
+	if ( t.prt ) prt = new String(*t.prt);
 	else prt = 0;
 	for_each(t.shift.begin(), t.shift.end(), sc);
 	return *this;
@@ -256,7 +269,7 @@ public:
 	where(w), desc(l), side(sd), shift(), c(co) {
 	shiftcpy sc(&shift);
 
-	if ( p ) prt = new String(p);
+	if ( p ) prt = new String(*p);
 	else prt =0;
 	if ( sh ) 
 	    for_each(sh->begin(), sh->end(), sc);
@@ -267,7 +280,7 @@ public:
 	    shift(), c(t->c) {
 	shiftcpy sc(&shift);
 
-	if ( t->prt ) prt = new String(t->prt);
+	if ( t->prt ) prt = new String(*t->prt);
 	else prt =0;
 	for_each(t->shift.begin(), t->shift.end(), sc);
     }
@@ -276,7 +289,7 @@ public:
 		shift(), c(g.c) {
 	shiftcpy sc(&shift);
 
-	if ( g.prt ) prt = new String(g.prt);
+	if ( g.prt ) prt = new String(*g.prt);
 	else prt =0;
 	for_each(g.shift.begin(), g.shift.end(), sc);
     }
@@ -305,7 +318,7 @@ public:
 	shift = g.shift;
 	c = g.c;
 	if ( prt ) delete prt;
-	if ( g.prt ) prt = new String(g.prt);
+	if ( g.prt ) prt = new String(*g.prt);
 	else prt = 0;
 	for_each(g.shift.begin(), g.shift.end(), sc);
 	return *this;
@@ -421,7 +434,7 @@ protected:
 	linepoint(linepoint& lp) :
 	    point(lp.x,lp.y,lp.c), desc(lp.desc), plotstr(0),
 	    initial(lp.initial), arrow(lp.arrow) {
-	    if ( lp.plotstr ) plotstr = new String(lp.plotstr);
+	    if ( lp.plotstr ) plotstr = new String(*lp.plotstr);
 	}
 
 	~linepoint() {
@@ -440,7 +453,7 @@ public:
     line() : plotstr(0), desc(), pts(),initial(1) {}
 
     line(linedesc *l, String *s ) : desc(l), pts(), initial(1) {
-	plotstr = new String(s);
+	plotstr = new String(*s);
     }
     
     line(linedesc *l) :  plotstr(0), desc(l), pts(), initial(1) { }
@@ -448,7 +461,7 @@ public:
 	list<linepoint*>::iterator lpi;
 	
 	if ( l.plotstr ) {
-	    plotstr = new String(l.plotstr);
+	    plotstr = new String(*l.plotstr);
 	}
 	// make a copy of the points as well as the list in pts
 

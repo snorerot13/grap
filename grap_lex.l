@@ -241,7 +241,7 @@ atan2|min|max		{
 			DEBUG("ident: %s\n",yytext);
 			id = new String(yytext);
 			if ( lex_expand_macro &&
-			     ( mi = macros.find(id)) != macros.end() ) {
+			     ( mi = macros.find(*id)) != macros.end() ) {
 			        m = (*mi).second;
 				delete id;
 				ch = yyinput();
@@ -252,7 +252,7 @@ atan2|min|max		{
 				delete id;
 			}
 			else {
-			    ci = the_graph->coords.find(id);
+			    ci = the_graph->coords.find(*id);
 			    if ( ci != the_graph->coords.end()) {
 				c = (*ci).second;
 				yylval.coordptr = c;
@@ -308,9 +308,10 @@ atan2|min|max		{
 						return TEXT;
 					    } else {
 						macro *m = new macro(macrotext);
-						macrotext = 0;
+
 						yylval.macro_val = m;
-						DEBUG("MACRO\n",0);
+						DEBUG("MACRO:%s\n",macrotext->c_str());
+						macrotext = 0;
 						return MACRO;
 					    }
 					}
@@ -379,7 +380,7 @@ atan2|min|max		{
     macroDictionary::iterator mi;
     
     String *id = new String(yytext);
-    if ( ( mi = macros.find(id)) != macros.end()) {
+    if ( ( mi = macros.find(*id)) != macros.end()) {
 	m = (*mi).second;
 	delete id;
 	BEGIN(GRAP);
@@ -431,23 +432,26 @@ bool include_file(String *s, int rs=0) {
     char file[MAXPATHLEN];
     struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
 
-    if ( *s != "-" ) {
-	s->strncpy(file,MAXPATHLEN);
-	if ( ( f = fopen(file,"r")) == 0 ) {
-	    cerr << "Can't open " << file << " ";
-	    perror(0);
-	    return 0;
+    if ( s ) {
+	if ( *s != "-" ) {
+	    strncpy(file, s->c_str(), MAXPATHLEN);
+	    if ( ( f = fopen(file,"r")) == 0 ) {
+		cerr << "Can't open " << file << " ";
+		perror(0);
+		return 0;
+	    }
+	    g->yy = yy_create_buffer(f,YY_BUF_SIZE);
+	    g->name = new String(*s);
 	}
-	g->yy = yy_create_buffer(f,YY_BUF_SIZE);
-	g->name = new String(s);
+	else {
+	    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
+	    g->name = new String("stdin");
+	}
+	lexstack.push_front(g);
+	yy_switch_to_buffer(g->yy);
+	return 1;
     }
-    else {
-	g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
-	g->name = new String("stdin");
-    }
-    lexstack.push_front(g);
-    yy_switch_to_buffer(g->yy);
-    return 1;
+    else return 0;
 }
 	
 void lex_begin_macro_text() {
@@ -468,9 +472,9 @@ int include_string(String *s, struct for_descriptor *f=0,
 	grap_buffer_state *g;
 
 	g = new grap_buffer_state(0, f, 0, 1, 1, it);
-	cbuf = new char[len = s->strlen()+1];
+	cbuf = new char[len = s->length()+1];
 
-	s->strncpy(cbuf,len-1);
+	strncpy(cbuf,s->c_str(),len-1);
 	cbuf[len-1] = '\0';
 	g->yy = yy_scan_string(cbuf);
 	lexstack.push_front(g);
@@ -502,7 +506,7 @@ void macro_args(macro *m) {
 	else slashcount = 0;
 	*arg += (char) c;
     }
-    if ( c == ')' && arg->strlen() ) {
+    if ( c == ')' && arg->length() ) {
 	if ( !m->add_arg(arg)) delete arg;
     }
     else
