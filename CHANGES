@@ -1,7 +1,10 @@
 Change log
 
 0.97b: Finally have a copy of egcs, so grap will now compile under it
-using both the stl and the standard string class.
+using both the stl and the standard string class.  What do you know,
+compiling under egcs halves the run time.  This is roughly half due to
+better egcs compilation and half due to the better performance of the
+standard string class.
 
 0.95b: bug fix: deleting grap_buffer_state contents twice on error, allow 
 more than one shift description on ticks, grids, and labels.  Thanks to
@@ -9,7 +12,8 @@ Anindo Banerjea at ISI for spotting my misimplementation.
 
 Another couple of Bannerjea catches: through is now recognized as a
 synonym for thru.  "For," "then" and "else" clauses were previously
-treated as macros but now have a terminating separator added to them.  The result is that things like
+treated as macros but now have a terminating separator added to them.
+The result is that things like
 
 if (x == 3) { y = y + 1 }
 x = x + 1
