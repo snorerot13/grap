@@ -19,8 +19,18 @@ local.color_example.ps:	color_example.ms
 	../grap -d ../grap.defines color_example.ms | groff -pe $(MACROS) $(COLOR) > local.color_example.ps
 
 clean:
-	rm -f *.ps file* embed* example.html
+	rm -f *.gif *.ps *.eqn *.grap example.html *.ps.gz
 
+example.ps.gz:	example.ps
+	gzip example.ps
+
+example.pdf:	example.ps
+	ps2pdf example.ps example.pdf
+
+install:	example.pdf example.ps.gz example.html
+	mv example.pdf example.ps.gz ${HOME}/public_html/Vault/software/grap/
+	mv *.gif ${HOME}/public_html/Vault/software/grap/example
+	mv example.html ${HOME}/public_html/Vault/software/grap/example/index.html
 #html conversions
 
 file17.gif:	file17.grap
