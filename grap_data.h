@@ -1,0 +1,346 @@
+#ifndef GRAP_DATA_H
+#define GRAP_DATA_H
+#include <string.h>
+
+const static int strchunk = 256;
+
+class String {
+public:
+    String() : str(0), len(0) { }
+
+    String(const char *c) : str(0), len(0) {
+	resize(::strlen(c)+1);
+	strcpy(str,c);
+    };
+
+    String(const int i) : str(0), len(0) {
+	resize(20);
+	snprintf(str,len,"%d",i);
+    };
+
+    String(const double d, const String *fmt = 0) : str(0), len(0) {
+	resize(21);
+	if ( fmt ) 
+	    snprintf(str,len,fmt->str,d);
+	else 
+	    snprintf(str,len,"%g",d);
+    };
+
+    String(const String* x) : str(0), len(0) {
+	resize(x->len);
+	strcpy(str,x->str);
+    };
+
+    String(const String& x) : str(0), len(0) {
+	resize(x.len);
+	strcpy(str,x.str);
+    };
+
+    ~String() {
+	if ( str) {
+	    delete str;
+	    str = 0;
+	}
+	len = 0;
+    };
+
+    char& operator[](const int i) {
+	if ( i < len ) return str[i];
+	else {
+	    resize(i+1);
+	    return str[i];
+	}
+    };
+
+    String& operator=(const String &s) {
+	if ( len < s.len) resize(s.len);
+	strcpy(str,s.str);
+	return *this;
+    };
+
+    String& operator+=(const String& s) {
+	int nlen = s.strlen() + strlen()+ 1;
+	if ( len < nlen ) resize(nlen);
+	strcat(str,s.str);
+	return *this;
+    }
+
+    String& operator+=(const char *s) {
+	int nlen = ::strlen(s) + strlen() + 1;
+	if ( len < nlen ) resize(nlen);
+	strcat(str,s);
+	return *this;
+    }
+
+    String& operator+=(const char c) {
+	int last = strlen();
+	
+	if ( len < last +2 ) resize(last+2);
+	last=strlen();
+	str[last] = c; str[last+1] = '\0';
+	return *this;
+    }
+
+    int operator==(const String &s) {
+	return !strcmp(str,s.str);
+    }
+
+    int operator==(const char *s) {
+	return !strcmp(str,s);
+    }
+
+    int operator!=(const String &s) {
+	return strcmp(str,s.str);
+    }
+
+    int operator!=(const char *s) {
+	return strcmp(str,s);
+    }
+    friend ostream& operator<<(ostream&, String&);
+
+    void quote() {
+	int l;
+	if ( len < strlen()+3 ) resize(len+3);
+	for ( int i = len-1; i >=1; i-- )
+	    str[i] = str[i-1];
+	l = strlen();
+	if ( l == 0 ) l = 1;
+	str[0] = '"'; str[l] = '"'; str[l+1] = '\0';
+    }
+
+    void unquote() {
+	int i;
+	if ( str[0] == '"' ) {
+	    for ( i = 0; i < len-2; i++ ) str[i] = str[i+1];
+	    str[strlen()-1] = '\0';
+	}
+
+	i = strlen();
+	if ( str[i-1] == '"' ) str[i-1] = '\0';
+    }
+
+    void strncpy(char *s, int l) {
+	::strncpy(s,str,l);
+    }
+
+    int strlen() const {
+	return ( (str) ? ::strlen(str) : 0 );
+    }
+    
+protected:
+    char *str;
+    int len;
+
+    void resize(int ns) {
+	char *c;
+	int s;
+
+	s =( ns/strchunk + (( ns % strchunk ) ? 1 : 0 )) * strchunk;
+
+	c = new char[s];
+	if ( len ) 
+	    for ( int j = 0; j < len; j++) c[j] = str[j];
+	else
+	    c[0] = '\0';
+	if ( str ) delete str;
+	str = c;
+	len = s;
+    }
+};
+
+inline ostream& operator<<(ostream& f, String& s) { return f << s.str; }
+
+template <class objtype>
+class Dictionary {
+public:
+    Dictionary() : list(0), it(0) {};
+    ~Dictionary() { clear();}
+    int find(String n, objtype &found ) {
+	node *v = list;
+	while ( v != NULL && v->name != n )
+	    v= v->next;
+	if ( v )
+	    found = v->obj;
+	return (v) ? 1 : 0;
+    }
+    void insert(String n, objtype o) {
+	node *v;
+	
+	if ( list ) {
+	    for ( v = list; v->next != 0; v = v->next)
+		;
+	    v->next = new node(n,o);
+	} else list = new node(n,o);
+    }
+    int first(objtype& found) {
+	it = (list ) ? list->next : 0;
+	if ( list) found = list->obj;
+	return (list) ? 1 : 0;
+    }
+    int next(objtype& found) {
+	node *i = it;
+	if ( it ) found = it->obj;
+	it = (it) ? it->next : 0;
+	return (i) ? 1 : 0;
+    }
+    void clear() {
+	node *v, *u;
+ 	for ( v = list; v; v = u ) {
+	    u = v->next;
+	    delete v;
+	}  
+	list = it = 0;
+    } 
+
+protected:
+    class node {
+    public:
+	node(String n, objtype o) : name(n), obj(o), next(0) {}
+	String name;
+	objtype obj;
+	node *next;
+    };
+    node *list;
+    node *it;
+};
+
+template <class objtype>
+class Sequence {
+public:
+    Sequence() : seq(0), it(0) {};
+
+    ~Sequence() { clear(); }
+
+    void clear() {
+	node *v, *u;
+ 	for ( v = seq; v; v = u ) {
+	    u = v->next;
+	    delete v;
+	}  
+	seq = it = 0;
+    } 
+
+    int first(objtype& found) {
+	it = (seq) ? seq->next : 0;
+	
+	if ( seq ) found = seq->obj;
+	return (seq) ? 1 : 0;
+    }
+    
+    int next(objtype& found) {
+	node *i = it;
+	if ( it ) found = it->obj;
+	if ( it ) it = it->next;
+	return (i) ?  1 : 0;
+    }
+    void insert(objtype o) {
+	node *v;
+
+	if ( seq ) {
+	    for ( v = seq; v->next != 0; v = v->next)
+		;
+	    v->next = new node(o);
+	} else seq = new node(o);
+    }
+protected:
+    class node {
+    public:
+	node(objtype o) : obj(o), next(0) {}
+	objtype obj;
+	node *next;
+    };
+    node *seq;
+    node *it;
+};
+
+template <class objtype>
+class Stack : public Sequence<objtype> {
+public:
+    Stack() : Sequence<objtype>() {}
+    objtype pop() {
+	objtype o;
+	node *s;
+	if (seq) {
+	    o = seq->obj;
+	    s = seq;
+	    seq = seq->next;
+	    delete s;
+	}
+	return o;
+    }
+
+    objtype top() const {
+	objtype o;
+	if ( seq ) o = seq->obj;
+	return o;
+    }
+
+    void push(objtype o) {
+	node *n = new node(o);
+	n->next = seq;
+	seq = n;
+    }
+
+    bool empty() { return seq == 0; }
+
+    int size() {
+	int i = 0;
+	node *v;
+	
+	if ( seq ) {
+	    for ( v = seq; v != 0; v = v->next)
+		i++;
+	}
+	return i;
+    }
+};
+
+class macro {
+public:
+    macro(String *t=0) : text(t), next_arg(0) {
+	for ( int i = 0; i < numargs ; i++ )
+	    arg[i] = 0;
+    }
+    int add_arg(String *s ) {
+	if ( next_arg < numargs ) {
+	    if ( arg[next_arg] ) delete arg[next_arg];
+	    arg[next_arg++] = s;
+	    return 1;
+	}
+	else return 0;
+    }
+    
+    String *invoke() {
+	String *s = new String;
+	int i=0;
+	int argn;
+
+	while ((*text)[i] != '\0' ) {
+	    switch ((*text)[i] ) {
+		default:
+		    *s += (*text)[i];
+		    break;
+		case '$':
+		    i++;
+		    argn = (*text)[i] - 0x30;
+		    if ( argn > 0 || argn <= numargs ) {
+			if ( arg[argn-1] )
+			    *s += *(arg[argn-1]);
+		    }
+		    break;
+	    }
+	    i++;
+	}
+	next_arg = 0;
+	for ( i = 0 ; i < numargs; i ++ ) {
+	    if ( arg[i] ) delete arg[i];
+	    arg[i] =0;
+	}
+	return s;		
+    }
+    static const int numargs = 9;
+    int next_arg;
+    String *text;
+    String *arg[numargs];
+};
+#endif
