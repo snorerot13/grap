@@ -12,8 +12,6 @@
 #define DEBUG(a,b) fprintf(stderr,a,b)
 #endif
 
-// #define YY_USER_ACTION  if ( !stack_init ) init_stack();
-    
 int return_macro = 0;
 int slashcount = 0;
 int macro_end = 0;
@@ -35,7 +33,6 @@ extern coordinateDictionary coordinates;
 int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
 void macro_args(macro*);
-void init_stack();
 void newline();
 
 %}
@@ -393,36 +390,30 @@ atan2|min|max		{
 }
     
 %%
-void init_stack() {
-    grap_buffer_state *g = new grap_buffer_state;
-
-    g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
-    g->f = 0;
-    g->name = new String("stdin");
-    g->line = 1;
-    g->type = GFILE;
-    g->report_start =1;
-    lexstack.push(g);
-}
-
-bool include_file(String *s) {
+bool include_file(String *s, int rs=0) {
     FILE *f;
     char file[MAXPATHLEN];
     YY_BUFFER_STATE buf;
     struct grap_buffer_state *g = new (struct grap_buffer_state);
 
-    s->strncpy(file,MAXPATHLEN);
-    if ( ( f = fopen(file,"r")) == 0 ) {
-	cerr << "Can't open " << file << " ";
-	perror(0);
-	return 0;
+    if ( *s != "-" ) {
+	s->strncpy(file,MAXPATHLEN);
+	if ( ( f = fopen(file,"r")) == 0 ) {
+	    cerr << "Can't open " << file << " ";
+	    perror(0);
+	    return 0;
+	}
+	g->yy = yy_create_buffer(f,YY_BUF_SIZE);
+	g->name = new String(s);
     }
-    g->yy = yy_create_buffer(f,YY_BUF_SIZE);
+    else {
+	g->yy = yy_create_buffer(stdin,YY_BUF_SIZE);
+	g->name = new String("stdin");
+    }
     g->f = 0;
-    g->name = new String(s);
     g->line = 1;
     g->type = GFILE;
-    g->report_start=0;
+    g->report_start=rs;
     lexstack.push(g);
     yy_switch_to_buffer(g->yy);
     return 1;

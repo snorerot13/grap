@@ -82,7 +82,7 @@ frame ht 1.5 wid 1.5
 define square {($1) * ($1)}
 define root {($1)^.5 }
 define P {
-	"x" at i, square(i); i = i +1;
+	times at i, square(i); i = i +1;
 	circle at j, root(j); j= j+5;
 }
 i = 1; j = 5

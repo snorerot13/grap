@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream.h>
 #include <math.h>
+#include <stdlib.h>
 #include "grap.h"
 
 #ifndef DEFINES
@@ -31,8 +32,7 @@ String *graph_pos;
 String *ps_param;
 
 // defined in grap_lex.l
-extern void init_stack();
-extern bool include_file(String *);
+extern bool include_file(String *, int i=0);
 extern void lex_begin_macro_text();
 extern void lex_begin_rest_of_line();
 extern void lex_begin_copy( String*s=0);
@@ -44,6 +44,14 @@ void init_graph();
 
 int nlines;
 int in_copy=0;
+
+extern char *optarg;
+extern int optind;
+extern int optopt;
+extern int opterr;
+extern int optreset;
+
+const char *opts = "d:D";
 
 %}
 %token NUMBER START END IDENT COPY SEP COPY_END STRING LINE_NAME COORD_NAME
@@ -1286,11 +1294,31 @@ void init_graph() {
 }
 
 int main(int argc, char** argv) {
-    int i;
     String defines=DEFINES;
+    String fname;
+    int use_defines = 1;
+    char c;
 
-    init_stack();
-    include_file(&defines);
-    lexstack.top()->report_start = 1;
+    while ( ( c = getopt(argc,argv,opts)) != -1)
+	switch (c) {
+	    case 'd':
+		defines = optarg;
+		use_defines = 1;
+		break;
+	    case 'D':
+		use_defines = 0;
+		break;
+	}
+    if ( argc == optind ) {
+	fname = "-";
+	include_file(&fname,1);
+    }
+    else {
+	for ( int i = argc-1; i >= optind; i-- ) {
+	    fname = argv[i];
+	    include_file(&fname,1);
+	}
+    }
+    if ( use_defines) include_file(&defines,1);
     yyparse();
 }
