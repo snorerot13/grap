@@ -1,6 +1,6 @@
 Change log
 
-1.24: Fixed a bug parsing draw/new with no line descriptions.  Thanks to
+1.25: Fixed a bug parsing draw/new with no line descriptions.  Thanks to
 Robert W. Numrich for spotting it.
 
 Cygwin seems to need errno.h to declare errno in grap_lex.l. I added the
@@ -9,6 +9,8 @@ missing semi-colons to grap.y to shut bison up.
 
 Added the clipped and unclipped attributes to allow plot statements to place
 strings outside the frame.
+
+Tuned the makefile so you can use pmake in parallel.
 
 1.23: made it possible to disable sprintf and other calls to sprintf(3)
 with a user given format string, which is a potential security hole.

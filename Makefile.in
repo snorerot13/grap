@@ -53,9 +53,11 @@ grap:	${OBJS}
 .l.cc:
 	${LEX} -o$@ $<
 
-y.tab.h grap.cc:	grap.y
+grap.cc:	grap.y
 	${YACC} -d grap.y
 	mv y.tab.c grap.cc
+
+y.tab.h:	grap.cc
 
 grap_lex.cc:	grap_lex.l y.tab.h
 
