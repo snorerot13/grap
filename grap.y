@@ -85,7 +85,8 @@ extern void bar_statement(coord *, sides, double, double, double,
 void init_dict(); 
 
 // adapters to return complex (complex-ish) functions
-double grap_random() {  return double(random()) / (pow(2,32)-1); }
+double grap_random() {  return double(random()) / (pow(2,31)-1); }
+double grap_srandom(double x) { srandom((unsigned int) x); return 3.0; }
 double pow10(double x) { return pow(10,x); }
 double toint(double x) { return (double) int(x); }
 double grap_min(double a, double b) { return (a<b) ? a : b; } 
@@ -96,7 +97,8 @@ typedef double (*function1)(double);
 typedef double (*function2)(double, double);
 // jump tables for dispatching internal functions
 function0 jtf0[NF0] = { grap_random };
-function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log };
+function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp,
+			log, grap_srandom };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
 %token NUMBER START END IDENT COPY SEP STRING COORD_NAME UNDEFINE

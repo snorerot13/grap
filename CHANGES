@@ -12,6 +12,9 @@ Added an srand function to seed the random number generator, though
 there's none documented in Kernighan and Bentley's grap.  W. Robert
 Daasc caught this omission.
 
+While I was in there, I discovered that rand was not returning its
+full range from [0-1).  It does now.
+
 1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially
 revamped, and the code brought into better conformance with the

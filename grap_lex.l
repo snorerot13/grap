@@ -85,7 +85,8 @@ char *strdup(const char *);
 #endif 
 
 char *f0names[NF0] = { "rand" };
-char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt","eexp","ln" };
+char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
+		       "eexp","ln", "srand" };
 char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
@@ -428,7 +429,7 @@ rand			{
 			BEGIN(GRAP);
  			return FUNC0;
 			}
-log|exp|int|sin|cos|sqrt|rand|eexp|ln	{
+log|exp|int|sin|cos|sqrt|srand|eexp|ln	{
 			int i;
 
 			debug("FUNC1");
