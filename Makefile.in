@@ -162,8 +162,9 @@ makesum:	.makesum
 .makesum:	grap grap.defines examples/example.ms
 	cd examples && for f in md5 cksum sum echo ; do \
 		sed 's/rand()/1/' < example.ms | \
-			../grap -d ../grap.defines | $$f > cksum.$$f; \
+			../grap -d ../grap.defines | $$f > ../cksum.$$f; \
 	done
+	touch .makesum
 
 check:	grap grap.defines examples/example.ms
 	cd examples && sed 's/rand()/1/' < example.ms | \
