@@ -11,7 +11,7 @@ MANDIR = @mandir@/man1
 INSTALL=@INSTALL@
 INSTALL_PROGRAM=@INSTALL_PROGRAM@
 INSTALL_DATA=@INSTALL_DATA@
-RM=rm
+RM=rm -f
 RMDIR=rmdir
 MKDIR=mkdir
 LEX=@LEX@
@@ -33,7 +33,6 @@ CCFLAGS=$(CXXFLAGS)
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o version.o $(LIBOBJS)
 
 all:	depend grap
-
 
 .l.cc:
 	$(LEX) -o$@ $<
@@ -73,23 +72,23 @@ dist:
 	${MAKE} grap.ps
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
-	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile \
+	${RM} /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile \
 		/tmp/${DISTDIR}/examples/Makefile /tmp/${DISTDIR}/.cvsignore \
 		/tmp/${DISTDIR}/examples/.cvsignore 
-	rm /tmp/${DISTDIR}/examples/Makefile.local \
+	${RM} /tmp/${DISTDIR}/examples/Makefile.local \
 		/tmp/${DISTDIR}/examples/color_example.ms
-	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
-	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
-	rm -rf /tmp/${DISTDIR}/examples/*.ps.gz /tmp/${DISTDIR}/examples/*.pdf 
+	${RM} /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
+	${RM} -r /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
+	${RM} -r /tmp/${DISTDIR}/examples/*.ps.gz /tmp/${DISTDIR}/examples/*.pdf 
 	cd /tmp && tar czf ${DISTDIR}.tar.gz ${DISTDIR}
-	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
+	mv /tmp/${DISTDIR}.tar.gz . && ${RM} -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output depend
+	${RM} grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output depend
 
 veryclean:
 	${MAKE} clean
-	rm -f config.log config.status config.cache config.h version.cc *.tgz
+	${RM} config.log config.status config.cache config.h version.cc *.tgz
 
 install:	grap grap.defines grap.1
 	strip grap
