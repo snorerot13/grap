@@ -98,7 +98,7 @@ install:	grap grap.defines grap.1
 	$(INSTALL_DATA) README $(DEFINESDIR)
 	$(INSTALL_DATA) CHANGES $(DEFINESDIR)
 	$(INSTALL_DATA) COPYRIGHT $(DEFINESDIR)
-	$(INSTALL_DATA) examples/*.d examples/*.ms examples/*.result examples/Makefile $(DEFINESDIR)/examples
+	$(INSTALL_DATA) examples/*.d examples/example.ms examples/*.result examples/Makefile $(DEFINESDIR)/examples
 
 deinstall:
 	$(RM) $(BINDIR)/grap
