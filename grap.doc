@@ -364,7 +364,7 @@ justification modifiers, and absolute and
 relative
 .Li size
 modifiers.
-.IP
+.Pp
 .Li size
 .Ar expr
 sets the string size to 
@@ -1187,9 +1187,9 @@ and (4,6).  A simple way to plot a set of numbers in a file named
 .Pa ./data
 is:
 .Bd -literal -offset indent
-.G1
+\&.G1
 copy "./data"
-.G2
+\&.G2
 .Ed
 .Ss Pic Macros
 .Pp
