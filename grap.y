@@ -56,6 +56,7 @@ extern void lex_begin_copy( String*s=0);
 extern int include_string(String *,struct for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern void lex_hunt_macro();
+extern int yyparse(void);	// To shut yacc (vs. bison) up.
 void draw_graph();
 void init_graph();
     
@@ -1446,6 +1447,7 @@ copy_statement:
 		String *t;
 		String *expand;
 		int lim;
+		char end;
 
 		expand = new String;
 
@@ -1470,9 +1472,18 @@ copy_statement:
 		    else if (t) delete t;
 		    t = $5->invoke();
 		    *expand += *t;
+		    // "here" macros should end with a SEP.  If the user
+		    // hasn't done so, we add a SEP for them.  XXX this
+		    // may be configuarble later
+
+		    end = (*expand)[expand->length()-1];
+
+		    if ( !$5->name && end != ';' && end != '\n' ) 
+			expand->append(1,';');
 		    delete t;
 		    delete s;
 		}
+		
 		include_string(expand,0,GMACRO);
 		delete expand;
 		delete $9;

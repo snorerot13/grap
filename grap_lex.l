@@ -379,7 +379,7 @@ atan2|min|max		{
 	yylval.line_list = sl;
 	sl = 0;
 	copystate = 0;
-	DEBUG("COPYTEXT",0);
+	DEBUG("COPYTEXT %d\n",yylval.line_list->size());
 	return COPYTEXT;
     }
     }
