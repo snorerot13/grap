@@ -26,25 +26,20 @@ OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
 grap:	$(OBJS)
 
 y.tab.h:	grap.cc
-
-grap_lex.o:	grap_lex.cc grap.h y.tab.h grap_data.h grap_draw.h
-
-grap.cc grap_lex.cc:	grap.y grap.h grap_data.h grap_draw.h  grap_pic.h
 grap.cc:	grap.y
-grap_lex.cc:	grap_lex.l
+grap_lex.cc:	grap_lex.l y.tab.h
 
-grap_draw.o: grap_draw.cc grap.h grap_data.h grap_draw.h
-
+grap.o:		grap.cc grap.h grap_data.h grap_draw.h grap_pic.h
+grap_lex.o:	grap_lex.cc grap.h y.tab.h grap_data.h grap_draw.h grap_pic.h
+grap_draw.o:	grap_draw.cc grap.h grap_data.h grap_draw.h grap_pic.h
 grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
-
-pic.h:	pic.macros
-	perl ./pic2c.pl < pic.macros > $@
 
 y.output:	grap.y
 	$(YACC) -v $(.ALLSRC)
 
 grap.1:	grap.doc
 	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1
+
 clean:
 	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1
 

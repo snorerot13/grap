@@ -4,10 +4,13 @@
 #include "grap.h"
 
 void coord::newpt(double x, double y) {
+// Add apoint to a coordinate system
     newx(x);
     newy(y);
 }
 void coord::newx(double x) {
+// Specific code to add the x value.  If the axis is being autoscaled,
+// see if this point expands it.  Otherwise, sanity check it.
     if ( xautoscale == 2) {
 	xmax = (x > xmax ) ? x : xmax;
 	xmin = (x < xmin ) ? x : xmin;
@@ -32,6 +35,8 @@ void coord::newx(double x) {
 }
 
 void coord::newy(double y) {
+// Specific code to add the x value.  If the axis is being autoscaled,
+// see if this point expands it.  Otherwise, sanity check it.
     if ( yautoscale == 2) {
 	ymax = (y > ymax ) ? y : ymax;
 	ymin = (y < ymin ) ? y : ymin;
@@ -56,7 +61,12 @@ void coord::newy(double y) {
 }
 
 void coord::addmargin(double mf) {
-    double range;
+// Add a margin to the coordinate system to center the plot better.
+// The margin factor(mf) is given as a multiplier to the current size
+// (0.07 is 7% on either size).  If the axis is logarithmic, we have
+// to work in that space.
+    
+    double range;	// The size of the axis we're working on
 
     // Log sale must be positive
     
@@ -72,7 +82,7 @@ void coord::addmargin(double mf) {
     if ( xautoscale ) {
 
 	if ( logscale & x_axis) {
-	    double b, t;
+	    double b, t;	// bottom and top of the logscale range
 
 	    // Solving the log mapping equation for 1+mf and -mf
 	    // Isn't math cool?
@@ -90,7 +100,7 @@ void coord::addmargin(double mf) {
     if ( yautoscale ) {
 
 	if ( logscale & y_axis) {
-	    double b, t;
+	    double b, t; 	// bottom and top of the logscale range
 
 	    // Solving the log mapping equation for 1+mf and -mf
 	    // Isn't math cool?
@@ -104,12 +114,17 @@ void coord::addmargin(double mf) {
 	    ymax = ymax + mf * range;
 	}
     }
+
+    // If they're too close together, just punt
+    
     if ( xmax == xmin) xmax += 1.0;
     if ( ymax == ymin) ymax += 1.0;
 }
 
 
 double coord::map(double v, axis ax ) {
+// map the cooridinate from data space to [0,1]. 1 is the top of the axis,
+// 0 the bottom.  Do it right for logscale or cartesian coordinates
     switch ( ax ) {
 	case x_axis:
 	    if (logscale & x_axis ) {
@@ -132,6 +147,8 @@ double coord::map(double v, axis ax ) {
 	    break;
     }
 }
+
+// Linepoint constructor. Too long for a header, but straightforward.
 
 line::linepoint::linepoint(double xx, double yy, coord* cc, line *ll,
 			   String *s, linedescval *l, int a=0)

@@ -27,8 +27,7 @@ linelist *sl;
 String *copy_end, *copy_backstop;
 
 extern macroDictionary macros;
-extern lineDictionary lines;
-extern coordinateDictionary coordinates;
+extern graph *the_graph;
 
 int include_string(String *, struct for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
@@ -233,15 +232,15 @@ atan2|min|max		{
 				delete id;
 			}
 			else {
-				if ( ( ci = coordinates.find(id)) !=
-				            coordinates.end()) {
-				        c = (*ci).second;
-					yylval.coordptr = c;
-					return COORD_NAME;
-				} else {
-				    yylval.string = id;
-				    return IDENT;
-				}
+			    ci = the_graph->coords.find(id);
+			    if ( ci != the_graph->coords.end()) {
+				c = (*ci).second;
+				yylval.coordptr = c;
+				return COORD_NAME;
+			    } else {
+				yylval.string = id;
+				return IDENT;
+			    }
 			}
                         }
 .			DEBUG("unknown: %s\n",yytext); return 0;

@@ -25,6 +25,7 @@ class Picframe: public frame, public drawable {
 public:
     void draw(frame *) ;
 protected:
+    void autoguess(sides, double &, double&, double&, double &, int&);
     void addautoticks(sides);
     void addautogrids(sides);
     void frame_line(double, double, sides);
@@ -59,22 +60,6 @@ class Picgraph : public graph {
     int graphs;			// the number of graphs drawn this block
     Picframe *pframe;		// The pic frame for deallocation
 public:
-    void init(String *n=0, String* p=0) {
-	graph::init();	// Init the base classes parameters
-
-	if ( pframe) {
-	    delete pframe;
-	    pframe = 0; base = 0; the_frame = 0;
-	}
-
-	if ( (pframe = new Picframe) ) {
-	    base = pframe;
-	    the_frame = pframe;
-	}
-	if ( n ) name = new String(n);
-	if ( p ) pos = new String(p);
-    }
-	
     Picgraph() :
 	graph(), ps_param(0), name(0), pos(0), pic(), troff(), graphs(0) {}
     
@@ -92,93 +77,22 @@ public:
 	if ( !pic.empty )
 	    for_each(pic.begin(), pic.end(), sfree);
     }
-	    
 
+    // overload the virtual functions in graph
+    
+    void init(String * =0, String* =0);
     void begin_block(String *param) { graphs = 0; ps_param = param; }
     void end_block() { if ( graphs ) cout << ".PE" << endl; }
-
     void troff_string(String *s) {
 	String *t = new String(s);
-
 	troff.push_back(t);
     }
 	
     void pic_string(String *s) {
 	String *p = new String(s);
-
 	pic.push_back(p);
     }
 	
-    void draw() {
-
-	class string_out_f : public UnaryFunction<String*, int> {
-	    ostream &f;
-	public:
-	    int operator()(String *s) { f << *s << endl; }
-	    string_out_f(ostream& ff) : f(ff) {};
-	} string_out(cout);
-
-	class string_del_f : public UnaryFunction<String*, int> {
-	public:
-	    int operator()(String *s) { delete s; }
-	} string_del;
-
-	class line_convert_f :
-              public UnaryFunction<lineDictionary::value_type,int> {
-	    graph *g;
-	public:
-	    line_convert_f(graph *gg) : g(gg) { }
-	    int operator()(lineDictionary::value_type li) {
-		line *l = (li).second;
-		Picline *pl = new Picline(*l);
-		g->objs.push_back(pl);
-	    }
-	} line_convert(this);
-		
-
-	// Put adapters into the object list to draw lines
-
-	if ( !lines.empty() ) 
-	    for_each(lines.begin(), lines.end(), line_convert);
-	if ( visible ) {
-	    if ( !graphs++ ) {
-		cout << ".PS";
-		if (ps_param ) {
-		    cout << *ps_param;
-		    delete ps_param;
-		    ps_param = 0;
-		}
-		cout << endl;
-	    }
-	    if ( !troff.empty() ) 
-		for_each(troff.begin(), troff.end(), string_out);
-	    if ( name ) {
-		cout << *name << ": ";
-		delete name;
-		name = 0;
-	    }
-	    cout << "[" << endl;
-	    graph::draw();
-	    cout << "]";
-	    if ( pos ) {
-		cout << " " << *pos << endl;
-		delete pos;
-		pos = 0;
-	    }
-	    else cout << endl;
-	    if ( !pic.empty() ) 
-		for_each(pic.begin(), pic.end(), string_out);
-	}
-	if ( !troff.empty() ) {
-	    for_each(troff.begin(), troff.end(), string_del);
-	    troff.erase(troff.begin(), troff.end());
-	}
-	if ( !pic.empty() ) {
-	    for_each(pic.begin(), pic.end(), string_del);
-	    pic.erase(pic.begin(), pic.end());
-	}
-	    
-    }
     void add_line(line &l) {
 	Picline *pl = new Picline(l);
 	objs.push_back(pl);
@@ -193,5 +107,6 @@ public:
 	Piccircle *pc = new Piccircle(c);
 	objs.push_back(pc);
     }
+    void draw();
 };
 #endif

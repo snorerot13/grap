@@ -4,7 +4,119 @@
 #include "grap.h"
 #include "grap_pic.h"
 
+void Picgraph::init(String *n=0, String* p=0) {
+    // Start a new graph, but maybe not a new block.
+    
+    graph::init();	// Init the base classes parameters
+
+    if ( pframe) {
+	delete pframe;
+	pframe = 0; base = 0; the_frame = 0;
+    }
+
+    if ( (pframe = new Picframe) ) {
+	base = pframe;
+	the_frame = pframe;
+    }
+    if ( n ) name = new String(n);
+    if ( p ) pos = new String(p);
+}
+	
+void Picgraph::draw() {
+// Do the work of drawing the current graph.  Convert non-drawable
+// lines to Piclines, and put them in the object list for this graph.
+// Do pic specific setup for the graph, and let the base class plot
+// all the elements (they're all pic objects by now).  This also
+// clears out the pic specific data structures as they're drawn.
+
+    // Lots of functors to output, convert aand delete list elements
+    
+    class string_out_f : public UnaryFunction<String*, int> {
+	ostream &f;
+    public:
+	int operator()(String *s) { f << *s << endl; }
+	string_out_f(ostream& ff) : f(ff) {};
+    } string_out(cout);
+
+    class string_del_f : public UnaryFunction<String*, int> {
+    public:
+	int operator()(String *s) { delete s; }
+    } string_del;
+
+    class line_convert_f :
+    public UnaryFunction<lineDictionary::value_type,int> {
+	graph *g;
+    public:
+	line_convert_f(graph *gg) : g(gg) { }
+	int operator()(lineDictionary::value_type li) {
+	    line *l = (li).second;
+	    Picline *pl = new Picline(*l);
+	    g->objs.push_back(pl);
+	}
+    } line_convert(this);
+		
+
+    // Hook the lines up
+    if ( !lines.empty() ) 
+	for_each(lines.begin(), lines.end(), line_convert);
+
+    if ( visible ) {
+	if ( !graphs++ ) {
+	    cout << ".PS";
+	    if (ps_param ) {
+		cout << *ps_param;
+		delete ps_param;
+		ps_param = 0;
+	    }
+	    cout << endl;
+	}
+	// Print any saved embedded troff
+	
+	if ( !troff.empty() ) 
+	    for_each(troff.begin(), troff.end(), string_out);
+
+	// if we have a name, use it
+	if ( name ) {
+	    cout << *name << ": ";
+	    delete name;
+	    name = 0;
+	}
+
+	// The graph itself
+	cout << "[" << endl;
+	graph::draw();
+	cout << "]";
+
+	// Positioning info relative to another graph in this block
+	if ( pos ) {
+	    cout << " " << *pos << endl;
+	    delete pos;
+	    pos = 0;
+	}
+	else cout << endl;
+
+	// Saved pic commands
+	if ( !pic.empty() ) 
+	    for_each(pic.begin(), pic.end(), string_out);
+    }
+
+    // Clear out any saved pic/troff commands
+    if ( !troff.empty() ) {
+	for_each(troff.begin(), troff.end(), string_del);
+	troff.erase(troff.begin(), troff.end());
+    }
+    if ( !pic.empty() ) {
+	for_each(pic.begin(), pic.end(), string_del);
+	pic.erase(pic.begin(), pic.end());
+    }
+	    
+}
+
+
 void PicDisplayString::draw(frame *) {
+// Draw a display string.  Basically just a straight translation into
+// pic/troff idioms.
+    
     if ( size ) {
 	if ( relsz ) {
 	    if (size > 0.0 )  {
@@ -33,6 +145,7 @@ void PicDisplayString::draw(frame *) {
 
 
 void Picframe::frame_line(double x2, double y2, sides s) {
+// straightforward line drawing of one frame line
 
     if ( desc[s].color ) {
 	desc[s].color->unquote();
@@ -78,15 +191,16 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 }
 
 void Picframe::label_line(sides s) {
-    int gn;
-    DisplayString *str;
-    // XXX this should be a member function of Display String
+// Label a graph side.  We rely heavily on pic tricks here.  The C++
+// is straightforward.
 
-    class displaystring : public UnaryFunction<DisplayString*, int> {
+    // Functor to convert a DisplayString to a PicdisplayString and print it
+    class display_f : public UnaryFunction<DisplayString*, int> {
     public:
 	int operator() (DisplayString *str) {
 	    PicDisplayString *p = new PicDisplayString(*str);
 	    p->draw(0);
+	    delete p;
 	}
     } display;
 	    
@@ -127,17 +241,16 @@ void Picframe::label_line(sides s) {
     cout << endl;
 }
 
-void Picframe::addautoticks(sides sd) {
-    double lo, hi;
-    double range;
-    double ts;
-    double dir, idx;
-    int ls;
-    String *s;
-    tick *t;
+void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
+			 double &ts, int& ls) {
+// Calculate a reasonable placement of tickmarks if the user has not
+// specified one.  We aim for 5.  The algorithm is heuristic.
+    
+    double lo, hi;	// Low and high tickmarks
+    double range;	// the range of the coordinate system
 
-    if ( tickdef[sd].size == 0 ) return;
-
+    // determine the range of the axes
+    
     if ( sd == bottom || sd == top ) {
 	lo = tickdef[sd].c->xmin;
 	hi = tickdef[sd].c->xmax;
@@ -148,6 +261,7 @@ void Picframe::addautoticks(sides sd) {
 	ls = (tickdef[sd].c->logscale & y_axis);
     }
 
+    // Make our ticksize guess
     if ( !ls ) {
 	range = fabs(hi - lo);
 	
@@ -159,9 +273,26 @@ void Picframe::addautoticks(sides sd) {
 	idx = pow(10,floor(log10(lo)));
     }
 
+    // Are ticks increasing or decreasing?
     if ( hi - lo < 0 ) dir = -1;
     else dir = 1;
 
+    lim = hi;
+}
+
+
+void Picframe::addautoticks(sides sd) {
+// Place ticks in accordance with the parameters returned by autoguess
+    double ts;		// The tick size (for linear axes)
+    double dir, idx;	// The direction of ticks and an index value
+    double hi;		// the tick limit
+    int ls;		// is this a logscale axis?
+    tick *t;		// Temporary tick value
+
+    if ( tickdef[sd].size == 0 ) return;
+
+    autoguess(sd, idx, dir, hi, ts, ls);
+ 
     while ( idx - hi < EPSILON*dir ) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
 		     tickdef[sd].c);
@@ -174,38 +305,16 @@ void Picframe::addautoticks(sides sd) {
 }
     
 void Picframe::addautogrids(sides sd) {
-    double lo, hi;
-    double range;
+// Place grids in accordance with the parameters returned by autoguess
     double ts;
     double dir, idx;
+    double hi;
     int ls;
-    String *s;
     grid *g;
 
     if ( griddef[sd].desc.ld == def ) return;
 
-    if ( sd == bottom || sd == top ) {
-	lo = griddef[sd].c->xmin;
-	hi = griddef[sd].c->xmax;
-	ls = (tickdef[sd].c->logscale & x_axis);
-    } else {
-	lo = griddef[sd].c->ymin;
-	hi = griddef[sd].c->ymax;
-	ls = (tickdef[sd].c->logscale & y_axis);
-    }
-
-    if ( !ls ) {
-	range = fabs(hi - lo);
-	ts = pow(10,floor(log10(range)));
-	while ( range/ts > 6 ) ts *= 2;
-	while ( range/ts < 4 ) ts /=2;
-	idx = ts * ceil(lo/ts);
-    } else {
-	idx = pow(10,floor(log10(lo)));
-    }
-
-    if ( hi - lo < 0 ) dir = -1;
-    else dir = 1;
+    autoguess(sd, idx, dir, hi, ts, ls);
 
     while ( idx - hi < EPSILON*dir ) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,
@@ -219,6 +328,13 @@ void Picframe::addautogrids(sides sd) {
 }    
 
 void Picframe::draw(frame *) {
+// Draw the frame.  Autotick if necessary and draw the axes and
+// tickmarks.  Straightforward application of the helpers above.  The
+// result is a frame that is labelled for pic placement of other
+// graphs in the same block.
+    
+    // functors to draw ticks and grids out of the lists.  We generate
+    // temporary Pic objects and plot them.
     class draw_tick_f : public UnaryFunction<tick *, int> {
 	frame *f;
     public:
@@ -261,9 +377,13 @@ void Picframe::draw(frame *) {
 }
 
 void Picline::draw(frame *f) {
-    list<line::linepoint*>::iterator lpi;
-    linepoint *lp;
-    double x,y;
+// Iterate through the points in the line and draw them.  Map them
+// according to the point's coordinates, then put them into the graph.
+// There are some details to laying out the styles and poltting
+// strings correctly.
+    list<line::linepoint*>::iterator lpi;// An iterator to traverse the list
+    linepoint *lp;			// The current point
+    double x,y;				// Scratch
 
     if ( pts.empty() ) return;
 
@@ -321,9 +441,13 @@ void Picline::draw(frame *f) {
 }
 
 void Pictick::draw(frame *f) {
-    double a,b;
-    char *dir;
-    char *just;
+// Actually draw a tick mark.  Map it into the appropriate coordinate
+// space and draw and label the line.  The translation from data
+// structure to pic is straightforward.
+    
+    double a,b;	// x and y offsets from the origin
+    char *dir;	// Direction of the tick mark
+    char *just;	// placement of the label relative to the end of the tick
 	
     switch (side) {
 	case left:
@@ -390,6 +514,7 @@ void Pictick::draw(frame *f) {
 }
     
 void Picgrid::draw(frame *f) {
+// Draw a grid line.  As usual very similar to a tick.
     double a,b;
     double len;
     char *dir;
@@ -479,8 +604,8 @@ void Picgrid::draw(frame *f) {
 }
     
 void Piccircle::draw(frame *f) {
-    double x,y;
-    int gn;
+// Plot a circle.  Strightforward.
+    double x,y;	// To transform the point into device coordinates
 	
     x = center.c->map(center.x,x_axis);
     y = center.c->map(center.y,y_axis);
@@ -502,13 +627,13 @@ void Piccircle::draw(frame *f) {
 }
 
 void Picplot::draw(frame *f) {
-    DisplayString *s;
-    double x, y;
-    int gn;
+// Slightly trickier than the circle because we have to output a list
+// of strings instead of one.  A functor to convert the DisplayStrings
+// to PicDisplayStrings and plot them simplifies matters.
+    double x, y;  // To transform the point into device coordinates
 
-    // XXX again, this should be a member of Display String
-
-    class displaystring : public UnaryFunction<drawable*, int> {
+    // To print a set of strings
+    class display_f: public UnaryFunction<drawable*, int> {
     public:
 	int operator() (DisplayString *s) {
 	    PicDisplayString *ps = new PicDisplayString(*s);

@@ -10,21 +10,10 @@
 #endif
 
 doubleDictionary vars;
-coordinateDictionary coordinates;
-lineDictionary lines;
-
 graph *the_graph =0;
-
-// plotSequence plots;
-// circleSequence circles;
-// stringSequence pic;
-// stringSequence troff;
-// frame the_frame;
 lexStack lexstack;
 macroDictionary macros;
-// int visible;
 int first_line;
-//int graphs;
 
 extern int lex_expand_macro;
 
@@ -124,22 +113,12 @@ graph :
                 if ( !the_graph) the_graph = new Picgraph;
 		the_graph->init();
 		init_dict();
-		//init_graph();
 		first_line = 1;
-//		graphs = 0;
-// 		if ( $1 ) ps_param = $1;
-// 		else ps_param = 0;
 		the_graph->begin_block($1);
 	    } prog END
             {
 		the_graph->draw();
 		the_graph->end_block();
-//		draw_graph();
-// 		if ( graphs ) cout << ".PE" << endl;
-// 		if ( ps_param ) {
-// 		    delete ps_param;
-// 		    ps_param = 0;
-// 		}
 	    }
 ;
 prog :
@@ -231,8 +210,6 @@ string:
 		     
 
 		 for_each($5->begin(), $5->end(), num_to_str);
-// 		 for ( gotnext = $5->first(d); gotnext; gotnext= $5->next(d)) 
-// 		     s->next_number(d);
 		 s->finish_fmt();
 		 delete $5;
 		 delete $3;
@@ -594,7 +571,6 @@ plot_statement:
 		plot *p = new plot($1,$3);
 		the_graph->add_plot(*p);
 		delete p;
-//		plots.push_back(p);
 	    }
 |	PLOT expr opt_string AT point SEP
 	    {
@@ -615,8 +591,6 @@ plot_statement:
 		p = new plot(seq,$5);
 		the_graph->add_plot(*p);
 		delete p;
-//		plots.push_back(p);
-		    
 	    }
 ;
 
@@ -1119,9 +1093,11 @@ coord_statement:
 		coordinateDictionary::iterator ci;
 
 		if ($2) {
-		    if ( (ci = coordinates.find($2)) == coordinates.end()) {
+		    ci = the_graph->coords.find($2);
+		    
+		    if (  ci == the_graph->coords.end()) {
 			c = new coord;
-			coordinates[$2] = c;
+			the_graph->coords[$2] = c;
 		    }
 		    else { c = (*ci).second; }
 		    delete $2;
@@ -1294,16 +1270,12 @@ graph_statement:
 		    the_graph->draw();
 		    the_graph->init($2, $4);
 		    init_dict();
-// 		    draw_graph();
-// 		    init_graph();
 		}
 		else {
 		    the_graph->init($2, $4);
 		    init_dict();
 		}
 		    
-// 		graph_name = new String($2);
-// 		if ( $4 ) graph_pos = new String($4);
 		if ( $2 ) delete $2;
 		if ( $4 ) delete $4;
 	    }
@@ -1360,153 +1332,10 @@ int yyparse();
 
 extern int yylex();
 
-void draw_graph() {
-//     int gn;
-//     coord *c;
-//     line *l;
-//     plot *p;
-//     circle *cir;
-//     String *s;
-//     coordinateDictionary::iterator ci;
-    
-//     class string_out_f : public UnaryFunction<String*, int> {
-// 	ostream &f;
-//     public:
-// 	int operator()(String *s) { f << *s << endl; }
-// 	string_out_f(ostream& ff) : f(ff) {};
-//     } string_out(cout);
-
-//     class plot_out_f : public UnaryFunction<plot *,int> {
-// 	frame *f;
-//     public:
-// 	plot_out_f(frame *ff) : f(ff) {};
-// 	int operator() (plot *p) { p->draw(f); }
-//     } plot_out(&the_frame);
-	
-//     class circle_out_f : public UnaryFunction<circle *,int> {
-// 	frame *f;
-//     public:
-// 	circle_out_f(frame *ff) : f(ff) {};
-// 	int operator() (circle *c) { c->draw(f); }
-//     } circle_out(&the_frame);
-	
-//     class line_out_f : public UnaryFunction<line *,int> {
-// 	frame *f;
-//     public:
-// 	line_out_f(frame *ff) : f(ff) {};
-// 	int operator() (lineDictionary::value_type li) {
-// 	    line *l = li.second;
-// 	    l->draw(f);
-// 	}
-//     } line_out(&the_frame);
-	
-//     class addm_f :
-//     public UnaryFunction<coordinateDictionary::value_type, int> {
-//     public:
-// 	int operator() (coordinateDictionary::value_type cp) {
-// 	    coord *c = cp.second;
-// 	    c->addmargin(0.07);
-// 	}
-//     } addm;
-
-//     for_each(coordinates.begin(), coordinates.end(), addm);
-//     if ((ci = coordinates.find("grap.internal.default"))
-// 	 == coordinates.end()) {
-// 	cerr << "Lost default coords!!" << endl;
-// 	exit(20);
-//     }
-//     else { c = (*ci).second; }
-//     if ( visible ) {
-// 	if ( !graphs++ ) {
-// 	    cout << ".PS";
-// 	    if (ps_param ) cout << *ps_param;
-// 	    cout << endl;
-// 	}
-// 	for_each(troff.begin(), troff.end(), string_out);
-// 	if ( graph_name ) cout << *graph_name << ": ";
-// 	cout << "[" << endl;
-// 	the_graph->base->draw();
-	
-// 	for_each(plots.begin(), plots.end(), plot_out);
-// 	for_each(circles.begin(), circles.end(), circle_out);
-// 	for_each(lines.begin(), lines.end(), line_out ) ;
-	
-// 	cout << "]";
-// 	if ( graph_pos ) cout << " " << *graph_pos << endl;
-// 	else cout << endl;
-// 	for_each(pic.begin(), pic.end(), string_out);
-//     }
-//     if ( graph_name ) {
-// 	delete graph_name;
-// 	graph_name = 0;
-//     }
-//     if ( graph_pos ) {
-// 	delete graph_pos;
-// 	graph_pos = 0;
-//     }
-}
 
 void init_dict() {
-//     int gotnext;
-//     coord *c;
-//     line *l;
-//     plot *p;
-//     circle *cir;
-//     String *s;
-
-       linedescval defld = { invis,0,0 };
-
-//     class del_str_f : public UnaryFunction<String *, int> {
-//     public:
-// 	int operator() (String *s) { delete s; }
-//     } del_str;
-
-//     class del_plot_f : public UnaryFunction<plot *, int> {
-//     public:
-// 	int operator() (plot *p) { delete p; }
-//     } del_plot;
-
-//     class del_circle_f : public UnaryFunction<circle *, int> {
-//     public:
-// 	int operator() (circle *c) { delete c; }
-//     } del_circle;
-
-//     class del_coords_f :
-//     public UnaryFunction<coordinateDictionary::value_type, int> {
-//     public:
-// 	int operator() (coordinateDictionary::value_type ci) {
-// 	    coord * c = ci.second;
-// 	    delete c;
-// 	}
-//     } del_coords;
-
-//     class del_line_f :
-//     public UnaryFunction<lineDictionary::value_type, int> {
-//     public:
-// 	int operator() (lineDictionary::value_type li) {
-// 	    line * l = li.second;
-// 	    delete l;
-// 	}
-//     } del_line;
-
-//     visible = 0;
-
-//     the_graph->clear();
-// //     for_each(coordinates.begin(), coordinates.end(), del_coords);
-// //     for_each(lines.begin(), lines.end(), del_line);
-// //     for_each(plots.begin(), plots.end(), del_plot);
-// //     for_each(circles.begin(), circles.end(), del_circle);
-//     for_each(troff.begin(), troff.end(), del_str);
-//     for_each(pic.begin(), pic.end(), del_str);
+    linedescclass defld(invis,0,0);
     
-//     coordinates.erase(coordinates.begin(), coordinates.end());
-//     lines.erase(lines.begin(), lines.end());
-//     plots.erase(plots.begin(), plots.end());
-//     circles.erase(circles.begin(), circles.end());
-//     pic.erase(pic.begin(), pic.end());
-//     troff.erase(troff.begin(), troff.end());
-//     the_frame.clear();
-		
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
     for ( int i = 0 ; i < 4; i++) {

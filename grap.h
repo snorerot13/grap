@@ -34,7 +34,6 @@ typedef list<DisplayString *> stringlist;
 #include "grap_pic.h"
 
 
-
 #define RAND 0
 
 #define LOGFCN 0
