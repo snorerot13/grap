@@ -14,7 +14,8 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#else
+#endif
+#ifndef HAVE_OPTARG
 extern "C" {
     extern char *optarg;
     extern int optind;

@@ -66,4 +66,14 @@ else
 		AC_DEFINE(RAND_DECLARED)
 	fi
 fi
+
+if test $ac_cv_header_unistd_h = "yes" ; then
+AC_CACHE_CHECK(for optarg in unistd.h,grap_cv_header_optarg,
+AC_EGREP_HEADER(optarg,unistd.h,grap_cv_header_optarg="yes";
+,grap_cv_header_optarg="no"))
+if test $grap_cv_header_optarg = "yes"; then
+AC_DEFINE(OPTARG_DEFINED)
+fi
+fi
+
 AC_OUTPUT(examples/Makefile Makefile)

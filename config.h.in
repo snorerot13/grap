@@ -14,5 +14,6 @@
 #undef HAVE_RAND
 #undef HAVE_STRDUP
 #undef RANDOM_DECLARED
+#undef OPTARG_DEFINED
 
 #endif
