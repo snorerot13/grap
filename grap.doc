@@ -686,6 +686,20 @@ for more details.
 Prints its argument to the standard error.
 .Ed
 .Pp
+.Ic sh Ar block
+.Bd -filled -offset indent
+This passes 
+.Ar block
+to 
+.Xr sh 1 .
+Unlike K&B 
+.Nm
+no macro or variable expansion is done.  I believe that this is also
+true for gnu pic version 1.10.  See the 
+.Sx Macros
+section for information on defining blocks.
+.Ed
+.Pp
 .Ic pic Ar pic_statement
 .Bd -filled -offset indent
 This issues the given 
@@ -894,6 +908,7 @@ for more examples of macros.
 .Xr groff 1 ,
 .Xr pic 1 ,
 .Xr printf 3 ,
+.Xr sh 1 ,
 .Xr sprintf 3 ,
 .Xr troff 1
 .Sh AUTHOR
