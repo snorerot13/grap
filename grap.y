@@ -176,7 +176,7 @@ public:
     copydesc *copyd;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
-%type <num> opt_wid assignment_statement
+%type <num> opt_wid assignment_statement if_expr
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
 %type <string> START string
@@ -330,7 +330,7 @@ expr_list:
 
 opt_expr:
             { $$ = 0; }
-|	NUMBER
+|	expr
 	    { $$ = $1; }
 ;
 
@@ -517,10 +517,6 @@ expr:
             { $$ = ($1 || $3); }
 |	NOT expr %prec PLUS
             { $$ = ! ( (int) $2); }
-|	string EQ string
-            { $$ = (*$1 == *$3); }
-|	string NEQ string
-            { $$ = (*$1 != *$3); }
 |	FUNC0 LPAREN RPAREN
 	    {
 		switch ($1) {
@@ -599,6 +595,121 @@ expr:
 	     }
 |	NUMBER
 	    { $$ = $1; }
+;
+
+if_expr:
+	if_expr PLUS if_expr
+	    { $$ = $1 + $3; }
+|	if_expr MINUS if_expr
+            { $$ = $1 - $3; }
+|	if_expr TIMES if_expr
+	    { $$ = $1 * $3; }
+|	if_expr DIV if_expr
+	    { $$ = $1 / $3; }
+|	if_expr CARAT if_expr
+	    { $$ = pow($1,$3);}
+|	MINUS if_expr %prec CARAT
+	    { $$ = - $2;}
+|	if_expr EQ if_expr
+            { $$ = ($1 == $3); }
+|	if_expr NEQ if_expr
+            { $$ = ($1 != $3); }
+|	if_expr LT if_expr
+            { $$ = ($1 < $3); }
+|	if_expr GT if_expr
+            { $$ = ($1 > $3); }
+|	if_expr LTE if_expr
+            { $$ = ($1 <= $3); }
+|	if_expr GTE if_expr
+            { $$ = ($1 >= $3); }
+|	if_expr AND if_expr
+            { $$ = ($1 && $3); }
+|	if_expr OR if_expr
+            { $$ = ($1 || $3); }
+|	NOT if_expr %prec PLUS
+            { $$ = ! ( (int) $2); }
+|	FUNC0 LPAREN RPAREN
+	    {
+		switch ($1) {
+		    case RAND:
+			$$ = double(random()) / (pow(2,32)-1);
+			break;
+		    default:
+			$$ = 0;
+			break;
+		}
+	    }
+|	FUNC1 LPAREN if_expr RPAREN
+ 	    {
+		switch ($1) {
+		    case LOGFCN:
+			$$ = log10($3);
+			break;
+		    case EXP:
+			$$ = pow(10,$3);
+			break;
+		    case EEXP:
+			$$ = exp($3);
+			break;
+		    case INT:
+			$$ = int($3);
+			break;
+		    case SIN:
+			$$ = sin($3);
+			break;
+		    case COS:
+			$$ = cos($3);
+			break;
+		    case SQRT:
+			$$ = sqrt($3);
+			break;
+		    default:
+			$$ = 0;
+			break;
+		}
+	    }
+|	FUNC2 LPAREN if_expr COMMA if_expr RPAREN
+	    {
+
+		switch ($1) {
+		    case MAXFUNC:
+			$$ = ($3 > $5 ) ? $3 : $5;
+			break;
+		    case MINFUNC:
+			$$ = ($3 < $5 ) ? $3 : $5;
+			break;
+		    case ATAN2:
+			$$ = atan2($3,$5);
+			break;
+		    default:
+			$$ = 0;
+			break;
+		}
+	    }
+|	LPAREN if_expr RPAREN
+ 	    { $$ = $2; }
+|	IDENT
+ 	    {
+		double *d;
+		doubleDictionary::iterator di;
+		
+		if ( (di = vars.find(*$1)) != vars.end()) {
+		    d = (*di).second;
+		    $$ = *d;
+		}
+		else {
+		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
+		    $$ = 0.0;
+		}
+
+		delete $1;
+	     }
+|	NUMBER
+	    { $$ = $1; }
+|	string EQ string
+            { $$ = (*$1 == *$3); }
+|	string NEQ string
+            { $$ = (*$1 != *$3); }
 ;
 
 assignment_statement:
@@ -935,8 +1046,6 @@ by_clause:
 	    }
 |	BY PLUS expr
 	    { $$.op = PLUS; $$.expr = $3; }
-|	BY MINUS expr
-	    { $$.op = MINUS; $$.expr = $3; }
 |	BY TIMES expr
 	    { $$.op = TIMES; $$.expr = $3; }
 |	BY DIV expr
@@ -1309,22 +1418,26 @@ copy_statement:
 		unquote($2);
 		if (!include_file($2)) return 0;
 	    }
-|	COPY until_clause THRU { lex_hunt_macro(); } MACRO SEP
+|	COPY until_clause THRU { lex_hunt_macro(); } MACRO  until_clause SEP
 	    {
-//  		if ( $2 && $3 ) {
-//  		    yyerror("Can't specify both filename and until");
-//  		}
-		if ( $2 ) {
+		copydesc *c = 0; // To shut the compiler up about uninit
+		if ( $2 && $6 ) {
+		    delete $2;
+		    delete $6;
+		    yyerror("Only specify 1 unilt or filename\n");
+		}
+		else c = ($2) ? $2 : $6;
+		if ( c ) {
 		    // lex_begin_copy takes command of the string that's
 		    // passed to it, sio don't delete it.  (I don't
 		    // remember why I did that...)
-		    if ( $2->t == copydesc::until ) lex_begin_copy($2->s);
+		    if ( c->t == copydesc::until ) lex_begin_copy(c->s);
 		    else {
 			lex_begin_copy(0);
-			include_file($2->s);
-			delete $2->s;
+			include_file(c->s);
+			delete c->s;
 		    }
-		    delete $2;
+		    delete c;
 		}
 	    }
 	COPYTEXT
@@ -1336,12 +1449,12 @@ copy_statement:
 
 		expand = new String;
 
-		while ( $8 && !$8->empty() ) {
+		while ( $9 && !$9->empty() ) {
 		    int i = 0;
 		    t = new String;
 		    
-		    s = $8->front();
-		    $8->pop_front();
+		    s = $9->front();
+		    $9->pop_front();
 		    lim = s->length();
 		    
 		    while ( i < lim ) {
@@ -1362,7 +1475,7 @@ copy_statement:
 		}
 		include_string(expand,0,GMACRO);
 		delete expand;
-		delete $8;
+		delete $9;
 		// don't delete defined macros
 		if ( !$5->name)
 		    delete $5;
@@ -1415,7 +1528,7 @@ else_clause:
 ;
 
 if_statement:
-	IF expr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
+	IF if_expr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
 	    {
 		// force all if blocks to be terminated by a SEP
 		*$5 += ';';

@@ -204,7 +204,9 @@ different plotting styles and labels.  My version of this graph also
 uses the 
 .CW until
 keyword to include the data rather than external
-files.
+files.  
+.CW until
+appears before and after the macro definiton.
 .EQ
 delim off
 .EN
@@ -225,7 +227,7 @@ delim off
 \&1992 43.50
 \&END
 \&new dotted
-\&copy until "END" thru {next at $1, $2;}
+\&copy thru {next at $1, $2;} until "END" 
 \&1964 52
 \&1968 52
 \&[...]
@@ -272,7 +274,7 @@ copy until "END" thru {next at $1, $2;}
 1992 43.50
 END
 new dotted
-copy until "END" thru {next at $1, $2;}
+copy thru {next at $1, $2;} until "END" 
 1964 52
 1968 52
 1972 51.08
@@ -324,7 +326,8 @@ the bottom ticks shows the
 .CW
 from .. to .. by
 .R
-construct.
+construct.  The filename is given after the macro for variety (and to
+test that feature).
 .EQ
 delim off
 .EN
@@ -338,7 +341,7 @@ delim off
 \&label left "Millions of Hosts"
 \&label bot "Year"
 \&draw solid
-\&copy "internet.d" thru { next at $1, $2/1e6; }
+\&copy thru { next at $1, $2/1e6;} "internet.d" 
 \&.G2
 .ft
 .DE
@@ -353,7 +356,7 @@ ticks left
 label left "Millions of Hosts"
 label bot "Year"
 draw solid
-copy "internet.d" thru { next at $1, $2/1e6; }
+copy thru { next at $1, $2/1e6;} "internet.d"
 .G2
 .KE
 .KS

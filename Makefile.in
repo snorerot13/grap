@@ -55,7 +55,7 @@ version.cc:	Makefile
 	echo "$(DISTDIR)" | perl -ne 'print "char *version=\"$(DISTDIR)\";\n";' > version.cc
 
 y.output:	grap.y
-	$(YACC) -v $<
+	$(YACC) -v grap.y
 
 grap.an:	grap.doc
 	perl -pe "s#DEFINES#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc | groff -Tascii -mdoc | rman -f roff > grap.an

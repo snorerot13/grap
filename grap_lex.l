@@ -16,7 +16,7 @@ extern "C" {
 #include "grap_draw.h" 
 #include "y.tab.h"
 
-#define LEX_DEBUG
+//#define LEX_DEBUG
 #ifndef LEX_DEBUG
 #define DEBUG(a,b) {}
 #else
