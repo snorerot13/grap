@@ -173,7 +173,7 @@ public:
     DisplayString(string s, int ju=0, double sz=0, int rsz=0, bool c=true,
 	    string *col=0) :
 	string(s), j(ju), size(sz), relsz(rsz), clip(c), color(col) { }
-    DisplayString(DisplayString& ds) :
+    DisplayString(const DisplayString& ds) :
 	string(ds), j(ds.j), size(ds.size), relsz(ds.relsz), clip(ds.clip),
 	color(ds.color) { 
 	    if ( color ) color = new string(*color);
@@ -264,7 +264,7 @@ public:
     coord *c;		// The coordinate scale that the tick is in
     
     tick() : where(0), size(0), side(top_side), prt(0), shift(), c(0) { }
-    tick(tick& t) :
+    tick(const tick& t) :
 	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
 	shiftcpy sc(&shift);
 	
@@ -344,7 +344,7 @@ public:
 	for_each(t->shift.begin(), t->shift.end(), sc);
     }
 
-    grid(grid& g) : where(g.where), desc(g.desc), side(g.side), prt(0),
+    grid(const grid& g) : where(g.where), desc(g.desc), side(g.side), prt(0),
 		shift(), c(g.c) {
 	shiftcpy sc(&shift);
 
@@ -489,7 +489,7 @@ public:
 		    arrow(false) { } ;
     linesegment(double xx, double yy, coord* cc, line *ll, DisplayString *s=0,
 	      linedesc *l=0, bool a=0);
-    linesegment(linesegment& ls) :
+    linesegment(const linesegment& ls) :
 	to(ls.to), desc(ls.desc), plotstr(0) , arrow(ls.arrow) {
 	if ( ls.from ) from = new point(ls.from);
 	if ( ls.plotstr ) plotstr = new DisplayString(*ls.plotstr);
@@ -515,7 +515,7 @@ public:
 	if (s) plotstr = new DisplayString(*s);
     }
     
-    line(line& l) : plotstr(0), desc(l.desc),  lastpoint(0) {
+    line(const line& l) : plotstr(0), desc(l.desc),  lastpoint(0) {
 	if ( l.plotstr ) {
 	    plotstr = new DisplayString(*l.plotstr);
 	}
@@ -591,7 +591,7 @@ public:
     circle(point *p, double r, linedesc *l=0) : center(p), rad(r), ld(solid) {
 	if ( l ) ld = *l;
     }
-    circle(circle& c) : center(&c.center), rad(c.rad), ld(c.ld) { }
+    circle(const circle& c) : center(&c.center), rad(c.rad), ld(c.ld) { }
 };
 
 class box {
