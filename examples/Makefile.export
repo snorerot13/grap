@@ -1,0 +1,10 @@
+MACROS=-ms 
+
+example.ps:	example.ms
+	grap example.ms | groff -pe $(MACROS) > example.ps
+
+local.example.ps:	example.ms
+	../grap -d ../grap.defines example.ms | groff -pe $(MACROS) > local.example.ps
+
+clean:
+	rm -f *.ps 
