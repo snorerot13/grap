@@ -31,6 +31,9 @@ although I'm uncertain if a version was ever released with the bug
 intact.  I think this may have been a related to Lee Ji Hwan's bug,
 which means it probably hasn't seen the light of day.
 
+-h prints a usage summary.  --help is a synonym for -h and --version is a
+synonym for -v.
+
 1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially
 revamped, and the code brought into better conformance with the
