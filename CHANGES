@@ -1,5 +1,8 @@
 Change log
 
+1.26: .lf was appearing outside the PS/PE pairs, so I disabled generation of
+those lines.
+
 1.25: Fixed a bug parsing draw/new with no line descriptions.  Thanks to
 Robert W. Numrich for spotting it.
 
