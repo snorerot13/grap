@@ -30,6 +30,7 @@ class plot;
 class tick;
 class grid;
 class circle;
+class shiftdesc;
 
 typedef less<String> Strcmp;
 
@@ -46,6 +47,7 @@ typedef list<String *> stringSequence;
 typedef list<circle *> circleSequence;
 typedef list<struct grap_buffer_state*> lexStack;
 typedef list<DisplayString *> stringlist;
+typedef list<shiftdesc *> shiftlist;
 
 #include "grap_draw.h"
 #include "grap_pic.h"

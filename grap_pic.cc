@@ -245,39 +245,66 @@ void Picframe::label_line(sides s) {
 
     // Functor to convert a DisplayString to a PicdisplayString and print it
     display_f display;
+    double dx, dy; // Used to place the alignment line relative to the axis
+    shiftlist::const_iterator csi;
+
+    switch (s) {
+	case left:
+	    dx = -0.4; dy = 0;
+	    break;
+	case right:
+	    dx = 0.4; dy = 0;
+	    break;
+	case top:
+	    dx = 0; dy = 0.4;
+	    break;
+	case bottom:
+	    dx = 0; dy = -0.4;
+	    break;
+	default: // to keep the compiler quiet
+	    dx = dy = 0;
+	    break;
+    }
+
+    for (csi = lshift[s]->begin(); csi != lshift[s]->end(); csi++) {
+	switch ((*csi)->dir) {
+	    case left:
+		dx -= (*csi)->param;
+		break;
+	    case right:
+		dx += (*csi)->param;
+		break;
+	    case top:
+		dy += (*csi)->param;
+		break;
+	    case bottom:
+		dy -= (*csi)->param;
+		break;
+	}
+    }
 	    
     cout << "line invis ";
 
     for_each(label[s]->begin(), label[s]->end(), display);
 
-    cout << "from Frame.";
-    switch (lshift[s].dir) {
+    switch (s) {
 	case left:
-	    cout << "Left.start - (" << lshift[s].param << ", 0) " ;
+	    cout << "from Frame.Left.start + (" << dx << ", " << dy << ") " ;
+	    cout << "to Frame.Left.end + (" << dx << ", " << dy << ") " ;
 	    break;
 	case right:
-	    cout << "Right.start + (" << lshift[s].param << ", 0) " ;
+	    cout << "from Frame.Right.start + (" << dx << ", " << dy << ") " ;
+	    cout << "to Frame.Right.end + (" << dx <<  ", " << dy << ") " ;
 	    break;
 	case bottom:
-	    cout << "Bottom.end - (0, " << lshift[s].param << ") " ;
+	    cout << "from Frame.Bottom.end + (" << dx <<  ", " << dy << ") " ;
+	    cout << "to Frame.Bottom.start + (" << dx <<  ", " << dy << ") " ;
 	    break;
 	case top:
-	    cout << "Top.start + (0, " << lshift[s].param << ") " ;
+	    cout << "from Frame.Top.start + (" << dx <<  ", " << dy << ") " ;
+	    cout << "to Frame.Top.end + (" << dx << ", " << dy << ") " ;
 	    break;
-    }
-    cout << "to Frame.";
-    switch (lshift[s].dir) {
-	case left:
-	    cout << "Left.end - (" << lshift[s].param << ", 0) " ;
-	    break;
-	case right:
-	    cout << "Right.end + (" << lshift[s].param << ", 0) " ;
-	    break;
-	case bottom:
-	    cout << "Bottom.start - (0, " << lshift[s].param << ") " ;
-	    break;
-	case top:
-	    cout << "Top.end + (0, " << lshift[s].param << ") " ;
+	default:
 	    break;
     }
     cout << endl;
@@ -471,6 +498,7 @@ void Pictick::draw(frame *f) {
     double a,b;	// x and y offsets from the origin
     char *dir;	// Direction of the tick mark
     char *just;	// placement of the label relative to the end of the tick
+    Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
 	
     switch (side) {
 	default:
@@ -514,24 +542,9 @@ void Pictick::draw(frame *f) {
 	cout << "move from Frame.Origin + (" << a << ", " << b;
 	cout << ") then " << dir << " ";
 	cout << dist << endl;
-	if ( shift.param != 0 ) {
-	    cout << "move " ;
-	    switch (shift.dir) {
-		case left:
-		    cout << "left ";
-		    break;
-		case right:
-		    cout << "right ";
-		    break;
-		case top:
-		    cout << "up ";
-		    break;
-		case bottom:
-		    cout << "down ";
-		    break;
-	    }
-	    cout << shift.param << endl;
-	}
+
+	for_each(shift.begin(), shift.end(), sd);
+
 	prt->quote();
 	cout << *prt << " " << just << " at Here" << endl;
     }
@@ -542,6 +555,7 @@ void Picgrid::draw(frame *f) {
     double a,b;
     double len;
     char *dir;
+    Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
 	
     switch (side) {
 	default:
@@ -605,24 +619,9 @@ void Picgrid::draw(frame *f) {
 	cout << "move from Frame.Origin + (" << a << ", " << b;
 	cout << ") then " << dir << " ";
 	cout << -0.125 << endl;
-	if ( shift.param != 0 ) {
-	    cout << "move " ;
-	    switch (shift.dir) {
-		case left:
-		    cout << "left ";
-		    break;
-		case right:
-		    cout << "right ";
-		    break;
-		case top:
-		    cout << "up ";
-		    break;
-		case bottom:
-		    cout << "down ";
-		    break;
-	    }
-	    cout << shift.param << endl;
-	}
+
+	for_each(shift.begin(), shift.end(), sd);
+
 	prt->quote();
 	cout << *prt << " at Here" << endl;
     }

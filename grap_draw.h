@@ -101,6 +101,21 @@ public:
     }
 };
 
+// This functor copies one shiftlist into another, making copies of
+// each shiftdesc on the list.  It's used by various objects that have
+// shiftlists in them.  Each element is inserted at the back
+class shiftcpy : public unary_function<shiftdesc*, int> {
+protected:
+    shiftlist *s;	// The new shiftlist
+public:
+    shiftcpy(shiftlist *ss) : s(ss) { }
+    int operator() (shiftdesc *sd) {
+	shiftdesc *sd2 = new shiftdesc(sd);
+	s->push_back(sd2);
+	return 1;
+    }
+};
+
 class frame;
 
 // An abstract class that means that an object is drawable, and
@@ -172,32 +187,45 @@ public:
     double size;	// how large a tick mark to make
     sides side;		// Which side of the graph the mark is on
     String *prt;	// The string to print next to the mark
-    shiftdesc shift;	// Shift information, to fine tune position of prt
+    shiftlist shift;	// Shift information, to fine tune position of prt
     coord *c;		// The coordinate scale that the tick is in
     
-    tick() : where(0), size(0), side(top), prt(0), shift(0), c(0) { }
+    tick() : where(0), size(0), side(top), prt(0), shift(), c(0) { }
     tick(tick& t) :
-	where(t.where), size(t.size), side(t.side), shift(t.shift),
-	c(t.c) {
- 	    if ( t.prt ) prt = new String(t.prt);
-	    else prt =0;
+	where(t.where), size(t.size), side(t.side), shift(), c(t.c) {
+	shiftcpy sc(&shift);
+	
+	if ( t.prt ) prt = new String(t.prt);
+	else prt =0;
+	for_each(t.shift.begin(), t.shift.end(), sc);
     }
-    tick(double w, double s, sides sd, String *p, shiftdesc *sh,
-	 coord *co) :
-	where(w), size(s), side(sd), shift(sh), c(co) {
- 	    if ( p ) prt = new String(p);
-	    else prt =0;
+    tick(double w, double s, sides sd, String *p, shiftlist *sh,
+	 coord *co) : where(w), size(s), side(sd), shift(), c(co) {
+	shiftcpy sc(&shift);
+
+	if ( p ) prt = new String(p);
+	else prt =0;
+	if ( sh ) 
+	    for_each(sh->begin(), sh->end(), sc);
     }
 
     ~tick() {
+	shiftdesc *s;
 	if ( prt) {
 	    delete prt;
 	    prt = 0;
+	}
+	while ( !shift.empty() ) {
+	    s = shift.front();
+	    shift.pop_front();
+	    delete s;
 	}
     }
 
     // Important safety tip:  Don't byte-copy string pointers.
     tick& operator=(const tick& t) {
+	shiftcpy sc(&shift);
+
 	where = t.where;
 	size = t.size;
 	side = t.side;
@@ -206,6 +234,7 @@ public:
 	if ( prt ) { delete prt; }
 	if ( t.prt ) prt = new String(t.prt);
 	else prt = 0;
+	for_each(t.shift.begin(), t.shift.end(), sc);
 	return *this;
     }
 	    
@@ -217,40 +246,59 @@ public:
     linedesc desc;	// style of the grid line
     sides side;		// Side of the graph where line labels are printed
     String *prt;	// The label for this line
-    shiftdesc shift;	// Shift info for the label
+    shiftlist shift;	// Shift info for the label
     coord *c;		// Coordinate system for this line
     
-    grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(0), c(0) { }
+    grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(), c(0) { }
 
-    grid(double w, linedesc *l, sides sd, String *p, shiftdesc *sh,
+    grid(double w, linedesc *l, sides sd, String *p, shiftlist *sh,
 	 coord *co) :
-	where(w), desc(l), side(sd), shift(sh), c(co) {
-	    if ( p ) prt = new String(p);
-	    else prt =0;
+	where(w), desc(l), side(sd), shift(), c(co) {
+	shiftcpy sc(&shift);
+
+	if ( p ) prt = new String(p);
+	else prt =0;
+	if ( sh ) 
+	    for_each(sh->begin(), sh->end(), sc);
     }
 
     // To allow ticks and grids to share parse rules
     grid(tick *t) : where(t->where),  desc(dotted,0,0), side(t->side),
-	    shift(&t->shift), c(t->c) {
+	    shift(), c(t->c) {
+	shiftcpy sc(&shift);
+
 	if ( t->prt ) prt = new String(t->prt);
 	else prt =0;
+	for_each(t->shift.begin(), t->shift.end(), sc);
     }
 
     grid(grid& g) : where(g.where), desc(g.desc), side(g.side),
-		shift(&g.shift), c(g.c) {
+		shift(), c(g.c) {
+	shiftcpy sc(&shift);
+
 	if ( g.prt ) prt = new String(g.prt);
 	else prt =0;
+	for_each(g.shift.begin(), g.shift.end(), sc);
     }
 
     ~grid() {
+	shiftdesc *s;
+	
 	if ( prt ) {
 	    delete prt;
 	    prt = 0;
+	}
+	while ( !shift.empty() ) {
+	    s = shift.front();
+	    shift.pop_front();
+	    delete s;
 	}
     }
 
     // Important safety tip:  Don't byte-copy string pointers.
     grid& operator=(const grid& g) {
+	shiftcpy sc(&shift);
+
 	where = g.where;
 	desc = g.desc;
 	side = g.side;
@@ -259,6 +307,7 @@ public:
 	if ( prt ) delete prt;
 	if ( g.prt ) prt = new String(g.prt);
 	else prt = 0;
+	for_each(g.shift.begin(), g.shift.end(), sc);
 	return *this;
     }
 };
@@ -293,6 +342,11 @@ protected:
     public:
 	int operator() (DisplayString *ds) { delete ds; return 0;}
     } free_ds;
+
+    class free_sd_f : public UnaryFunction<shiftdesc *, int> {
+    public:
+	int operator() (shiftdesc *sd) { delete sd; return 0;}
+    } free_sd;
     
 public:
     double ht;			// height of the graph
@@ -302,7 +356,7 @@ public:
                                 // lists of DisplayStrings that must
                                 // be translated by the associated
                                 // drawable class
-    shiftdesc lshift[4];	// positioning info for labels
+    shiftlist *lshift[4];	// positioning info for labels
     tick tickdef[4];		// default tick definitions
     grid griddef[4];		// default gridline definitions
     ticklist tks;		// the ticks to draw (generated from
@@ -315,26 +369,37 @@ public:
 	for ( int i = 0 ; i < 4 ; i ++ ) {
 	    desc[i] = linedesc(def,0,0);
 	    label[i] = new stringlist;
-	    lshift[i] = shiftdesc(top,0);
-	    griddef[i] = grid(0.0,desc+i,top,&g,lshift+i,0);
+	    lshift[i] = new shiftlist;
+	    griddef[i] = grid(0.0,desc+i,top,&g,lshift[i],0);
 	    tickdef[i] = tick(0.0,((i== bottom || i == left ) ? 0.125 : 0),
-			      (sides) i, &g, lshift+i, 0);
+			      (sides) i, &g, lshift[i], 0);
 	}
     }
 
     virtual ~frame() {
 	for ( int i = 0; i < 4; i++ ) {
 	    if ( label[i] ) {
-		if ( !label[i]->empty() ) 
-		    for_each(label[i]->begin(), label[i]->end(), free_ds);
+		for_each(label[i]->begin(), label[i]->end(), free_ds);
+		label[i]->erase(label[i]->begin(), label[i]->end());
 		delete label[i];
+		label[i] =0;
+	    }
+	    if ( lshift[i] ) {
+		for_each(lshift[i]->begin(), lshift[i]->end(), free_sd);
+		lshift[i]->erase(lshift[i]->begin(), lshift[i]->end());
+		delete lshift[i];
+		lshift[i] =0;
 	    }
 	}
 	    
-	if ( !tks.empty() )
+	if ( !tks.empty() ) {
 	    for_each(tks.begin(), tks.end(), free_tick);
-	if ( !gds.empty() )
+	    tks.erase(tks.begin(), tks.end());
+	}
+	if ( !gds.empty() ) {
 	    for_each(gds.begin(), gds.end(), free_grid);
+	    gds.erase(gds.begin(), gds.end());
+	}
     }
 };
 

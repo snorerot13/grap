@@ -1,5 +1,9 @@
 Change log
 
+0.93a: bug fix: deleting grap_buffer_state contents twice on error, allow 
+more than one shift description on ticks, grids, and labels.  Thanks to
+Anindo Banerjea at ISI for spotting my misimplementation.
+
 0.92a: bug fix - string equality check.  Small change to Makefile.in
 to support default Solaris behavior.  Added -v for version info.  Some
 general internals fiddling (I'd like to call it cleanup, but I think

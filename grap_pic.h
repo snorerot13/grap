@@ -6,6 +6,35 @@
 // for the full copyright and limitations of liabilities.
 
 
+// This is used by Pictick and Picgrid to iterate across their shifts
+class Picshiftdraw : unary_function<shiftdesc*, int> {
+protected:
+    ostream &f;	// The output ostream
+public:
+    Picshiftdraw(ostream& ff) : f(ff) { }
+    int operator()(shiftdesc *sd) {
+	if ( sd->param != 0 ) {
+	    f << "move " ;
+	    switch (sd->dir) {
+		case left:
+		    f << "left ";
+		    break;
+		case right:
+		    f << "right ";
+		    break;
+		case top:
+		    f << "up ";
+		    break;
+		case bottom:
+		    f << "down ";
+		    break;
+	    }
+	    f << sd->param << endl;
+	}
+	return 1;
+    }
+};
+
 class PicDisplayString : public DisplayString, public drawable {
 public:
     PicDisplayString(DisplayString& ds) :
@@ -102,13 +131,26 @@ public:
 
 	// pframe should always be a copy of base, so don't delete it
 
-	if ( ps_param ) delete ps_param;
-	if ( name ) delete name;
-	if ( pos ) delete pos;
-	if ( !troff.empty() )
+	if ( ps_param ) {
+	    delete ps_param;
+	    ps_param = 0;
+	}
+	if ( name ) {
+	    delete name;
+	    name = 0;
+	}
+	if ( pos ) {
+	    delete pos;
+	    pos = 0;
+	}
+	if ( !troff.empty() ) {
 	    for_each(troff.begin(), troff.end(), sfree);
-	if ( !pic.empty() )
+	    troff.erase(troff.begin(), troff.end());
+	}
+	if ( !pic.empty() ) {
 	    for_each(pic.begin(), pic.end(), sfree);
+	    pic.erase(pic.begin(), pic.end());
+	}
     }
 
     // overload the virtual functions in graph

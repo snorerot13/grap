@@ -11,6 +11,8 @@
 .Nm
 .Op Fl d Ar defines_file
 .Op Fl D
+.Op Fl V
+.Op fl u
 .Op Ar filename ...
 .Sh DESCRIPTION
 .Nm
@@ -72,6 +74,17 @@ option inhibits the reading of any initial macros file.
 .Pp
 .Fl v
 prints the version on the standard output and exits.
+.Pp
+.Fl u
+makes labels unaligned by default.  This version of 
+.Nm
+uses new features of gnu pic to align the left and right labels with
+the axes, that is that the left and right labels run at right angles
+to the text of the paper.  I personally like it better that way and it
+saves space, but 
+.Fl u
+disables it.  This may be useful in porting old 
+.Nm .
 .Pp
 All
 .Nm

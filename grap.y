@@ -40,6 +40,7 @@ graph *the_graph =0;
 lexStack lexstack;
 macroDictionary macros;
 int first_line;
+ bool unaligned_default = 0;	// Should strings be unaligned by default 
 
 extern int lex_expand_macro;
 extern char *version; 
@@ -75,7 +76,7 @@ extern int optopt;
 extern int opterr;
 extern int optreset;
 
-const char *opts = "d:Dv";
+const char *opts = "d:Dvu";
 
 // Classes for various for_each calls
 
@@ -117,14 +118,21 @@ public:
 class add_tick_f : public UnaryFunction<tick*, int> {
     sides side;
     double size;
-    shiftdesc shift;
+    shiftlist shift;
 public:
-    add_tick_f(sides sd, double sz, shiftdesc sc) :
-	side(sd), size(sz), shift(sc) {};
+    add_tick_f(sides sd, double sz, shiftlist *s) :
+	side(sd), size(sz), shift() {
+	shiftcpy sc(&shift);
+
+	for_each(s->begin(), s->end(), sc);
+    };
     int operator()(tick *t) {
+	shiftcpy sc(&t->shift);
 	t->side = side;
 	t->size = size;
-	t->shift = shift;
+
+	for_each(shift.begin(), shift.end(), sc);
+
 	the_graph->base->tks.push_back(t);
 	if ( t->side == top || t->side == bottom )
 	    t->c->newx(t->where);
@@ -161,6 +169,7 @@ public:
     String *string;
     frame *frameptr;
     shiftdesc *shift;
+    shiftlist *shift_list;
     point *pt;
     linedesc *lined;
     stringlist *string_list;
@@ -190,7 +199,8 @@ public:
 %type <double_list> num_line expr_list
 %type <tick_list> ticklist tickat tickfor tickdesc
 %type <pt> point
-%type <shift> shift opt_shift
+%type <shift_list> opt_shift
+%type <shift> shift 
 %type <by> by_clause
 %type <axistype> x_axis_desc y_axis_desc
 %type <axisname> log_desc
@@ -339,9 +349,12 @@ opt_linedesc:
 ;
 
 opt_shift:
-            { $$ = new shiftdesc;}
-|	 shift
-	    { $$ = $1; }
+            { $$ = new shiftlist;}
+|	 shift opt_shift 
+	    {
+		$$ = $2;
+		$$->push_back($1);
+	    }
 ;
 
 
@@ -609,7 +622,11 @@ point:
 ;
 
 strmod:
-	    { $$.size = 0; $$.rel =0; $$.just =0; }
+	    {
+		$$.size = 0;
+		$$.rel =0;
+		$$.just = (unaligned_default) ? unaligned : 0;
+	    }
 | 	strmod SIZE expr
 	    { $$.size = $3; $$.rel = ($3<0);}
 | 	strmod SIZE PLUS expr
@@ -646,8 +663,11 @@ strlist:
 		DisplayString *s;
 			
 		last = for_each($1->begin(), $1->end(), modaccumulator());
+
+		// If unaligned_default is set, then treat unaligned
+		// strings as unmodified strings
 		
-		if ( $3.just != 0 )
+		if ( $3.just != (unaligned_default ? unaligned : 0) )
 		    last.just = $3.just;
 		
 		if ( $3.size != 0 ) {
@@ -821,7 +841,7 @@ direction:
 ticklist:
 	expr opt_string
 	    {
-		tick *t = new tick($1,0,top,0, (shiftdesc *) 0, 0);
+		tick *t = new tick($1,0,top,0, (shiftlist *) 0, 0);
  		String *s;
 
 		if ( $2 ) {
@@ -838,7 +858,7 @@ ticklist:
 	    }
 |	ticklist COMMA expr opt_string
 	    {
-		tick *t = new tick($3,0,top,0,(shiftdesc *) 0, 0);
+		tick *t = new tick($3,0,top,0,(shiftlist *) 0, 0);
  		String *s;
 
 		if ( $4 ) {
@@ -905,7 +925,7 @@ tickfor:
 		
 		idx = $3;
 		while ( (idx - $5) *dir  < EPSILON ) {
-		    t = new tick(idx, 0, top, 0, (shiftdesc *) 0, 0);
+		    t = new tick(idx, 0, top, 0, (shiftlist *) 0, 0);
 		    t->c = $2;
 
 		    s = new String(idx,fmt);
@@ -942,10 +962,14 @@ tickdesc :
 ticks_statement:
 	TICKS side direction opt_shift tickdesc SEP
 	    {
+		shiftdesc *sd;
+		shiftcpy sc(&the_graph->base->tickdef[$2].shift);
+		
 		add_tick_f add_tick($2,$3,$4);
 
 		the_graph->base->tickdef[$2].side = $2;
-		the_graph->base->tickdef[$2].shift = *$4;
+
+		for_each($4->begin(), $4->end(), sc);
 
 		if ( $5 && $5->empty() )
 		    the_graph->base->tickdef[$2].size = $3;
@@ -955,6 +979,11 @@ ticks_statement:
 		if ( $5 ) {
 		    for_each($5->begin(), $5->end(), add_tick);
 		    delete $5;
+		}
+		while (!$4->empty()) {
+		    sd = $4->front();
+		    $4->pop_front();
+		    delete sd;
 		}
 		delete $4;
 	    }
@@ -981,6 +1010,8 @@ grid_statement:
 		tick *t;
 		grid *g;
 		linedesc defgrid(dotted, 0, 0);
+		shiftcpy *sc;
+		shiftdesc *sd;
 
 		// Turning on a grid turns off default ticks on that side
 		
@@ -999,8 +1030,9 @@ grid_statement:
 		    defgrid.color = 0;
 		}
 
-
-		the_graph->base->griddef[$2].shift = $5;
+		sc = new shiftcpy(&the_graph->base->griddef[$2].shift);
+		for_each($5->begin(), $5->end(), *sc);
+		delete sc;
 
 		if ( $3 ) {
 		    if ( the_graph->base->griddef[$2].prt )
@@ -1029,7 +1061,9 @@ grid_statement:
 			    defgrid.color = 0;
 			}
 		    
-			g->shift = *$5;
+			sc = new shiftcpy(&g->shift);
+			for_each($5->begin(), $5->end(), *sc);
+			delete sc;
 
 			if ( $3 ) {
 			    if ( g->prt ) delete g->prt;
@@ -1044,6 +1078,11 @@ grid_statement:
 		    }
 		    delete $6;
 		}
+		while ( !$5->empty() ) {
+		    sd = $5->front();
+		    $5->pop_front();
+		    delete sd;
+		}
 		delete $5;
 		delete $4;
 	    }
@@ -1053,16 +1092,17 @@ label_statement:
 	LABEL side strlist opt_shift SEP
 	    {
 		align_string a;
+		shiftdesc *sd;
 			      
 		for_each($3->begin(),  $3->end(), a);
 		
 		the_graph->base->label[$2] = $3;
-		if ( $4->param != 0 ) {
-		    the_graph->base->lshift[$2] = *$4;
-		}
-		else {
-		    the_graph->base->lshift[$2].dir = $2;
-		    the_graph->base->lshift[$2].param = 0.4;
+
+		// Copy the label shifts into the frame
+		while (!$4->empty() ) {
+		    sd = $4->front();
+		    $4->pop_front();
+		    the_graph->base->lshift[$2]->push_back(sd);
 		}
 		delete $4;
 	    }
@@ -1459,8 +1499,6 @@ int yyerror(char *s) {
 	    default:
 		break;
 	}
-	if ( g->f ) delete g->f;
-	if ( g->name ) delete g->name;
 	delete g;
     }
     cerr << s << endl;
@@ -1501,6 +1539,9 @@ int main(int argc, char** argv) {
 	    case 'v':
 		cout << version << endl;
 		exit(0);
+	    case 'u':
+		unaligned_default = 1;
+		break;
 	}
     if ( argc == optind ) {
 	fname = "-";
