@@ -495,9 +495,9 @@ expr:
 |	NOT expr %prec PLUS
             { $$ = ! ( (int) $2); }
 |	string EQ string
-            { $$ = ($1 == $3); }
+            { $$ = (*$1 == *$3); }
 |	string NEQ string
-            { $$ = ($1 != $3); }
+            { $$ = (*$1 != *$3); }
 |	FUNC0 LPAREN RPAREN
 	    {
 		switch ($1) {
@@ -567,7 +567,10 @@ expr:
 		    d = (*di).second;
 		    $$ = *d;
 		}
-		else cout << "Can't find " << $1 << endl;
+		else {
+		    cerr << *$1 << " is uninitialized, using 0.0" << endl;
+		    $$ = 0.0;
+		}
 
 		delete $1;
 	     }
