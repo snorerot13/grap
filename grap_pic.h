@@ -62,7 +62,7 @@ public:
     void draw(frame *) ;
     ~Picframe() { }
 protected:
-    void autoguess(sides, double &, double&, double&, double &, int&);
+    void autoguess(sides, double &, double&, double&, double &, int&, coord *);
     void addautoticks(sides);
     void addautogrids(sides);
     void frame_line(double, double, sides);

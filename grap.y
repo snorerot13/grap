@@ -146,7 +146,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <string> START string
 %type <val>  FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
-%type <coordptr> opt_coordname COORD_NAME
+%type <coordptr> opt_coordname COORD_NAME autotick
 %type <side>  side  bar_dir
 %type <frameptr> sides size size_elem final_size
 %type <lined> linedesc_elem linedesc opt_linedesc
@@ -676,14 +676,18 @@ tickfor:
 	    { $$ = tick_for($2, $3, $5, $6, $7); }
 ;
 tickdesc :
-	    { $$ = 0;}
-|	ON
-            { $$ = 0;}
-|	tickat
+	tickat
 	    { $$ = $1;}
 |	tickfor
 	    { $$= $1; }
 ;
+
+autotick:
+	opt_coordname
+	    { $$ = $1;}
+|	ON opt_coordname
+            { $$ = $2;}
+;	    
 
 ticks_statement:
 	TICKS side direction opt_shift tickdesc SEP
@@ -695,6 +699,11 @@ ticks_statement:
 	    }
 | 	TICKS side OFF SEP
 	    { the_graph->base->tickdef[$2].size = 0; }
+| 	TICKS side direction autotick SEP
+	    {
+		the_graph->base->tickdef[$2].size = $3;
+		if ( $4 ) the_graph->base->tickdef[$2].c = $4;
+	    }
 ;
 
 opt_tick_off:
@@ -705,7 +714,17 @@ opt_tick_off:
 
 grid_statement:
 	GRID side opt_tick_off opt_linedesc opt_shift tickdesc SEP
-	    { grid_statement($2, $3, $4, $5, $6); }
+	    {
+		grid_statement($2, $3, $4, $5, $6);
+	    }
+|	GRID side opt_tick_off opt_linedesc opt_shift autotick SEP
+	    {
+		grid_statement($2, $3, $4, $5, 0);
+		// Because turning on a grid on a given side disables
+		// automatic tick generation there, this is sets up
+		// that side with the proper coordinates.
+		if ( $6 ) the_graph->base->griddef[$2].c = $6;
+	    }
 ;
 
 label_statement:

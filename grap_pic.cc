@@ -273,7 +273,7 @@ void Picframe::label_line(sides s) {
 }
 
 void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
-			 double &ts, int& ls) {
+			 double &ts, int& ls, coord *c) {
 // Calculate a reasonable placement of tickmarks if the user has not
 // specified one.  We aim for 5.  The algorithm is heuristic.
     
@@ -283,13 +283,13 @@ void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
     // determine the range of the axes
     
     if ( sd == bottom || sd == top ) {
-	lo = tickdef[sd].c->xmin;
-	hi = tickdef[sd].c->xmax;
-	ls = (tickdef[sd].c->logscale & x_axis);
+	lo = c->xmin;
+	hi = c->xmax;
+	ls = (c->logscale & x_axis);
     } else {
-	lo = tickdef[sd].c->ymin;
-	hi = tickdef[sd].c->ymax;
-	ls = (tickdef[sd].c->logscale & y_axis);
+	lo = c->ymin;
+	hi = c->ymax;
+	ls = (c->logscale & y_axis);
     }
 
     // Make our ticksize guess
@@ -327,7 +327,7 @@ void Picframe::addautoticks(sides sd) {
 
     if ( tickdef[sd].size == 0 ) return;
 
-    autoguess(sd, idx, dir, hi, ts, ls);
+    autoguess(sd, idx, dir, hi, ts, ls, tickdef[sd].c);
  
     while ( idx - hi < EPSILON*dir ) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
@@ -350,7 +350,7 @@ void Picframe::addautogrids(sides sd) {
 
     if ( griddef[sd].desc.ld == def ) return;
 
-    autoguess(sd, idx, dir, hi, ts, ls);
+    autoguess(sd, idx, dir, hi, ts, ls, griddef[sd].c);
 
     while ( idx - hi < EPSILON*dir ) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,

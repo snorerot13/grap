@@ -1,14 +1,14 @@
 Change log
 
-1.07: Cleaned up the automatic tick generation and fixed a bug in
-there, too.  Allow reassignmnet of coordinate system parameters, e.g.,
+1.10: Cleaned up the automatic tick generation and fixed a bug in
+there, too.  
 
+Allow reassignmnet of coordinate system parameters, e.g.,
 .G1
 coord test
 copy "examples/cy_fatal.d"
 coord test x 1980,2000
 .G2
-
 Default line format now uses the bullet macro if it's defined.  The
 coord statement now will accept multiple log scale modifiers.  The
 statement
@@ -39,6 +39,13 @@ produces 2 solid line segments.  This forced a little rethinking of
 the syntax for changing the properties of a line using new/draw.  The
 implementation is on the man page.  If it breaks existing grap
 scripts, I'd love to hear about it.
+
+Grids support similar syntax to that of ticks for explicitly
+requesting automatic grid generation.
+
+Automatic tock or grid generation can now be requested relative to a
+named coordinate system, formerly automatic ticks/grid lines were only
+generated for the default coordinate system.
 
 1.06: Added an anonymous donor's TeX defines.  Also added the -C
 compatibility option for groff and fixed some manpage formatting bugs.

@@ -637,7 +637,7 @@ ticks appear on a side by default, or have been declared by an earlier
 command, 
 .Ic grid
 does not cancel them unless 
-.Li tciks off
+.Li ticks off
 is specified.
 .Pp
 Instead of a direction for ticks, 

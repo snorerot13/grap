@@ -431,8 +431,9 @@ void ticks_statement(sides side, double dir, shiftlist *sl, ticklist *tl ) {
 
     for_each(sl->begin(), sl->end(), sc);
 
-    if ( !tl || tl->empty() )
+    if ( !tl || tl->empty() ) {
 	the_graph->base->tickdef[side].size = dir;
+    }
     else
 	the_graph->base->tickdef[side].size = 0;
 
@@ -455,23 +456,23 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
     tick *t;
     grid *g;
     linedesc defgrid(dotted, 0, 0);
-    shiftcpy *sc;
+    shiftcpy sc(&the_graph->base->griddef[side].shift);
     shiftdesc *sd;
 
-		// Turning on a grid turns off default ticks on that side
+    // Turning on a grid turns off default ticks on that side
 		
     the_graph->base->tickdef[side].size = 0;
-		
-    if ( ld ) {
-	// The default for grids is dotted
-	if ( ld->ld == def ) ld->ld = dotted;
-	the_graph->base->griddef[side].desc = *ld;
-    }
+
+    // All grids have a linedesc, so create one if the user didn't
+    // specify one.
+    if ( !ld ) ld = new linedesc;
+
+    // The default for grids is dotted
+    if ( ld->ld == def ) ld->ld = dotted;
+    the_graph->base->griddef[side].desc = *ld;
 
 
-    sc = new shiftcpy(&the_graph->base->griddef[side].shift);
-    for_each(sl->begin(), sl->end(), *sc);
-    delete sc;
+    for_each(sl->begin(), sl->end(), sc);
 
     if ( ticks_off ) {
 	if ( the_graph->base->griddef[side].prt )
@@ -486,6 +487,7 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 			
 	    g = new grid(t);
 	    g->side = side;
+	    shiftcpy scy(&g->shift);
 
 	    if ( ld ) {
 		// The default for grids is dotted
@@ -493,9 +495,7 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
   		g->desc = *ld;
 	    }
 		    
-	    sc = new shiftcpy(&g->shift);
-	    for_each(sl->begin(), sl->end(), *sc);
-	    delete sc;
+	    for_each(sl->begin(), sl->end(), scy);
 
 	    if ( ticks_off ) {
 		if ( g->prt ) delete g->prt;
