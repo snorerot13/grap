@@ -2,9 +2,18 @@
 #define GRAP_DATA_H
 #include <string.h>
 
+
 const static int strchunk = 256;
 
 class String {
+protected:
+    
+#ifdef HAVE_SNPRINTF
+    inline snprintf(char *s, int l, char *f, double d) { ::snprintf(s,l,f,d); }
+#else 
+    inline snprintf(char *s, int l, char *f, double d) { ::sprintf(s,f,d); }
+#endif
+    
 public:
     String() : str(0), len(0) { }
 
@@ -14,16 +23,15 @@ public:
     };
 
     String(const int i) : str(0), len(0) {
-	resize(20);
+	resize(strchunk);
 	snprintf(str,len,"%d",i);
     };
 
     String(const double d, const String *fmt = 0) : str(0), len(0) {
-	resize(21);
-	if ( fmt ) 
-	    snprintf(str,len,fmt->str,d);
-	else 
-	    snprintf(str,len,"%g",d);
+	resize(strchunk);
+	
+	if ( fmt ) snprintf(str,len,fmt->str,d);
+	else snprintf(str,len,"%g",d);
     };
 
     String(const String* x) : str(0), len(0) {
@@ -149,6 +157,22 @@ protected:
 };
 
 inline ostream& operator<<(ostream& f, String& s) { return f << s.str; }
+
+class grap_sprintf_String : public String {
+public:
+    grap_sprintf_String(char *f=0) : String(), fmt(0), next_fmt(0) {
+	if ( f ) {
+	    fmt = new char[strlne(f)*2];
+	    strcpy(fmt,f);
+	    next_fmt = fmt;
+	}
+    }
+
+    next_number(double d) 
+protected:
+    char *fmt;
+    char *next_fmt;
+};
 
 template <class objtype>
 class Dictionary {
