@@ -17,7 +17,7 @@ extern "C" {
     extern char *optarg;
     extern int optind;
     int getopt(int, char * const [], const char *);
-}
+};
 #endif
 
 #include "grap.h"
