@@ -46,12 +46,16 @@ the paper for a complete understanding of grap's power.  grap is a pic
 preprocessor, so any typesetting language that can use pic can use
 grap.  I believe that TeX can use pic, but I wouldn't be surprised if
 grap.defines needs to be fooled with.  If you use TeX and find a set
-of grap.defines that work, please let me know.
+of grap.defines that work, please let me know.  Some people have used
+the given grap.tex.defines.  Modifications always welcome.
+
+The man page uses the BSD macros.  If your system doesn't, there's an
+ASCII version in grap.man, and a postscript version in grap.ps.
 
 Check out the examples in the examples directory.
 
 So far I've compiled the code on Sunos 4.1.3, Solaris 5.5.1, FreeBSD
-2.2.7-3.4, and an unknown RedHat Linux 6.1.  It may run under other
+2.2.7-4.2, and an unknown RedHat Linux 6.1.  It may run under other
 systems, and your c++ compiler and yacc/lex versions are probably more
 important than the type of Unix you run.  Flex 2.5.4 and the yacc on
 FreeBSD 2.2.7 are known to work as well as later versions of bison.

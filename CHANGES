@@ -108,7 +108,7 @@ commands. (There, that'll tell me if anyone reads this!)
 1.01: Fixed a compilation bug under RedHat 6.1.  Cleaned up autoconf
 and tweaked the makefile.
 
-1.0: Incorporated Bruce Lilley's error reporting code.  Cleaned up the
+1.0: Incorporated Bruce Lilly's error reporting code.  Cleaned up the
 documents (including a menton for Bruce in the man page) for v1.0
 release.  Cleared up a file reading bug.
 

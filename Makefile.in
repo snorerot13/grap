@@ -51,6 +51,7 @@ grap_lex.cc:	grap_lex.l y.tab.h
 
 version.cc:	Makefile
 	echo "#include <string>" > version.cc
+	echo "using namespace std;" >> version.cc
 	echo "string version=\"$(DISTDIR)\";" >> version.cc
 
 y.output:	grap.y
@@ -59,6 +60,9 @@ y.output:	grap.y
 grap.man:	grap.1
 	groff -mdoc -Tascii grap.1 > grap.man
 
+grap.ps:	grap.1
+	groff -mdoc grap.1 > grap.ps
+
 grap.1:	grap.doc
 	perl -pe "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;\
 
@@ -66,6 +70,7 @@ dist:
 	cd examples && ${MAKE} clean
 	${MAKE} veryclean
 	${MAKE} grap.man
+	${MAKE} grap.ps
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
 	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
@@ -77,7 +82,7 @@ dist:
 	mv /tmp/${DISTDIR}.tar.gz . && rm -rf /tmp/${DISTDIR}
 
 clean:
-	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man ${DISTDIR}.tar.gz *core* y.output
+	rm -f grap $(OBJS) grap_lex.cc grap.cc  *.o y.tab.h grap.1 grap.man grap.ps ${DISTDIR}.tar.gz *core* y.output
 
 veryclean:
 	${MAKE} clean
