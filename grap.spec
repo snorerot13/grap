@@ -4,7 +4,7 @@ Version: 1.21
 Release: 1
 Copyright: BSD
 Group: Applications/Publishing
-Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-1.20.tar.gz
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-1.21.tar.gz
 
 %description
 This is grap, an implementation of Kernigan and Bentley\'s grap
