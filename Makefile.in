@@ -73,8 +73,11 @@ dist:
 	${MAKE} grap.ps
 	cd .. && tar cf - grap | (cd /tmp && tar xf -)
 	cd /tmp && mv grap ${DISTDIR}
-	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile /tmp/${DISTDIR}/examples/Makefile
-	rm /tmp/${DISTDIR}/examples/Makefile.local /tmp/${DISTDIR}/examples/color_example.ms
+	rm /tmp/${DISTDIR}/configure.in /tmp/${DISTDIR}/Makefile \
+		/tmp/${DISTDIR}/examples/Makefile /tmp/${DISTDIR}/.cvsignore \
+		/tmp/${DISTDIR}/examples/.cvsignore 
+	rm /tmp/${DISTDIR}/examples/Makefile.local \
+		/tmp/${DISTDIR}/examples/color_example.ms
 	rm /tmp/${DISTDIR}/examples/.html* /tmp/${DISTDIR}/examples/.cvsignore
 	rm -rf /tmp/${DISTDIR}/CVS /tmp/${DISTDIR}/examples/CVS
 	rm -rf /tmp/${DISTDIR}/examples/*.ps.gz /tmp/${DISTDIR}/examples/*.pdf 
