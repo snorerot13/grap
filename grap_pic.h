@@ -200,19 +200,15 @@ public:
 };
 
 class Piccoord: public coord, public drawable {
-    string *gn;
 public:
-    Piccoord(const coord& c, string *n) : coord(c), gn(n) { }
+    Piccoord(const coord& c) : coord(c) { }
     ~Piccoord() { }
     void draw(frame *f) {
 	const string& nm = (name != "") ? name : "gg";
-	const string& graph_name = (gn) ? (*gn + ".") : "";
 
-	cout << "define x_"<< nm << " { ( "
-	     << graph_name << "Frame.Origin.x + ( ( $1 - " << xmin
+	cout << "define x_"<< nm << " { ((( $1 - " << xmin
 	     << ") / " << xmax-xmin << ") * " << f->wid << " ) }" << endl;
-	cout << "define y_"<< nm << " { ( "
-	     << graph_name << "Frame.Origin.y + ( ( $1 - " << ymin
+	cout << "define y_"<< nm << " { ((( $1 - " << ymin
 	     << ") / " << ymax-ymin << ") * " << f->ht << " ) }" << endl;
 	cout << "define xy_" << nm << " { x_" << nm << "($1), "
 	     << "y_"<< nm << "($2) }" << endl; 

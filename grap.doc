@@ -1200,9 +1200,11 @@ elements in the graph.  The macros are
 .Ic y_gg ,
 and
 .Ic xy_gg .
-The first 2 return pic locations at the given point on the x or y axis
-of the graph.  The final one returns a comma separated pair of both x
-and y coordinates.  Other coordinate spaces can be used by replacing 
+These macros define pic distances that correspond to the given
+argument.  They can be used to size boxes or to plot pic constructs on
+the graph.  To place a given construct on the graph, you should add
+Frame.Origin to it.
+Other coordinate spaces can be used by replacing 
 .Ic gg
 with the name of the coordinate space.  A coordinate space named
 .Ic gg
@@ -1214,7 +1216,8 @@ DWB
 .Nm
 may use these as part of its implemenation.  This
 .Nm
-provides them only for compatibility.
+provides them only for compatibility.  Note that these are very simple
+macros, and may not do what you expect under complex conditions.
 .Sh ENVIRONMENT VARIABLES
 .Pp
 If the environment variable 

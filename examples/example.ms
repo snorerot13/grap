@@ -2679,10 +2679,10 @@ pic for loops.  You don't have access to grap variables from pic.
 \&ticks bot on test
 \&ticks left on test 
 \&pic for i = 0 to 9 do {
-\&pic "x" at xy_test(i,i)
+\&pic "x" at Frame.Origin + xy_test(i,i)
 \&pic }
 \&pic for i = 0 to 9 do {
-\&pic "o" at xy_gg(1,i)
+\&pic "o" at Frame.Origin + xy_gg(1,i)
 \&pic }
 \&.G2
 .G1
@@ -2692,10 +2692,10 @@ frame
 ticks bot on test
 ticks left on test 
 pic for i = 0 to 9 do {
-pic "x" at xy_test(i,i)
+pic "x" at Frame.Origin + xy_test(i,i)
 pic }
 pic for i = 0 to 9 do {
-pic "o" at xy_gg(1,i)
+pic "o" at Frame.Origin + xy_gg(1,i)
 pic }
 .G2
 .DE

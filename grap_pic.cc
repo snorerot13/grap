@@ -72,7 +72,7 @@ void Picgraph::draw(frame *) {
 	for (coordinateDictionary::iterator ci = coords.begin();
 	     ci != coords.end();
 	     ci++) {
-	    Piccoord pc(*(*ci).second, name);
+	    Piccoord pc(*(*ci).second);
 	    displayer(&pc);
 	}
 	for_each(objs.begin(), objs.end(), displayer);
