@@ -16,7 +16,6 @@ RMDIR=rmdir
 MKDIR=mkdir
 LEX=@LEX@
 YACC=@YACC@
-YACCFLAGS=@YACCFLAGS@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
@@ -24,7 +23,7 @@ PERL=@PERL@
 DISTDIR=grap-1.10
 SOURCES=grap.cc grap_lex.cc *.cc
 
-CXXFLAGS += -g @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
+CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
 # solaris make uses these as defaults:
 
