@@ -140,9 +140,9 @@ public:
     double num;
     String *string;
     frame *frameptr;
-    shiftdesc shift;
+    shiftdesc *shift;
     point *pt;
-    linedescval linedesc;
+    linedesc *lined;
     stringlist *string_list;
     linelist *line_list;
     ticklist *tick_list;
@@ -165,7 +165,7 @@ public:
 %type <coordptr> opt_coordname COORD_NAME
 %type <side>  side  bar_dir
 %type <frameptr> sides size 
-%type <linedesc> linedesc_elem linedesc opt_linedesc
+%type <lined> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
 %type <double_list> num_line expr_list
 %type <tick_list> ticklist tickat tickfor tickdesc
@@ -313,13 +313,13 @@ opt_expr:
 ;
 
 opt_linedesc:
-            { $$.ld = def; $$.param = 0; $$.color = 0;}
+            { $$ = new linedesc; }
 |	linedesc
 	    {  $$ = $1;}
 ;
 
 opt_shift:
-            { $$.dir = top; $$.param = 0; }
+            { $$ = new shiftdesc;}
 |	 shift
 	    { $$ = $1; }
 ;
@@ -327,19 +327,19 @@ opt_shift:
 
 linedesc_elem:
 	INVIS
-	    { $$.ld = invis; $$.param = 0; $$.color = 0;}
+            { $$ = new linedesc(invis); }
 |	 SOLID
-	    { $$.ld = solid;  $$.param = 0; $$.color = 0;}
+            { $$ = new linedesc(solid); }
 |	 DOTTED opt_expr
-	    { $$.ld = dotted; $$.param = $2; $$.color = 0;}
+            { $$ = new linedesc(dotted, $2); }
 |	 DASHED opt_expr
-	    { $$.ld = dashed; $$.param = $2; $$.color = 0;}
+            { $$ = new linedesc(dashed, $2); }
 |	 COLOR string
-	    { $$.ld = def; $$.color = $2; $$.fillcolor = 0;}
-|	 FILLCOLOR string
-	    { $$.ld = def; $$.fillcolor = $2; $$.color = 0;}
+            { $$ = new linedesc(def, 0, $2); }
 |	 FILL opt_expr
-            { $$.ld = def; $$.fill = $2; $$.color = $$.fillcolor = 0; }
+            { $$ = new linedesc(def, 0, 0, $2); }
+|	 FILLCOLOR string
+            { $$ = new linedesc(def, 0, 0, 0, $2); }
 ;
 
 linedesc:
@@ -348,18 +348,19 @@ linedesc:
 |	 linedesc linedesc_elem
             {
 		$$ = $1;
-		if ( $2.ld != def ) {
-		    $$.ld = $2.ld;
-		    $$.param = $2.param;
+		if ( $2->ld != def ) {
+		    $$->ld = $2->ld;
+		    $$->param = $2->param;
 		}
-		if ( $2.color ) {
-		    if ( $$.color ) delete $$.color;
-		    $$.color = $2.color;
+		if ( $2->color ) {
+		    if ( $$->color ) delete $$->color;
+		    $$->color = $2->color;
 		}
-		if ( $2.fillcolor ) {
-		    if ( $$.fillcolor ) delete $$.fillcolor;
-		    $$.fillcolor = $2.fillcolor;
+		if ( $2->fillcolor ) {
+		    if ( $$->fillcolor ) delete $$->fillcolor;
+		    $$->fillcolor = $2->fillcolor;
 		}
+		delete $2;
 	    }
 ;
 
@@ -368,7 +369,7 @@ draw_statement:
 	    {
 		line *l;
 		lineDictionary::iterator li;
-		linedescval defld = { invis,0,0 };
+		linedesc defld(invis,0,0);
 		String s = "\"\\(bu\"";
 
 		if ( $2 ) {
@@ -382,7 +383,7 @@ draw_statement:
 		    }
 		} else l = defline;
 
-		l->desc = $3;
+		l->desc = *$3;
 
 		if ( $4 ) {
 		    if ( l->plotstr ) *l->plotstr = *$4;
@@ -396,7 +397,7 @@ draw_statement:
 		    }
 		}
 		l->initial = 1;
-		
+		delete $3;
 	    }
 ;
 
@@ -676,18 +677,19 @@ next_statement:
 		if ( $2 ) {
 		    li = the_graph->lines.find($2);
 		    if ( li == the_graph->lines.end() ) {
-			l = new line((linedescval *)0, &s );
+			l = new line((linedesc *)0, &s );
 			the_graph->lines[$2] = l;
 		    }
 		    else { l = (*li).second; }
 		} else l = defline;
 		
-		if ( $5.ld != def )
-		    l->addpoint($4->x,$4->y,$4->c,0,&$5);
+		if ( $5->ld != def )
+		    l->addpoint($4->x,$4->y,$4->c,0,$5);
 		else 
 		    l->addpoint($4->x,$4->y,$4->c);
 		
 		delete $4;
+		delete $5;
 	    }
 ;
 
@@ -731,7 +733,8 @@ sides:
 		if ( !$1 ) $$ = new frame;
 		else $$ = $1;
 		
-		$$->desc[$2] = $3;
+		$$->desc[$2] = *$3;
+		delete $3;
 	    }
 ;
 
@@ -740,11 +743,12 @@ frame_statement:
 	    {
 		int i;
 
-		if ( $2.ld != def ) {
+		if ( $2->ld != def ) {
 		    for ( i = 0 ; i < 4; i++ ) {
-			the_graph->base->desc[i] = $2;
+			the_graph->base->desc[i] = *$2;
 		    }
 		}
+		delete $2;
 		
 		if ( $3 ) {
 		    the_graph->base->ht = $3->ht;
@@ -756,7 +760,7 @@ frame_statement:
 		    for ( i = 0 ; i < 4; i++ ) {
 			if ( $4->desc[i].ld != def )
 			    the_graph->base->desc[i] =
-				(linedescval) $4->desc[i];
+				(linedesc) $4->desc[i];
 		    }
 		    delete $4;
 		}
@@ -765,13 +769,13 @@ frame_statement:
 
 shift:
 	UP expr
-	    { $$.dir = top; $$.param = $2;}
+            { $$ = new shiftdesc(top, $2);}
 |	DOWN expr
-	    { $$.dir = bottom; $$.param = $2;}
+            { $$ = new shiftdesc(bottom, $2);}
 |	LEFT expr
-	    { $$.dir = left; $$.param = $2;}
+            { $$ = new shiftdesc(left, $2);}
 |	RIGHT expr
-	    { $$.dir = right; $$.param = $2;}
+            { $$ = new shiftdesc(right, $2);}
 ;
 
 tickdir:
@@ -917,7 +921,7 @@ ticks_statement:
 		add_tick_f add_tick($2,$3,$4);
 
 		the_graph->base->tickdef[$2].side = $2;
-		the_graph->base->tickdef[$2].shift = $4;
+		the_graph->base->tickdef[$2].shift = *$4;
 
 		if ( $5 && $5->empty() )
 		    the_graph->base->tickdef[$2].size = $3;
@@ -928,6 +932,7 @@ ticks_statement:
 		    for_each($5->begin(), $5->end(), add_tick);
 		    delete $5;
 		}
+		delete $4;
 	    }
 | 	TICKS OFF SEP
 	    {
@@ -951,16 +956,21 @@ grid_statement:
 	    {
 		tick *t;
 		grid *g;
-		linedescval defgrid = { dotted, 0,0 };
+		linedesc defgrid(dotted, 0, 0);
 
 		// Turning on a grid turns off default ticks on that side
 		
 		the_graph->base->tickdef[$2].size = 0;
 		
-		if ( $4.ld != def ) 
-		    the_graph->base->griddef[$2].desc = $4;
+		if ( $4->ld != def ) 
+		    the_graph->base->griddef[$2].desc = *$4;
 		else {
-		    defgrid.color = $4.color;
+		    
+		    // This is some dirty sleight of hand.  $4->color
+		    // is only assigned to defgrid.color long enough
+		    // to make these copies. XXX
+		    
+		    defgrid.color = $4->color;
 		    the_graph->base->griddef[$2].desc = defgrid;
 		    defgrid.color = 0;
 		}
@@ -981,15 +991,21 @@ grid_statement:
 			
 			g = new grid(t);
 			g->side = $2;
-			if ( $4.ld != def )
-			    g->desc = $4;
+			if ( $4->ld != def )
+			    g->desc = *$4;
 			else {
-			    defgrid.color = $4.color;
+
+			    // This is some dirty sleight of hand.
+			    // $4->color is only assigned to
+			    // defgrid.color long enough to make these
+			    // copies. XXX
+		    
+			    defgrid.color = $4->color;
 			    g->desc = defgrid;
 			    defgrid.color = 0;
 			}
 		    
-			g->shift = $5;
+			g->shift = *$5;
 
 			if ( $3 ) {
 			    if ( g->prt ) delete g->prt;
@@ -1004,7 +1020,8 @@ grid_statement:
 		    }
 		    delete $6;
 		}
-		
+		delete $5;
+		delete $4;
 	    }
 ;
 
@@ -1016,13 +1033,14 @@ label_statement:
 		for_each($3->begin(),  $3->end(), a);
 		
 		the_graph->base->label[$2] = $3;
-		if ( $4.param != 0 ) {
-		    the_graph->base->lshift[$2] = $4;
+		if ( $4->param != 0 ) {
+		    the_graph->base->lshift[$2] = *$4;
 		}
 		else {
 		    the_graph->base->lshift[$2].dir = $2;
 		    the_graph->base->lshift[$2].param = 0.4;
 		}
+		delete $4;
 	    }
 ;
 radius_spec:
@@ -1054,7 +1072,7 @@ line_statement:
 	    {
 		line *l;
 		lineDictionary::iterator li;
-		linedescclass des;
+		linedesc des;
 
 		li = the_graph->lines.find("grap.internal");
 		if ( li == the_graph->lines.end() ) {
@@ -1064,13 +1082,13 @@ line_statement:
 		}
 		else { l = (*li).second; } 
 
-		des = $2;
-		if ( $7.ld != def ) {
-		    des.ld = $7.ld;
-		    des.param = $7.param;
+		des = *$2;
+		if ( $7->ld != def ) {
+		    des.ld = $7->ld;
+		    des.param = $7->param;
 		}
 
-		if ( $7.color ) des.color = $7.color;
+		if ( $7->color ) des.color = new String($7->color);
 		    
 		l->initial = 1;
 
@@ -1085,6 +1103,7 @@ line_statement:
 		    if ($1) l->addpoint($6->x,$6->y,$6->c);
 		    else l->addarrow($6->x,$6->y,$6->c);
 		}
+		delete $2; delete $7;
 	    }
 ;
 
@@ -1363,9 +1382,9 @@ bar_statement:
             {
 		// The point parsing has already autoscaled the
 		// coordinate system to include those points.
-		box *b = new box($2, $4, &$5);
+		box *b = new box($2, $4, $5);
 		the_graph->add_box(*b);
-		delete $2; delete $4;
+		delete $2; delete $4; delete $5;
 		delete b;
 	    }
 |	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base opt_linedesc SEP
@@ -1388,9 +1407,9 @@ bar_statement:
 		$2->newpt(p1->x,p1->y);
 		$2->newpt(p2->x,p2->y);
 		
-		b = new box(p1, p2, &$9);
+		b = new box(p1, p2, $9);
 		the_graph->add_box(*b);
-		delete p1; delete p2;
+		delete p1; delete p2; delete $9;
 		delete b;
 	    }
 ;
@@ -1429,7 +1448,7 @@ extern int yylex();
 
 
 void init_dict() {
-    linedescclass defld(invis,0,0);
+    linedesc defld(invis,0,0);
     String s = "\"\\(bu\"";
     
     defcoord = new coord;

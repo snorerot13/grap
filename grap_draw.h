@@ -9,7 +9,7 @@
 typedef enum { top=0, bottom,left, right} sides;
 
 // Styles of drawing lines
-typedef enum { solid, dotted, dashed, invis, def } linedesc;
+typedef enum { solid, dotted, dashed, invis, def } linetype;
 
 // The axes of graphs
 typedef enum { none = 0, x_axis = 1, y_axis = 2, both=3} axis;
@@ -18,35 +18,24 @@ typedef enum { none = 0, x_axis = 1, y_axis = 2, both=3} axis;
 typedef enum { ljust = 1, rjust = 2, above = 4, below = 8, aligned = 16,
 	       unaligned=32} just;
 
-// These should be classes, but they're used by yacc as union
-// members, and thererefore need versions without constructors
-
-typedef  struct {
-    linedesc ld;	// The basic style
+class linedesc  {
+    // Basic class features for line descriptions: constructors,
+    // destructor, and assignment
+public:
+    linetype ld;	// The basic style
     double param;	// Some styles have parameters e.g., dotted 0.3
     double fill;	// Used for drawing solids, e.g. box
     String *color;	// The name of a color for the line
     String *fillcolor ;	// The color to fill a solid
-} linedescval;		// Description of the style a line is drawn in
 
-class linedescclass : public linedescval {
-    // Basic class features for line descriptions: constructors,
-    // destructor, and assignment
-public:
-    linedescclass(linedesc l=def, double p=0, String *c=0, double f=0,
-		  String *fc=0) {
-	// C++ won't let me use initialize members of the base class
-	// as base class initializers, although old g++ (2.7.2) would
-	    ld = l;
-	    param = p;
-	    fill = f;
+    linedesc(linetype l=def, double p=0, String *c=0, double f=0,
+		  String *fc=0) :
+	ld(l), param(p), fill(f), color(0), fillcolor(0) {
 	    if ( c ) color = new String(c);
-	    else color = 0;
 	    if ( fc ) fillcolor = new String(fc);
-	    else fillcolor = 0;
     }
-    
-    linedescclass(linedescval *l) {
+
+    linedesc(linedesc *l) {
 	if ( l) {
 	    ld = l->ld;
 	    param = l->param;
@@ -64,18 +53,14 @@ public:
 	    fill = 0;
 	}
     }
-    
-    linedescclass(const linedescclass& ldc) {
-	    ld = ldc.ld;
-	    param = ldc.param;
-	    fill = ldc.fill;
+
+    linedesc(const linedesc& ldc) :
+	ld(ldc.ld), param(ldc.param), fill(ldc.fill), color(0), fillcolor(0) {
 	    if ( ldc.color ) color = new String(ldc.color);
-	    else color = 0;
 	    if ( ldc.fillcolor ) fillcolor = new String(ldc.fillcolor);
-	    else fillcolor = 0;
     }
 
-    ~linedescclass() {
+    ~linedesc() {
 	if ( color ) {
 	    delete color;
 	    color = 0;
@@ -86,7 +71,7 @@ public:
 	}
     }
 
-    linedescclass& operator=(const linedescval &l) {
+    linedesc& operator=(const linedesc &l) {
 	ld = l.ld;
 	param= l.param;
 	fill = l.fill;
@@ -95,25 +80,23 @@ public:
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}
 	if ( l.fillcolor ) fillcolor = new String(l.fillcolor);
 	return *this;
-    }
+	}
     
 } ;
 
 
-typedef struct {
-    sides dir;		// Direction to shift this label
-    double param;	// Amount to shift
-} shiftdesc;		// A description of a label shift
-
-class shiftclass : public shiftdesc {
+class shiftdesc  {
     // Basic class features for shift descriptions: constructors,
     // destructor, and assignment
 public:
-    shiftclass(sides s=top, double p=0) {
+    sides dir;		// Direction to shift this label
+    double param;	// Amount to shift
+
+    shiftdesc(sides s=top, double p=0) {
 	dir= s;
 	param = p;
     }
-    shiftclass(shiftdesc *sh ) {
+    shiftdesc(shiftdesc *sh ) {
 	if ( sh ) {
 	    dir = sh->dir;
 	    param = sh->param;
@@ -122,11 +105,6 @@ public:
 	    dir = top;
 	    param = 0;
 	}
-    }
-    shiftclass & operator=( const shiftdesc &sh ) {
-	dir = sh.dir;
-	param = sh.param;
-	return *this;
     }
 };
 
@@ -210,7 +188,7 @@ public:
     double size;	// how large a tick mark to make
     sides side;		// Which side of the graph the mark is on
     String *prt;	// The string to print next to the mark
-    shiftclass shift;	// Shift information, to fine tune position of prt
+    shiftdesc shift;	// Shift information, to fine tune position of prt
     coord *c;		// The coordinate scale that the tick is in
     
     tick() : where(0), size(0), side(top), prt(0), shift(0), c(0) { }
@@ -226,12 +204,12 @@ public:
  	    if ( p ) prt = new String(p);
 	    else prt =0;
     }
-    tick(double w, double s, sides sd, String *p, shiftclass *sh,
+/*    tick(double w, double s, sides sd, String *p, shift *sh,
 	 coord *co) :
 	where(w), size(s), side(sd), shift(sh), c(co) {
  	    if ( p ) prt = new String(p);
 	    else prt =0;
-    }
+	    } */
     ~tick() {
 	if ( prt) {
 	    delete prt;
@@ -257,21 +235,21 @@ public:
 class grid {
 public:
     double where;	// x or y value of the grid line
-    linedescclass desc;	// style of the grid line
+    linedesc desc;	// style of the grid line
     sides side;		// Side of the graph where line labels are printed
     String *prt;	// The label for this line
-    shiftclass shift;	// Shift info for the label
+    shiftdesc shift;	// Shift info for the label
     coord *c;		// Coordinate system for this line
     
     grid() : where(0), desc(dotted,0,0), side(top), prt(0), shift(0), c(0) { }
-    grid(double w, linedescval *l, sides sd, String *p, shiftdesc *sh,
-	 coord *co) :
-	where(w), desc(l), side(sd), shift(sh), c(co) {
-	    if ( p ) prt = new String(p);
-	    else prt =0;
-    }
+//      grid(double w, linedescval *l, sides sd, String *p, shiftdesc *sh,
+//  	 coord *co) :
+//  	where(w), desc(l), side(sd), shift(sh), c(co) {
+//  	    if ( p ) prt = new String(p);
+//  	    else prt =0;
+//      }
 
-    grid(double w, linedescclass *l, sides sd, String *p, shiftclass *sh,
+    grid(double w, linedesc *l, sides sd, String *p, shiftdesc *sh,
 	 coord *co) :
 	where(w), desc(l), side(sd), shift(sh), c(co) {
 	    if ( p ) prt = new String(p);
@@ -343,12 +321,12 @@ protected:
 public:
     double ht;			// height of the graph
     double wid;			// width
-    linedescclass desc[4];	// The line styles for the axes
+    linedesc desc[4];	// The line styles for the axes
     stringlist *label[4];	// labels for the axes.  These are
                                 // lists of DisplayStrings that must
                                 // be translated by the associated
                                 // drawable class
-    shiftclass lshift[4];	// positioning info for labels
+    shiftdesc lshift[4];	// positioning info for labels
     tick tickdef[4];		// default tick definitions
     grid griddef[4];		// default gridline definitions
     ticklist tks;		// the ticks to draw (generated from
@@ -359,9 +337,9 @@ public:
 	String g = "%g";
 	
 	for ( int i = 0 ; i < 4 ; i ++ ) {
-	    desc[i] = linedescclass(def,0,0);
+	    desc[i] = linedesc(def,0,0);
 	    label[i] = new stringlist;
-	    lshift[i] = shiftclass(top,0);
+	    lshift[i] = shiftdesc(top,0);
 	    griddef[i] = grid(0.0,desc+i,top,&g,lshift+i,0);
 	    tickdef[i] = tick(0.0,((i== bottom || i == left ) ? 0.125 : 0),
 			      (sides) i, &g, lshift+i, 0);
@@ -390,7 +368,7 @@ protected:
     // can have a different plotting symbol or drawing style.
     class linepoint : public point {
     public:
-	linedescclass desc;	// style for the connection to this point
+	linedesc desc;	// style for the connection to this point
 	String *plotstr;	// string to plot
 	int initial;		// true if this is the first point in a segment
 	int arrow;		// true if the connection ends with an arrow
@@ -398,7 +376,7 @@ protected:
 	linepoint() : point(),  desc(invis, 0.0, 0),  plotstr(0), initial(0),
 	    arrow(0)  { } ;
 	linepoint(double xx, double yy, coord* cc, line *ll, String *s,
-		  linedescval *l, int a=0);
+		  linedesc *l, int a=0);
 	linepoint(linepoint& lp) :
 	    point(lp.x,lp.y,lp.c), desc(lp.desc), plotstr(0),
 	    initial(lp.initial), arrow(lp.arrow) {
@@ -414,17 +392,17 @@ protected:
     };
 public:
     String *plotstr;		// default plotting string
-    linedescclass desc;		// Default connection style
+    linedesc desc;		// Default connection style
     list<linepoint*> pts;	// the list of points
     int initial;		// the value of initial for the next point
 
     line() : plotstr(0), desc(), pts(),initial(1) {}
 
-    line(linedescval *l, String *s ) : desc(l), pts(), initial(1) {
+    line(linedesc *l, String *s ) : desc(l), pts(), initial(1) {
 	plotstr = new String(s);
     }
     
-    line(linedescval *l) :  plotstr(0), desc(l), pts(), initial(1) { }
+    line(linedesc *l) :  plotstr(0), desc(l), pts(), initial(1) { }
     line(line& l) : desc(l.desc),  initial(l.initial) {
 	list<linepoint*>::iterator lpi;
 	
@@ -442,14 +420,14 @@ public:
 	    
     }
     void addpoint(double x, double y, coord* c, String *s=0,
-		  linedescval *l=0) {
+		  linedesc *l=0) {
 	linepoint *lp;
 
 	lp = new linepoint(x,y,c,this,s,l);
 	pts.push_back(lp);
     }
     void addarrow(double x, double y, coord* c, String *s=0,
-		  linedescval *l=0) {
+		  linedesc *l=0) {
 	linepoint *lp;
 
 	lp = new linepoint(x,y,c,this,s,l,1);
@@ -482,9 +460,9 @@ class box {
 public:
     point p1;		// upper left and 
     point p2;		// lower right points
-    linedescclass ld;	// Line style for the box
+    linedesc ld;	// Line style for the box
     box() : p1(), p2(), ld() { }
-    box(point *pp1, point *pp2, linedescval *l) :
+    box(point *pp1, point *pp2, linedesc *l) :
 	p1(pp1), p2(pp2), ld(l) { }
     box(const box &b) : p1(b.p1), p2(b.p2), ld(b.ld) { }
 };

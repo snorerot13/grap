@@ -152,11 +152,11 @@ double coord::map(double v, axis ax ) {
 // Linepoint constructor. Too long for a header, but straightforward.
 
 line::linepoint::linepoint(double xx, double yy, coord* cc, line *ll,
-			   String *s, linedescval *l, int a=0)
+			   String *s, linedesc *l, int a=0)
     : point(xx,yy,cc) {
 
 
-	// If a null linedescval is passed in, use the one in the line
+	// If a null linedesc is passed in, use the one in the line
 	
 	if ( !l ) l = &ll->desc;
 	
