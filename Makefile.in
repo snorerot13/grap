@@ -29,6 +29,11 @@ DISTDIR=grap-0.91a
 
 CXXFLAGS += -Wall @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
+# solaris make uses these as defaults:
+
+CCC=$(CXX)
+CCFLAGS=$(CXXFLAGS)
+
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o
 
 all:	grap
