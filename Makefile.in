@@ -28,7 +28,7 @@ MKDEP= 	@MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.21
+VERSION=1.22pre1
 DISTDIR=grap-${VERSION}
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
@@ -94,7 +94,8 @@ install:	grap grap.defines grap.1
 	strip grap || true
 	${INSTALL} -d ${BINDIR} || true
 	${INSTALL} -d ${MANDIR} || true
-	${INSTALL} -d ${DEFINESDIR}/examples || true
+	${INSTALL} -d ${DEFINESDIR} || true
+	${INSTALL} -d ${DOCDIR}/examples || true
 	${INSTALL_PROGRAM} grap ${BINDIR}
 	${INSTALL_DATA} grap.1 ${MANDIR}
 	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
