@@ -6,7 +6,8 @@ them.  He also compiles in UWIN under NT, which broke autoconf in some
 weird ways.  The most important of these necessitated adding a check
 to ensure that install supports -d.
 
-His test case is in the example file now.
+His test case is in the example file now.  He also found some spelling
+errors.
 
 While tinkering with those autoconf changes I found that grap didn't
 compile under g++ 2.7.2.1 any more.  Good thing that 0.97b wasn't
@@ -18,7 +19,7 @@ compiling under egcs halves the run time.  This is roughly half due to
 better egcs compilation and half due to the better performance of the
 standard string class.
 
-Moved to a config.h style grap.h.  Smoothed out the header files to
+Moved to a config.h-style grap.h.  Smoothed out the header files to
 confine as much conditional compilation as possible to grap.h.
 
 The code now uses hash_maps if they're available.
