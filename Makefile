@@ -10,6 +10,7 @@ MKDIR=mkdir
 
 LDLIBS=-ll -ly
 CXXFLAGS=-g
+#CXXFLAGS += -DLEX_DEBUG
 CXXFLAGS += -DDEFINES=\"$(DEFINESDIR)/grap.defines\"
 OBJS=grap.o grap_lex.o grap_draw.o
 

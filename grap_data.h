@@ -160,18 +160,47 @@ inline ostream& operator<<(ostream& f, String& s) { return f << s.str; }
 
 class grap_sprintf_String : public String {
 public:
-    grap_sprintf_String(char *f=0) : String(), fmt(0), next_fmt(0) {
-	if ( f ) {
-	    fmt = new char[strlne(f)*2];
-	    strcpy(fmt,f);
-	    next_fmt = fmt;
-	}
-    }
+    grap_sprintf_String(const char *f=0) : String(f) {}
+    grap_sprintf_String(const String& f) : String(f) {}
+    grap_sprintf_String(const String *f) : String(f) {}
+    next_number(double d) {
+	char *c = str;
+	char *fmt = new char[strlen() + strchunk];
+	char *f;
+	int first = 1;
 
-    next_number(double d) 
-protected:
-    char *fmt;
-    char *next_fmt;
+	f = fmt;
+	for(f=fmt; *f = *c; c++,f++ ) {
+	    if (*c == '%' ) {
+		if ( first ) {
+		    if ( c[1] == '%' ) {
+			*++f = '%';
+			*++f = '%';
+			*++f = '%';
+			c++;
+		    }
+		    else { first = 0; }
+		} else { *++f = '%'; }
+	    }
+	}
+	if ( len < 2* ::strlen(fmt) ) resize(2*::strlen(fmt));
+	snprintf(str,len,fmt,d);
+	delete fmt;
+    }
+    
+    finish_fmt() {
+        // next_number has to double %% throughout the string.  This
+        // method removes those doubled % s
+	
+	char *n = new char[len];
+	char *a, *b;
+
+	for ( a = str, b = n; *b = *a; a++, b++) {
+	    if ( *a == '%' && a[1] == '%' ) a++;
+	}
+	delete str;
+	str = n;
+    }
 };
 
 template <class objtype>

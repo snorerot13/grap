@@ -61,7 +61,7 @@ const char *opts = "d:D";
 %token PLUS MINUS TIMES DIV CARAT EQUALS SIZE UNALIGNED LABEL RADIUS CIRCLE
 %token LINE ARROW X Y LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
-%token GRAPH REST PRINT PIC TROFF UNTIL COLOR
+%token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH
 %start graphs
 %union {
     int val;
@@ -87,7 +87,7 @@ const char *opts = "d:D";
 %type <num> NUMBER expr opt_expr direction radius_spec
 %type <stringmod> strmod
 %type <string> IDENT STRING opt_string opt_ident TEXT else_clause REST TROFF
-%type <string> until_clause START
+%type <string> until_clause START string
 %type <val>  FRAMESIZE FUNC0 FUNC1 FUNC2 tickdir opt_tick_off
 %type <val>  line_token
 %type <coordptr> opt_coordname COORD_NAME
@@ -95,7 +95,7 @@ const char *opts = "d:D";
 %type <frameptr> sides size
 %type <linedesc> linedesc_elem linedesc opt_linedesc
 %type <string_list> strlist
-%type <double_list> num_line 
+%type <double_list> num_line expr_list
 %type <tick_list> ticklist tickat tickfor tickdesc
 %type <pt> point
 %type <shift> shift opt_shift
@@ -175,6 +175,8 @@ statement:
 	    { first_line = 0;}
 |	print_statement
 	    { first_line = 0;}
+|	sh_statement
+	    { first_line = 0;}
 |	pic_statement
 	    { first_line = 0;}
 |	troff_line
@@ -200,10 +202,41 @@ opt_ident:
 
 opt_string:
 	    { $$ = 0; } 
-|	STRING
+|	string
 	    { $$ = $1; }
 ;
 
+string:
+	STRING
+             { $$ = $1; }
+|       SPRINTF LPAREN STRING COMMA expr_list RPAREN
+             {
+		 double d;
+		 int gotnext;
+		 grap_sprintf_String *s = new grap_sprintf_String($3);
+
+		 for ( gotnext = $5->first(d); gotnext; gotnext= $5->next(d)) 
+		     s->next_number(d);
+		 s->finish_fmt();
+		 delete $5;
+		 delete $3;
+
+		 $$ = (String *) s;
+	     }
+;
+
+expr_list:
+	expr
+            {
+		$$ = new doublelist;
+		$$->insert($1);
+	    }
+|       expr_list COMMA expr
+            {
+		$$ = $1;
+		$$->insert($3);
+	    }
+;
 
 opt_expr:
             { $$ = 0; }
@@ -233,7 +266,7 @@ linedesc_elem:
 	    { $$.ld = dotted; $$.param = $2; $$.color = 0;}
 |	 DASHED opt_expr
 	    { $$.ld = dashed; $$.param = $2; $$.color = 0;}
-|	 COLOR STRING
+|	 COLOR string
 	    { $$.ld = def; $$.color = $2; }
 ;
 
@@ -352,9 +385,9 @@ expr:
             { $$ = ($1 || $3); }
 |	NOT expr %prec PLUS
             { $$ = ! ( (int) $2); }
-|	STRING EQ STRING
+|	string EQ string
             { $$ = ($1 == $3); }
-|	STRING NEQ STRING
+|	string NEQ string
             { $$ = ($1 != $3); }
 |	FUNC0 LPAREN RPAREN
 	    {
@@ -472,7 +505,7 @@ strmod:
 ;
 
 strlist:
-	STRING strmod
+	string strmod
 	    {
 		DisplayString *s;
 
@@ -481,7 +514,7 @@ strlist:
 		$$ = new stringlist;
 		$$->insert(s);
 	    }
-|	strlist STRING strmod
+|	strlist string strmod
 	    {
 		DisplayString *s;
 		int just;
@@ -1020,7 +1053,7 @@ coord_statement:
 
 until_clause:
 	    { $$ = 0; }
-|	UNTIL STRING
+|	UNTIL string
 	    {
 		$2->unquote();
 		$$ = $2;
@@ -1028,7 +1061,7 @@ until_clause:
 ;
 
 copy_statement:
-	COPY STRING SEP
+	COPY string SEP
 	    {
 		$2->unquote();
 		if (!include_file($2)) return 0;
@@ -1095,6 +1128,23 @@ define_statement:
 	    }
 ;
 
+sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
+            {
+		int len = $3->strlen()+1 ;
+		char *sys = new char [len];
+		int i=0;
+
+		// String to char*
+		       
+		while (sys[i] = (*$3)[i])
+		    i++;
+
+		delete $3;
+		
+		system(sys);
+	    }
+;
+
 else_clause:
 	    { $$ = 0; }
 | 	ELSE {lex_begin_macro_text(); } TEXT
@@ -1153,7 +1203,7 @@ graph_statement:
 ;
 
 print_statement:
-	PRINT STRING SEP
+	PRINT string SEP
 	    {
 		$2->unquote();
 		cerr <<  *$2 << endl;

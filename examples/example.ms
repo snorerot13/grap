@@ -1376,7 +1376,9 @@ blob at 0,.5; blob at .5, .5; blob at 1,.5
 .KS
 .PP
 A gratuitous color graph.  Don't ever produce anything this ugly.  The
-data is the 400m times used earlier.
+data is the 400m times used earlier.  There's a demonstration of 
+.CW sprintf
+in there, too.
 .EQ
 delim off
 .EN
@@ -1397,6 +1399,7 @@ delim off
 \&copy "400wpairs.d"
 \&"Women" size -3 at 1958,52
 \&"Men" size -3 at 1910,47
+\&sprintf("I say %g %5.3f%% %f %e",1,2,3,4.5) at 1940,50
 \&.G2
 .ft
 .DE
@@ -1418,6 +1421,7 @@ new dotted color "red"
 copy "400wpairs.d"
 "Women" size -3 at 1958,52
 "Men" size -3 at 1910,47
+sprintf("I say %g %5.3f%% %f %e",1,2,3,4.5) at 1940,50
 .G2
 .KE
 .KS
@@ -1476,3 +1480,6 @@ square at 2,4
 delta at 2,5
 .G2
 .KE
+.G1
+sh { echo "HELLO" }
+.G2
