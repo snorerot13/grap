@@ -9,6 +9,9 @@ to ensure that install supports -d.
 His test case is in the example file now.  He also found some spelling
 errors.
 
+The README file now reflects the real state of the world, too.  More
+kudos to Bruce.
+
 While tinkering with those autoconf changes I found that grap didn't
 compile under g++ 2.7.2.1 any more.  Good thing that 0.97b wasn't
 really released.  All is well again.
