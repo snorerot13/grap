@@ -121,6 +121,6 @@ check:	grap grap.defines examples/example.ms
 		exit 1; \
 	fi
 
-dist:	.makesum grap.man grap.ps
+dist:	grap.man grap.ps
 
 include .depend
