@@ -40,10 +40,10 @@ CHANGES.
 The code was all written by me, based on K&B's _Grap-A Language for
 Typesetting Graphs, Tutorial and User Manual_ by Jon L. Bentley and
 Brian W. Kernighan, revised May 1991.  That paper is available from
-http://www.kohala.com/~rstevens/troff/troff.html as
-http://www.kohala.com/~rstevens/troff/cstr114.ps .  You should check
-out the paper for a complete understanding of grap's power.  grap is a
-pic preprocessor, so any typesetting language that can use pic can use
+http://www.kohala.com/start/troff/troff.html as
+http://www.kohala.com/start/troff/cstr114.ps .  You should check out
+the paper for a complete understanding of grap's power.  grap is a pic
+preprocessor, so any typesetting language that can use pic can use
 grap.  I believe that TeX can use pic, but I wouldn't be surprised if
 grap.defines needs to be fooled with.  If you use TeX and find a set
 of grap.defines that work, please let me know.
@@ -51,26 +51,29 @@ of grap.defines that work, please let me know.
 Check out the examples in the examples directory.
 
 So far I've compiled the code on Sunos 4.1.3, Solaris 5.5.1, FreeBSD
-2.2.7-3.4, and an unknown version of RedHat Linux.  It may run under
-other systems, and your c++ compiler and yacc/lex versions are
-probably more important than the type of Unix you run.  Flex 2.5.4 and
-the yacc on FreeBSD 2.2.7 are known to work as well as later versions
-of bison.  g++ 2.7.2.1, 2.8.1 and 2.95.1 have all worked.  grap uses
-the standard template library, so that may also be a factor.  The STL
+2.2.7-3.4, and an unknown RedHat Linux 6.1.  It may run under other
+systems, and your c++ compiler and yacc/lex versions are probably more
+important than the type of Unix you run.  Flex 2.5.4 and the yacc on
+FreeBSD 2.2.7 are known to work as well as later versions of bison.
+g++ 2.7.2.1, 2.8.1 2.95.1 and 2.95.2 have all worked.  grap uses the
+standard template library, so that may also be a factor.  The STL
 included with g++ works.  grap has successfully compiled under UWIN
 (http://www.research.att.com/sw/tools/uwin/) under Windows NT with g++
 2.95.1. (Yeah, it surprised me, too.)
 
 The distribution uses GNU configure.  ./configure should create a
 viable set of makefiles.  After running configure, you should be able
-to use make directly.  The resulting makefile should run under most
-versions of make, including GNU make and FreeBSD's pmake.
+to use make directly (specifically, make depend && make).  The
+resulting makefile should run under most versions of make, including
+GNU make and FreeBSD's pmake.
 
 If you try to compile grap on a new system and have problems, let me
 know and I'll try to help.  If you succeed, let me know.
 
 Bug reports or other correspondance to faber@lunabase.org.  This
 program is a hobby, so understand that bug reports will be handled as
-I have time.  The most recent version should always be available at
-http://www.lunabase.org/~faber/Vault/software/grap/ .
+I have time.  The most recent stable version should always be
+available at http://www.lunabase.org/~faber/Vault/software/grap/ .  If
+you're having a problem, don't hesitate to mail, because I often have
+a slightly pre-release version with in-progress bug fixes too.
 

@@ -18,8 +18,10 @@ LEX=@LEX@
 YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
+PERL=@PERL@
 
 DISTDIR=grap-1.02
+SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS += @GXXFLAGS@ @DEFS@ -DDEFINES=\"$(DEFINESDIR)/grap.defines\" 
 
@@ -47,10 +49,6 @@ y.tab.h:	grap.y
 grap.cc:	grap.y
 grap_lex.cc:	grap_lex.l y.tab.h
 
-grap.o:		grap.cc grap.h grap_data.h grap_draw.h grap_pic.h
-grap_lex.o:	grap_lex.cc grap.h y.tab.h grap_data.h grap_draw.h grap_pic.h
-grap_draw.o:	grap_draw.cc grap.h grap_data.h grap_draw.h grap_pic.h
-grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
 
 version.cc:	Makefile
 	echo "$(DISTDIR)" | perl -ne 'print "char *version=\"$(DISTDIR)\";\n";' > version.cc
@@ -85,7 +83,7 @@ clean:
 
 veryclean:
 	${MAKE} clean
-	rm -f config.log config.status config.cache config.h version.cc grap.h *.tgz
+	rm -f config.log config.status config.cache config.h version.cc *.tgz
 
 install:	grap grap.defines grap.1
 	strip grap
@@ -107,3 +105,13 @@ deinstall:
 	$(RM) $(DEFINESDIR)/examples/*.d $(DEFINESDIR)/examples/*.ms $(DEFINESDIR)/examples/Makefile $(DEFINESDIR)/examples/*result
 	$(RMDIR) $(DEFINESDIR)/examples
 	$(RMDIR) $(DEFINESDIR)
+
+cleandepend:
+	${PERL} -i -ne 'print if 1 .. /^\# End of Makefile/;' Makefile
+
+depend:	${SOURCES}
+	${MAKE} cleandepend
+	@MAKEDEP@
+
+
+# End of Makefile

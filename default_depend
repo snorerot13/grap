@@ -1,0 +1,4 @@
+grap.o:		grap.cc grap.h grap_data.h grap_draw.h grap_pic.h
+grap_lex.o:	grap_lex.cc grap.h y.tab.h grap_data.h grap_draw.h grap_pic.h
+grap_draw.o:	grap_draw.cc grap.h grap_data.h grap_draw.h grap_pic.h
+grap_pic.o:	grap_pic.cc grap_pic.h grap.h grap_data.h grap_draw.h
