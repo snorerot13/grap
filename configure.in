@@ -76,4 +76,22 @@ AC_DEFINE(OPTARG_DEFINED)
 fi
 fi
 
+if test $ac_cv_func_snprintf = "no"; then
+AC_CACHE_CHECK(if sprintf returns an int, grap_cv_sprintf_int,
+AC_TRY_RUN([
+changequote(<<, >>)dnl
+#include <stdio.h>
+main(int argc, char* argv) {
+	char a<<[10]>>;
+	if ( (char *) sprintf(a,"ten") == a ) exit(1);
+	else exit(0);
+}
+changequote([, ])dnl
+],grap_cv_sprintf_int="yes",grap_cv_sprintf_int="no",echo ""))
+
+if test $grap_cv_sprintf_int = "no" ; then 
+AC_DEFINE(SPRINTF_NOT_INT)
+fi
+fi
+
 AC_OUTPUT(examples/Makefile Makefile)

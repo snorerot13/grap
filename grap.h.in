@@ -33,11 +33,20 @@ extern "C" {
 // you can break the code.
 inline int snprintf(char *s, int lim, const char *fmt, double d) {
     int tot;
+
+#ifdef SPRINTF_NOT_INT
+    // For some reason some old versions of SunOS have an sprintf that
+    // doesn't return an int.  In this case, we can't bounds check at all.
     
+    sprintf(s,fmt,d);
+    tot = lim;
+#else    
     if ( (tot = sprintf(s,fmt,d)) > lim ) {
 	cerr << "Bad format to internal sprintf crashed the stack" << endl;
 	abort();
     }
+#endif
+
     return tot;
 }
 #endif
