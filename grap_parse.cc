@@ -525,7 +525,7 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
     // Basically this should never fail...
     li = the_graph->lines.find("grap.internal");
     if ( li == the_graph->lines.end() ) {
-	des.ld = solid;
+	if ( des.ld == def ) des.ld = solid;
 	l = new line(&des);
 	the_graph->lines["grap.internal"] = l;
     }

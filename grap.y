@@ -8,6 +8,7 @@
 #endif
 #include <stdio.h>
 #include <iostream>
+#include <stack>
 #include <math.h>
 #ifdef STDC_HEADERS
 #include <stdlib.h>
@@ -917,11 +918,9 @@ copy_statement:
 	    {
 		string *s;
 		string *t;
-		string *expand;
 		int lim;
 		char end;
-
-		expand = new string;
+		stack<string *> st;
 
 		while ( $9 && !$9->empty() ) {
 		    int i = 0;
@@ -943,23 +942,27 @@ copy_statement:
 		    if ( t->length() ) $5->add_arg(t);
 		    else if (t) delete t;
 		    t = $5->invoke();
-		    *expand += *t;
 		    // "here" macros should end with a SEP.  If the
 		    // user hasn't done so, we add a SEP for them.
 		    // Even named macros should get a sep when they're
 		    // copied through,
 
-		    end = (*expand)[expand->length()-1];
+		    end = (*t)[t->length()-1];
 
 		    if ( end != ';' && end != '\n' ) 
-			*expand += ';';
-		    delete t;
+			*t += ';';
+		    // Because include string stacks the strings, we stack them
+		    // here and call include_string in reverse order to ensure
+		    // correct ordered execution of multiple lines.
+		    st.push(t);
 		    delete s;
 		}
-		
-		include_string(expand,0,GMACRO);
-		delete expand;
 		delete $9;
+		while ( !st.empty() ) {
+		    include_string(st.top(), 0, GMACRO);
+		    delete st.top();
+		    st.pop();
+	        }
 		// don't delete defined macros
 		if ( !$5->name)
 		    delete $5;

@@ -769,7 +769,7 @@ bool include_file(string *s, bool rs /* =false */ , bool usepath /* =true*/) {
 
 // Include the given string into the input stream.  Additional
 // parameters are a for descriptor associated with the buffer (if its
-// part of a for loop) and an input type (taht's usualy GMACRO)
+// part of a for loop) and an input type (that's usualy GMACRO)
 int include_string(string *s, struct for_descriptor *f /* =0 */,
     grap_input it /*=GMACRO */) {
 	char *cbuf;

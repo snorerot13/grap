@@ -14,10 +14,22 @@ function to get a (sort of) random number.  Don't use this for key
 generation.  W. Robert Daasc caught this omission.
 
 While I was in there, I discovered that rand was not returning its
-full range from [0-1).  It does now.
+full range from [0,1).  It does now.
 
 Some keywords that accept strings weren't accepting sprintf, some of
 them have been fixed.
+
+Lee Ji Hwan found a bug with large files being read thru macros
+causing a core dump.  That has been fixed.  It was a really
+embarrassing coding style error, too...
+
+John Aycock discovered a bug where a line style was ignored on the first
+line command executed.  It's not ignored anymore.
+
+I also found a bug in the execution order of copy through macros,
+although I'm uncertain if a version was ever released with the bug
+intact.  I think this may have been a related to Lee Ji Hwan's bug,
+which means it probably hasn't seen the light of day.
 
 1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially

@@ -27,7 +27,7 @@ MKDEP= 	@MKDEP@
 MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
-VERSION=1.21pre6
+VERSION=1.21pre7
 DISTDIR=grap-${VERSION}
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@
@@ -73,7 +73,7 @@ grap_lex.o:	grap_lex.cc
 
 # Only grap_parse.cc needs to have the version defined.
 grap_parse.o:	grap_parse.cc
-	${CXX} ${CXXFLAGS} -DVERSION="\"${VERSION}\"" -c grap_parse.cc
+	${CXX} ${CXXFLAGS} -DVERSION="\"${VERSION}\"" -DOS_VERSION=\""@OS_VERSION@"\" -c grap_parse.cc
 
 y.output:	grap.y
 	${YACC} -v grap.y
