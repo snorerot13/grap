@@ -1092,15 +1092,22 @@ functions are extensions and are probably not available in other
 .Nm
 implementations.
 .Pp
-If 
 .Ic rand
-is given an argument, it seeds the random number generator with that
-value.  Called with no arguments, it returns a random number uniformly
+returns a random number uniformly
 distributed on [0,1).  The following two argument functions are supported:
 .Ic atan2 , min , max .
 .Ic atan2 
 works just like
 .Xr atan2 3 .
+The random number generater can be seeded by calling 
+.Ic srand
+with a single parameter (converted internally to an integer).  Despite
+the fact that its return value is of no use, you must use 
+.Ic srand
+in a valid expression.  Assigning its return value to an unused
+variable is the usual way to do this.
+.Ic srand
+is not portable.
 .Pp
 Other than string comparison, no expressions can use strings.  One
 string valued function exists: 

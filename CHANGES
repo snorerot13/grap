@@ -8,6 +8,10 @@ Added xy_gg macros, too.
 Fixed a bug where giving a coordinate name before a parenthesized point
 caused a syntax error.  Thanks to Kees Zeelenberg for spotting this.
 
+Added an srand function to seed the random number generator, though
+there's none documented in Kernighan and Bentley's grap.  W. Robert
+Daasc caught this omission.
+
 1.20: The big jump reflects both internal changes and visible feature
 changes.  The class structure in the code has been substantially
 revamped, and the code brought into better conformance with the

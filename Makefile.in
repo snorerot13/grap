@@ -21,8 +21,10 @@ YACC=@YACC@
 CXX=@CXX@
 LD=${CXX}
 LIBOBJS=@LIBOBJS@
-MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
-MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
+PREMKDEP= grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h 
+POSTMKDEP=${RM} grap.cc grap_lex.cc y.tab.h
+MKDEP= 	@MKDEP@
+MKDEPFLAGS=@MKDEPFLAGS@;
 
 SOURCES=grap.cc grap_lex.cc *.cc
 VERSION=1.21pre3
