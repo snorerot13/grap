@@ -11,23 +11,27 @@ public:
     PicDisplayString(DisplayString& ds) :
 	DisplayString(ds) { }
     void draw(frame *);
+    ~PicDisplayString() { };
 };
 
 class Pictick : public tick, public drawable {
 public:
     Pictick(tick& t) : tick(t) { };
-    void draw(frame *); 
+    void draw(frame *);
+    ~Pictick() { }
 };
 
 class Picgrid: public grid, public drawable {
 public:
     Picgrid(grid &g) : grid(g) { }
-    void draw(frame *); 
+    void draw(frame *);
+    ~Picgrid() { }
 };
 
 class Picframe: public frame, public drawable {
 public:
     void draw(frame *) ;
+    ~Picframe() { }
 protected:
     void autoguess(sides, double &, double&, double&, double &, int&);
     void addautoticks(sides);
@@ -39,6 +43,7 @@ protected:
 class Picline : public line, public drawable {
 public:
     Picline(line &l) : line(l) { };
+    ~Picline() { }
     void draw(frame *);
 };
 
@@ -46,12 +51,14 @@ public:
 class Picplot: public plot, public drawable {
 public:
     Picplot(plot& p) : plot(p) { }
+    ~Picplot() { cerr << "pic plot destructor" << endl; }
     void draw(frame *);
 };
 
 class Piccircle: public circle, public drawable {
 public:
     Piccircle(circle& c) : circle(c) { }
+    ~Piccircle() { }
     void draw(frame *);
 };
 
@@ -64,6 +71,7 @@ protected:
     }
 public:
     Picbox(box& b) : box(b) { }
+    ~Picbox() { }
     void draw(frame *);
 };
 
@@ -88,7 +96,7 @@ public:
 	pframe(0) {}
     
     
-    virtual ~Picgraph() {
+    ~Picgraph() {
 	sfree_f sfree;
 
 	if ( ps_param ) delete ps_param;

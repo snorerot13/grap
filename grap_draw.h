@@ -111,7 +111,7 @@ class drawable {
 public:
     virtual void draw(frame *) = 0;
     // So we get the right size to delete (ick)
-    virtual ~drawable() { }
+    virtual ~drawable() { cerr << "drawable destructor" << endl; }
 };
 
 typedef list<drawable *> objlist;
@@ -434,7 +434,7 @@ public:
     
     plot(stringlist *s = 0, point *p =0) : strs(s), loc(p) { }
     // copy constructors have to copy ...
-    plot( plot& p ) : strs(0), loc(0) {
+    plot( const plot& p ) : strs(0), loc(0) {
 	if (p.loc) loc = new point(p.loc);
 
 	if ( p.strs ) {
@@ -450,6 +450,7 @@ public:
 	}
     }
     ~plot() {
+	cerr << "plot destructor" << endl;
 	if ( strs ) {
 	    DisplayString *ds;
 	    while ( !strs->empty()) {
@@ -508,6 +509,7 @@ protected:
     class obj_freer_f : public UnaryFunction<drawable *, int> {
     public:
 	int operator()(drawable *d) {
+	    cerr << "deleting drawable " << endl;
 	    delete d;
 	    return 0;
 	}

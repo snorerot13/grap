@@ -26,7 +26,7 @@ int copystate =0;
 
 int lex_expand_macro =1;
 
-linelist *sl;
+linelist *sl=0;
 String *copy_end, *copy_backstop;
 
 extern macroDictionary macros;
@@ -308,6 +308,7 @@ atan2|min|max		{
 						return TEXT;
 					    } else {
 						macro *m = new macro(macrotext);
+						macrotext = 0;
 						yylval.macro_val = m;
 						DEBUG("MACRO\n",0);
 						return MACRO;
@@ -363,6 +364,7 @@ atan2|min|max		{
 	}
 	BEGIN(GRAP);
 	yylval.line_list = sl;
+	sl = 0;
 	copystate = 0;
 	DEBUG("COPYTEXT",0);
 	return COPYTEXT;
@@ -417,6 +419,7 @@ atan2|min|max		{
 	copystate = 0;
 	BEGIN(GRAP);
 	yylval.line_list = sl;
+	sl = 0;
 	return COPYTEXT;
     } else yyterminate();
 }
@@ -518,6 +521,7 @@ void lex_begin_copy(String *s=0) {
     if ( copy_end) delete copy_end;
     if ( s ) copy_end = s;
     else copy_end = new String(".G2");
+    if ( sl ) delete sl;
     sl = new linelist;
 }
 
