@@ -12,7 +12,7 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(unistd.h hash_map)
 
 AC_CACHE_CHECK(that stl.h and string are compatible,grap_cv_lang_stl_and_string,
 AC_TRY_COMPILE(

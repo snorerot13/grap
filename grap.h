@@ -39,6 +39,7 @@ inline int snprintf(char *s, int lim, char *fmt, double d) {
 #endif
 
 #include "grap_data.h"
+#include <hash_map>
 class DisplayString;
 class line;
 class coord;
@@ -49,12 +50,31 @@ class grid;
 class circle;
 class shiftdesc;
 
+
+#ifndef HAVE_HASH_MAP
 typedef less<String> Strcmp;
 
 typedef map<String, double *, Strcmp> doubleDictionary;
 typedef map<String, coord *, Strcmp> coordinateDictionary;
 typedef map<String, line *, Strcmp> lineDictionary;
 typedef map<String, macro *, Strcmp> macroDictionary;
+#else
+// A functor for hashing strings - it is an adapter to get to the
+// standard library char * hash function.
+class Strhash : public unary_function<const String&, size_t> {
+private:
+    hash<const char *> h;
+public:
+    size_t operator()(const String& s) const {
+	return h(s.c_str());
+    }
+};
+
+typedef hash_map<String, double *, Strhash> doubleDictionary;
+typedef hash_map<String, coord *, Strhash> coordinateDictionary;
+typedef hash_map<String, line *, Strhash> lineDictionary;
+typedef hash_map<String, macro *, Strhash> macroDictionary;
+#endif
 typedef list<plot *> plotSequence;
 typedef list<double> doublelist;
 typedef list<tick *> ticklist;
