@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
-#ifdef STDC_HEADERS
+#if defined(STDC_HEADERS) | defined(HAVE_STDLIB_H)
 #include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H

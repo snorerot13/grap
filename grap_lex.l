@@ -6,10 +6,11 @@
 #include "config.h"
 #endif
 #ifdef STDC_HEADERS
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-extern int errno;
+#endif
+#if defined(STDC_HEADERS) | defined(HAVE_STDLIB_H)
+#include <stdlib.h>
 #else
 extern "C" {
     void free(void*);
@@ -23,6 +24,8 @@ extern "C" {
 #include "grap_data.h"
 #include "grap_draw.h" 
 #include "y.tab.h"
+
+extern int errno;
 
 #ifndef STRERROR_DECLARED
 #if HAVE_STRERROR 

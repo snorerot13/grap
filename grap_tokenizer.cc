@@ -5,9 +5,11 @@
 #endif
 #ifdef STDC_HEADERS
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#endif
+#if defined(STDC_HEADERS) | defined(HAVE_STDLIB_H)
+#include <stdlib.h>
 #endif
 #include <iostream>
 #include <sys/param.h>

@@ -11,11 +11,15 @@
 #include <stack>
 #include <math.h>
 #ifdef STDC_HEADERS
-#include <stdlib.h>
 #include <limits.h>
 #else
 // Best guess, really - limits should exist
+#ifndef LONG_MAX
 #define LONG_MAX        0x7fffffffL
+#endif
+#endif
+#if defined(STDC_HEADERS) | defined(HAVE_STDLIB_H)
+#include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

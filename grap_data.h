@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include <string>
 #include <vector>
-typedef string String;
 
 inline string *dblString(double d, string *f=0) {
     const int sz = 64;
