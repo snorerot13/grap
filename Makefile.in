@@ -8,6 +8,8 @@ BINDIR = @bindir@
 DEFINESDIR = @datadir@/grap
 MANDIR = @mandir@/man1
 
+PROGS=grap
+
 INSTALL=@INSTALL@
 INSTALL_PROGRAM=@INSTALL_PROGRAM@
 INSTALL_DATA=@INSTALL_DATA@
@@ -19,10 +21,10 @@ YACC=@YACC@
 CXX=@CXX@
 LIBOBJS=@LIBOBJS@
 PERL=@PERL@
-MKDEP=@MKDEP@
-MKDEPFLAGS=@MKDEPFLAGS@
+MKDEP= 	grep "^\#" grap.y > grap.cc ; grep "^\#" grap_lex.l > grap_lex.cc; touch y.tab.h ; @MKDEP@
+MKDEPFLAGS=@MKDEPFLAGS@; ${RM} grap.cc grap_lex.cc y.tab.h
 
-DISTDIR=grap-1.20pre5
+DISTDIR=grap-1.20pre4
 SOURCES=grap.cc grap_lex.cc *.cc
 
 CXXFLAGS +=@GXXFLAGS@ @DEFS@ 
@@ -44,23 +46,24 @@ CCFLAGS=$(CXXFLAGS)
 
 OBJS=grap.o grap_lex.o grap_draw.o grap_pic.o grap_parse.o grap_tokenizer.o \
 	version.o $(LIBOBJS)
+CLEANFILES=y.output
+VERYCLEANFILES=grap.cc grap_lex.cc
+SPOTLESSFILES=
 
+include Makefile.common
 
-all:	grap
-
-.l.cc:
-	$(LEX) -o$@ $<
 
 grap:	.depend $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(OBJS) $(LDLIBS) -o grap
 	@EXE_CORRECT@
+.l.cc:
+	$(LEX) -o$@ $<
 
 y.tab.h grap.cc:	grap.y
 	$(YACC) -d grap.y
 	mv y.tab.c grap.cc
 
 grap_lex.cc:	grap_lex.l y.tab.h
-
 
 version.cc:	Makefile
 	echo "#include <string>" > version.cc
@@ -92,34 +95,6 @@ grap.ps:	grap.1
 grap.1:	grap.doc
 	sed "s#DEFINES_FILE#$(DEFINESDIR)/grap.defines#g; s#EXAMPLES#$(DEFINESDIR)/examples#g;" < grap.doc > grap.1 ;
 
-manifest:	manifest.in
-	sed 's/^/${DISTDIR}\//;' < manifest.in > manifest
-
-dist:	manifest grap.man grap.ps .makesum
-	${RM} examples/test.grap
-	cd .. && tar cf - grap | (cd /tmp && tar xf - && mv grap ${DISTDIR} )
-	cd /tmp && tar --create --gzip --file ${DISTDIR}.tar.gz \
-		 --files-from ${DISTDIR}/manifest
-	mv /tmp/${DISTDIR}.tar.gz .
-	${RM} -r /tmp/${DISTDIR}
-
-clean:
-	${RM} grap $(OBJS) *.o ${DISTDIR}.tar.gz *core* y.output
-
-cleanconfig:
-	${RM} config.log config.status config.cache 
-
-veryclean:
-	${MAKE} clean
-	${RM} grap_lex.cc grap.cc y.tab.h version.cc *.tgz  grap.1 \
-		grap.man grap.ps 
-
-spotless:
-	${MAKE} veryclean
-	${MAKE} cleanconfig
-	${RM} .depend configure Makefile config.h cksum.* manifest
-
-
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.
 install:	grap grap.defines grap.1
@@ -144,19 +119,6 @@ deinstall:
 	$(RMDIR) $(DEFINESDIR)/examples
 	$(RMDIR) $(DEFINESDIR)
 
-cleandepend:
-	cat < /dev/null > .depend
-	touch -t 9912311000 .depend > /dev/null 2>&1 || ( sleep 1; touch Makefile)
-
-depend:	.depend
-
-.depend:	Makefile
-	grep "^#" grap.y > grap.cc
-	grep "^#" grap_lex.l > grap_lex.cc
-	touch y.tab.h
-	${MKDEP} ${MKDEPFLAGS}
-	${RM} grap.cc grap_lex.cc y.tab.h
-
 makesum:	.makesum
 
 .makesum:	grap grap.defines examples/example.ms
@@ -179,11 +141,6 @@ check:	grap grap.defines examples/example.ms
 		exit 1; \
 	fi
 
-# Some of the standard GNU targets to make some people's lives easier
-
-mostlyclean:	clean
-distclean:	veryclean
-	rm Makefile
-maintainer-clean:	veryclean
+dist:	.makesum grap.man grap.ps
 
 include .depend
