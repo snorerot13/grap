@@ -25,6 +25,16 @@ extern "C" {
 #include "grap_draw.h" 
 #include "y.tab.h"
 
+// Older versions of flex, 2.5.4 and before used unput, but later version seems
+// to be moving to yyunput.  This code covers for old flexes or lexes.  Old
+// flexes *do* define a 2 parameter yyunput, so the macro trick needs to go
+// this way.
+#ifdef LEX_HAS_YYUNPUT
+#define lex_unput(x)	yyunput(x)
+#else
+#define lex_unput(x)	unput(x)
+#endif
+
 extern int errno;
 
 #ifndef STRERROR_DECLARED
@@ -119,7 +129,7 @@ bool no_coord=false;
 
 identifier	[A-Za-z][A-Za-z0-9_]*
 
-keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y|undefine|clipped|unclipped
+keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y|undefine|clipped|unclipped|thickness
 %%
 <INITIAL>{
 ^.*$ 	{
@@ -642,7 +652,7 @@ atan2|min|max		{
 	if ( !strncmp(".G2",yytext,3) ) {
 	    debug("<COPYSTATE>End: ", yytext);
 	    yyless(0);
-	    unput('\n');
+	    lex_unput('\n');
 	    lexstack.front()->line--;
 	    tokenpos = 0;
 	} else
@@ -684,7 +694,7 @@ atan2|min|max		{
 }
 . {
     debug("<HUNTMACRO> ", yytext);
-    unput(*yytext);
+    lex_unput(*yytext);
     lex_begin_macro_text();
     return_macro = 1;
    }
@@ -975,7 +985,7 @@ void expand_macro(macro *m) {
 	macro_args(m);
 	tokenpos++;
     }
-    else unput(ch);
+    else lex_unput(ch);
     exp = m->invoke();
     include_string(exp);
     delete exp;

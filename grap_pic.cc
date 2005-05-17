@@ -182,8 +182,10 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 		cout << desc[s].param << " ";
 	    break;
     }
-    if ( desc[s].color&& !compat_mode  ) 
-	cout << " color " << *desc[s].color << " " ;
+    if ( !compat_mode ) { 
+	if ( desc[s].color ) cout << " color " << *desc[s].color << " " ;
+	if ( desc[s].thick ) cout << " thickness " << desc[s].thick << " " ;
+    }
     cout << "right " << x2 << " up " << y2 << endl;
 }
 
@@ -515,8 +517,10 @@ void Piclinesegment::draw(frame *f) {
 		    if ( desc.param ) cout << desc.param << " ";
 		    break;
 	    }
-	    if ( desc.color && !compat_mode ) 
-		cout << " color " << *desc.color << " " ;
+	    if ( !compat_mode ) {
+		if ( desc.color ) cout << " color " << *desc.color << " " ;
+		if ( desc.thick ) cout << " thickness " << desc.thick << " " ;
+	    }
 	    cout << "from Frame.Origin + (" << lastcx * f->wid << ", "
 		 << lastcy * f->ht << ") ";
 	    cout << "to Frame.Origin + (" << cx * f->wid << ", "
@@ -654,8 +658,10 @@ void Picgrid::draw(frame *f) {
 		cout << desc.param << " ";
 	    break;
     }
-    if ( desc.color && !compat_mode ) 
-	cout << " color " << *desc.color << " ";
+    if ( !compat_mode ) {
+	if ( desc.color ) cout << " color " << *desc.color << " ";
+	if ( desc.thick ) cout << " thickness " << desc.thick << " ";
+    }
     cout << "from Frame.Origin + (" << a << ", " << b;
     cout << ") then " << dir << " ";
     cout << len << endl;
@@ -712,18 +718,20 @@ void Piccircle::draw(frame *f) {
 		cout << ld.param << " ";
 	    break;
     }
-    if ( ld.fillcolor && !compat_mode ) {
-	// fillcolor takes precedence over fill - if fillcolor is not
-	// null, we draw one box filled with that color, and then a
-	// second unfilled one in color (black is none specified)
+    if ( !compat_mode ) {
+	if ( ld.fillcolor ) {
+	    // fillcolor takes precedence over fill - if fillcolor is not
+	    // null, we draw one box filled with that color, and then a
+	    // second unfilled one in color (black is none specified)
 
-	ld.fill = 0;
-	cout << " shaded " << *ld.fillcolor << " ";
-    }	
+	    ld.fill = 0;
+	    cout << " shaded " << *ld.fillcolor << " ";
+	}	
 
-    // Draw the circle with appropriate line style, fill, and color
-    if ( ld.color && !compat_mode ) 
-	cout << " outline " << *ld.color << " ";
+	// Draw the circle with appropriate line style, fill, and color
+	if ( ld.color ) cout << " outline " << *ld.color << " ";
+	if ( ld.thick ) cout << " thick " << ld.thick << " " ;
+    }
 
     if ( ld.fill ) cout << " fill " << ld.fill;
     cout << endl;
@@ -788,17 +796,19 @@ void Picbox::draw(frame *f) {
 	    break;
     }
 
-    if ( ld.fillcolor && !compat_mode ) {
-	// fillcolor takes precedence over fill - if fillcolor is not
-	// null, we draw one box filled with that color, and then a
-	// second unfilled one in color (black is none specified)
+    if ( !compat_mode ) {
+	if ( ld.fillcolor ) {
+	    // fillcolor takes precedence over fill - if fillcolor is not
+	    // null, we draw one box filled with that color, and then a
+	    // second unfilled one in color (black is none specified)
 
-	ld.fill = 0;
-	cout << " shaded " << *ld.fillcolor << " ";
-    }	
+	    ld.fill = 0;
+	    cout << " shaded " << *ld.fillcolor << " ";
+	}	
 
-    if ( ld.color && !compat_mode ) 
-	cout << " outline " << *ld.color << " " ;
+	if ( ld.color ) cout << " outline " << *ld.color << " " ;
+	if ( ld.thick ) cout << " thickness " << ld.thick << " " ;
+    }
 
     if ( ld.fill ) cout << " fill " << ld.fill;
     cout << endl;

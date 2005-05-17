@@ -24,6 +24,7 @@
 #undef PACKAGE_VERSION
 #undef PACKAGE_BUGREPORT
 #undef OS_VERSION
+#undef LEX_HAS_YYUNPUT
 
 #undef DEFINES 
 

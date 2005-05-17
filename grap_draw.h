@@ -40,10 +40,11 @@ public:
     double fill;	// Used for drawing solids, e.g. box
     string *color;	// The name of a color for the line
     string *fillcolor ;	// The color to fill a solid
+    double thick;		// Linethickness
 
     linedesc(linetype l=def, double p=0, string *c=0, double f=0,
-		  string *fc=0) :
-	ld(l), param(p), fill(f), color(0), fillcolor(0) {
+		  string *fc=0, double ft=0) :
+	ld(l), param(p), fill(f), color(0), fillcolor(0), thick(ft) {
 	    if ( c ) color = new string(*c);
 	    if ( fc ) fillcolor = new string(*fc);
     }
@@ -53,6 +54,7 @@ public:
 	    ld = l->ld;
 	    param = l->param;
 	    fill = l->fill;
+	    thick = l->thick;
 	    if ( l->color ) color = new string(*l->color);
 	    else color = 0;
 	    if ( l->fillcolor ) fillcolor = new string(*l->fillcolor);
@@ -64,23 +66,26 @@ public:
 	    color = 0;
 	    fillcolor = 0;
 	    fill = 0;
+	    thick = 0;
 	}
     }
 
     linedesc(const linedesc& ldc) :
-	ld(ldc.ld), param(ldc.param), fill(ldc.fill), color(0), fillcolor(0) {
+	ld(ldc.ld), param(ldc.param), fill(ldc.fill), color(0), fillcolor(0),
+	thick(ldc.thick) {
 	    if ( ldc.color ) color = new string(*ldc.color);
 	    if ( ldc.fillcolor ) fillcolor = new string(*ldc.fillcolor);
     }
     // Make a new linedescriptor that combines the properites in ld1 and
     // ld2.
     linedesc(const linedesc* ld1, const linedesc* ld2) :
-	ld(def), param(0), fill(0), color(0), fillcolor(0) {
+	ld(def), param(0), fill(0), color(0), fillcolor(0), thick(0) {
 	if ( ld1 ) *this = *ld1;
 	if ( ld2 && ld2->ld != def ) {
 	    ld = ld2->ld;
 	    param = ld2->param;
 	}
+	if ( (thick == 0)  && ld2 && ld2->thick ) thick = ld2->thick;
 	if ( ld2 && ld2->color ) color = new string(*ld2->color);
     }
 
@@ -93,6 +98,7 @@ public:
 	ld = l.ld;
 	param= l.param;
 	fill = l.fill;
+	thick = l.thick;
 	if ( color ) { delete color; color = 0;}
 	if ( l.color ) color = new string(*l.color);
 	if ( fillcolor ) { delete fillcolor; fillcolor = 0;}

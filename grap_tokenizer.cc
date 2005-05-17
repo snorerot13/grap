@@ -32,7 +32,8 @@ string gk[] = {
 // These are the keywords recognized by any keyword that takes a line
 // descriptor:
 string lk[] = {
-    "invis", "solid", "dotted", "dashed", "fill", "fillcolor", "color"
+    "invis", "solid", "dotted", "dashed", "fill", "fillcolor", "color", 
+    "thickness"
 };
 
 // Keywords recognized for sting modifiers 
@@ -96,6 +97,7 @@ void init_multiples() {
     keywords["dashed"] = keyword(empty, empty, false, DASHED);
     keywords["fillcolor"] = keyword(empty, empty, false, FILLCOLOR);
     keywords["color"] = keyword(empty, empty, false, COLOR);
+    keywords["thickness"] = keyword(empty, empty, false, THICKNESS);
 
 }
 

@@ -2780,7 +2780,7 @@ delim $$
 .PP
 A gratuitous color graph.  Don't ever produce anything this ugly.  The
 data is the 400m times used earlier.  There's a circle to show the color and
-fillcolor sttributes.
+fillcolor attributes.  I've also added a thickness to one line and the circle.
 .EQ
 delim off
 .EN
@@ -2797,11 +2797,11 @@ delim off
 \&grid left ticks off  color "yellow" at 44, 46, 48, 50, 52, 54 
 \&draw solid color "green" delta color "violet"
 \&copy "400mpairs.d"
-\&new dotted color "red"
+\&new color "red" thickness 2.5
 \&copy "400wpairs.d"
 \&"Women" size -3 at 1958,52
 \&"Men" size -3 at 1910,47
-\&circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5
+\&circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5 thickness 2
 \&.G2
 .ft
 .DE
@@ -2819,10 +2819,10 @@ grid bot ticks off  color "yellow" from 1900 to 1980 by 20
 grid left ticks off  color "yellow" at 44, 46, 48, 50, 52, 54 
 draw solid color "green" delta color "violet"
 copy "400mpairs.d"
-new dotted color "red"
+new color "red" thickness 2.5
 copy "400wpairs.d"
 "Women" size -3 at 1958,52
 "Men" size -3 at 1910,47
-circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5
+circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5 thickness 2
 .G2
 .KE

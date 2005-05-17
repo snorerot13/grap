@@ -126,6 +126,7 @@ linedesc* combine_linedesc(linedesc *desc, linedesc* elem) {
 	desc->param = elem->param;
     }
     if ( elem->fill ) desc->fill = elem->fill;
+    if ( elem->thick ) desc->thick = elem->thick;
     if ( elem->color ) {
 	if ( desc->color ) delete desc->color;
 	desc->color = elem->color;

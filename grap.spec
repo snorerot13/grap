@@ -1,10 +1,10 @@
 Summary: grap, typesets graphs for groff
 Name: grap
-Version: 1.32
+Version: 1.35
 Release: 1
 Copyright: BSD
 Group: Applications/Publishing
-Source: grap-1.32.tar.gz
+Source: grap-1.35.tar.gz
 
 %description
 This is grap, an implementation of Kernigan and Bentley\'s grap

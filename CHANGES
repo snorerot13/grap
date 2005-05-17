@@ -1,5 +1,18 @@
 Change log
 
+1.35
+
+Changes to lex code to compiler under newer versions of lex and
+configure code to activate them.  Several people pointed out the problem
+and I like Bruce Lilly's solution best.  Configure bugs are all mine.
+
+Bruce Lilly also noticed that copy statements with a macro and neither an
+until nor a filename didn't work as they should.  He provided the fix
+for that.
+
+Bill Ward pointed out that grap should support gpic's "thickness" just
+like the color attributes.  So now it does.
+
 1.32: Whoops.  Color modifiers were mis parsed in implicit plot statements.
 Now things like :
 
@@ -13,7 +26,7 @@ Minor code tweaks to make grap compile under g++ 3.4.2
 I like it, but Yuval Tamir rightly complained.
 
 1.30: Made the undocumented color commands support GNU pic color commands.  In
-other words added color to grap.  Probably the easiest place to see teh syntax
+other words added color to grap.  Probably the easiest place to see the syntax
 is the new example added to the examples file.  The changes are on the manual
 page, too, but the example sets basically everything that can be set, so it's a
 good example.

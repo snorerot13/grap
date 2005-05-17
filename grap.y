@@ -124,7 +124,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED
+%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED THICKNESS
 %start graphs
 %union {
     int val;
@@ -407,6 +407,8 @@ linedesc_elem:
             { $$ = new linedesc(def, 0, 0, $2); }
 |	 FILLCOLOR string
             { $$ = new linedesc(def, 0, 0, 0, $2); }
+|	 THICKNESS opt_expr
+            { $$ = new linedesc(def, 0, 0, 0, 0, $2); }
 ;
 
 linedesc:
@@ -973,6 +975,8 @@ copy_statement:
 		    yyerror("Only specify 1 until or filename\n");
 		}
 		else c = ($2) ? $2 : $6;
+		// The else handles files with neither else clause, copying
+		// text to the trailing .G2.  Fix from Bruce Lilly
 		if ( c ) {
 		    // lex_begin_copy takes command of the string that's
 		    // passed to it, so don't delete it.  (I don't
@@ -987,6 +991,7 @@ copy_statement:
 		    }
 		    delete c;
 		}
+		else lex_begin_copy(0);
 	    }
 	COPYTEXT
 	    {

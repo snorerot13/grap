@@ -260,7 +260,12 @@ It may also include a
 .Ic color
 keyword followed by the color to draw the string in double quotes.  Any color
 understood by the underlying groff system can be used.  Color can only be used
-under GNU pic, and is not available in compatibility mode.
+under GNU pic, and is not available in compatibility mode.  Similarly, for 
+pic implementations that understand
+.Ic thickness ,
+that attribute may be used with a real valued parameter.  
+.Ic Thickness
+is not available in compatibility mode.
 .Pp
 If the first 
 .Ar line_description 
