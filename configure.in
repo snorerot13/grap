@@ -18,29 +18,6 @@ TVF_PROG_GXX_SUBST(NO_UNDEF,-Wno-unused)
 TVF_PROG_GXX_SUBST(SUPPRESS_OPT,-O0)
 
 AC_PROG_LEX
-
-# this mess checks to see if the lex we found will compile with yyunput or
-# needs the older unput.
-if test -n "$LEX"; then 
-	AC_MSG_CHECKING(if $LEX accepts yyunput)
-	cat > /tmp/lextest <<END
-%%
-.	yyunput();
-%%
-END
-	if $LEX /tmp/lextest$$ 2> /dev/null; then
-		mv ${LEX_OUTPUT_ROOT}.c ${LEX_OUTPUT_ROOT}.cc
-		if $CXX -c lex.yy.cc 2>/dev/null ; then 
-			AC_MSG_RESULT(yes);
-			AC_DEFINE(LEX_HAS_YYUNPUT)
-		else
-			AC_MSG_RESULT(no);
-		fi
-	else
-		AC_MSG_RESULT(no);
-	fi
-	rm -f /tmp/lextext$$ ./lex.yy.cc ./lex.yy.c ./lex.yy.o
-fi
 AC_PROG_YACC
 AC_PROG_INSTALL
 TVF_PROG_INSTALL_D

@@ -25,16 +25,6 @@ extern "C" {
 #include "grap_draw.h" 
 #include "y.tab.h"
 
-// Older versions of flex, 2.5.4 and before used unput, but later version seems
-// to be moving to yyunput.  This code covers for old flexes or lexes.  Old
-// flexes *do* define a 2 parameter yyunput, so the macro trick needs to go
-// this way.
-#ifdef LEX_HAS_YYUNPUT
-#define lex_unput(x)	yyunput(x)
-#else
-#define lex_unput(x)	unput(x)
-#endif
-
 extern int errno;
 
 #ifndef STRERROR_DECLARED
@@ -652,7 +642,7 @@ atan2|min|max		{
 	if ( !strncmp(".G2",yytext,3) ) {
 	    debug("<COPYSTATE>End: ", yytext);
 	    yyless(0);
-	    lex_unput('\n');
+	    unput('\n');
 	    lexstack.front()->line--;
 	    tokenpos = 0;
 	} else
@@ -694,7 +684,7 @@ atan2|min|max		{
 }
 . {
     debug("<HUNTMACRO> ", yytext);
-    lex_unput(*yytext);
+    unput(*yytext);
     lex_begin_macro_text();
     return_macro = 1;
    }
@@ -985,7 +975,16 @@ void expand_macro(macro *m) {
 	macro_args(m);
 	tokenpos++;
     }
-    else lex_unput(ch);
+    else {
+// flex 2.3.51+ undefs yytext_ptr which breaks the unput macro outside the
+// first %% section.  This is a kludge to expand the macro by hand if this bad
+// thing has happened.  I think I'll try to convince them this is a bad idea.
+#ifndef yytext_ptr
+	yyunput(ch, yytext);
+#else
+	unput(ch);
+#endif
+    }
     exp = m->invoke();
     include_string(exp);
     delete exp;
