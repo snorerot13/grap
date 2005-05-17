@@ -18,7 +18,7 @@ examples/result.SQ_MESH.Fail1.S3.R0.Global.Random1500.succ.result
 examples/result.SQ_MESH.Fail1.S3.R0.Local.Random1500.succ.result
 examples/result.SQ_MESH.Fail1.S3.R0.Hybrid.Random1500.succ.result
 configure
-configure.in
+configure.ac
 Makefile.in
 grap.defines
 grap.doc
