@@ -1,5 +1,21 @@
 Change log
 
+1.36
+
+Joel M. Cook pointed out that
+
+plot "\(bu" at 0, -306
+
+didn't work.  grap was requiring a numeric expression before the format
+string.  I think I've had that discussion before, but I decided to
+support the behavior this time.  Now both the expression and the format
+string are optional.  plot at x,y will plot a 0 at x,y. plot "x" at x,y
+is exactly equivalent to "x" at x,y in output, but slightly slower. 
+plot 3 at x,y works as before as does plot 2 "%g of clubs" at x,y
+
+I also modified the grammar to accept the base and wid paramaters to bar
+in any order.
+
 1.35
 
 Changes to lex code to compiler under newer versions of lex and
