@@ -297,7 +297,7 @@ void plot_statement(double val, DisplayString *fmt, point *pt) {
 	s = new DisplayString(val,fmt);
     }
     else s = new DisplayString(val);
-   
+  
     // Delete format whether or not we used it (delete on 0 is OK)
     delete fmt;
 

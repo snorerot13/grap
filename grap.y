@@ -151,8 +151,8 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     strmod stringmod;
     copydesc *copyd;
 }
-%type <num> NUMBER num_line_elem expr opt_expr direction radius_spec bar_base
-%type <num> opt_wid assignment_statement lexpr pure_lexpr right_hand_side
+%type <num> NUMBER num_line_elem expr opt_expr direction radius_spec
+%type <num> assignment_statement lexpr pure_lexpr right_hand_side
 %type <stringmod> strmod
 %type <String> IDENT STRING opt_ident TEXT else_clause REST TROFF
 %type <String> START string LHS
@@ -599,7 +599,7 @@ plot_statement:
 	    {
   		the_graph->new_plot($1,$3);
 	    }
-|	PLOT expr opt_display_string AT point SEP
+|	PLOT opt_expr opt_display_string AT point SEP
 	    { plot_statement($2, $3, $5); }
 ;
 
@@ -1166,20 +1166,7 @@ bar_dir:
 |       UP
              { $$ = top_side; } 
 ;
-bar_base:
-	BASE expr
-            { $$ = $2; }
-|
-            { $$ = 0; }
-;
 
-opt_wid:
-	WID expr
-            { $$ = $2; }
-|
-            { $$ = 1; }
-;
-	
 bar_statement:
         BAR point COMMA point opt_linedesc SEP
             {
@@ -1188,9 +1175,18 @@ bar_statement:
 		the_graph->new_box($2, $4, $5);
 		delete $2; delete $4; delete $5;
 	    }
-|	BAR opt_coordname bar_dir expr HT expr opt_wid bar_base
+|	BAR opt_coordname bar_dir expr HT expr opt_linedesc SEP
+           { bar_statement($2, $3, $4, $6, 1, 0, $7); }
+|	BAR opt_coordname bar_dir expr HT expr WID expr opt_linedesc SEP
+           { bar_statement($2, $3, $4, $6, $8, 0, $9); }
+|	BAR opt_coordname bar_dir expr HT expr BASE expr opt_linedesc SEP
+           { bar_statement($2, $3, $4, $6, 1, $8, $9); }
+|	BAR opt_coordname bar_dir expr HT expr WID expr BASE expr
             opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, $7, $8, $9); }
+           { bar_statement($2, $3, $4, $6, $8, $10, $11); }
+|	BAR opt_coordname bar_dir expr HT expr BASE expr WID expr
+            opt_linedesc SEP
+           { bar_statement($2, $3, $4, $6, $10, $8, $11); }
 ;
 
 void_function:

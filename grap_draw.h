@@ -195,7 +195,8 @@ public:
 	}
 
 	snprintf(c,64,fmt->c_str(),e);
-	*this = c;
+	// *this = c;
+	assign(c);
 	delete[] c;
 	if ( delf ) delete fmt;
 	else { 
