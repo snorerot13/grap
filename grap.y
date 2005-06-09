@@ -150,6 +150,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     axis axisname;
     strmod stringmod;
     copydesc *copyd;
+    bar_param *bar_p;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec
 %type <num> assignment_statement lexpr pure_lexpr right_hand_side
@@ -175,6 +176,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %type <line_list> COPYTEXT
 %type <macro_val> MACRO
 %type <copyd> until_clause
+%type <bar_p> bar_param bar_params
 %left OR AND
 %right NOT
 %left EQ NEQ LT GT LTE GTE
@@ -1167,6 +1169,30 @@ bar_dir:
              { $$ = top_side; } 
 ;
 
+/* NB: the tokenizer only allows one instance of wid or base or ht per line
+ * (you could have all 3) */
+bar_param:
+	HT expr { $$ = new bar_param; $$->ht = $2; $$->have_ht = true; }
+|	WID expr { $$ = new bar_param; $$->wid = $2; }
+|	BASE expr { $$ = new bar_param; $$->base = $2; }
+;
+
+bar_params:
+	  bar_param { $$ = $1; }
+| 	  bar_params bar_param { 
+		$$ = $1;
+		if ( $2 ) {
+			if ($2->have_x ) { $$->x = $2->x; $$->have_x = true; }
+			if ($2->have_ht ) { 
+				$$->ht = $2->ht; $$->have_ht = true;
+			}
+			if ( $2->wid != 1.0 ) { $$->wid = $2->wid; }
+			if ( $2->base != 0.0 ) { $$->base = $2->base; }
+			delete $2;
+		}
+	}
+;
+
 bar_statement:
         BAR point COMMA point opt_linedesc SEP
             {
@@ -1175,18 +1201,17 @@ bar_statement:
 		the_graph->new_box($2, $4, $5);
 		delete $2; delete $4; delete $5;
 	    }
-|	BAR opt_coordname bar_dir expr HT expr opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, 1, 0, $7); }
-|	BAR opt_coordname bar_dir expr HT expr WID expr opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, $8, 0, $9); }
-|	BAR opt_coordname bar_dir expr HT expr BASE expr opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, 1, $8, $9); }
-|	BAR opt_coordname bar_dir expr HT expr WID expr BASE expr
-            opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, $8, $10, $11); }
-|	BAR opt_coordname bar_dir expr HT expr BASE expr WID expr
-            opt_linedesc SEP
-           { bar_statement($2, $3, $4, $6, $10, $8, $11); }
+|	BAR opt_coordname bar_dir expr bar_params opt_linedesc SEP
+           { 
+	   	if ( !$5 || !$5->have_ht ) {
+			yyerror("bar must have a position and ht ");
+		}
+		else {
+			bar_statement($2, $3, $4, $5->ht, $5->wid, 
+				$5->base, $6);
+		}
+		delete $5;
+	}
 ;
 
 void_function:

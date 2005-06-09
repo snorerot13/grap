@@ -139,4 +139,16 @@ public:
 
 // we use this to make yacc happier
 typedef pair<coord *, string *> coordid;
+// bar parameter types
+class bar_param {
+    public:
+	double x;
+	double ht;
+	double wid;
+	double base;
+	bool have_x;
+	bool have_ht;
+    bar_param() : x(0.0), ht(0.0), wid(1.0), base(0.0), 
+		  have_x(false), have_ht(false) { }
+};
 #endif
