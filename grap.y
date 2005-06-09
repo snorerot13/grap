@@ -683,6 +683,21 @@ sides:
 	    }
 ;
 
+/* Though this looks kludgy as Hell, it's about as clean as I can make it.  Th
+ * eproblem is that liesdescs are composed of lists of linedesc elements, and 2
+ * linedescs next to each other are impossible to tell apart.  So, the global
+ * linedesc for the frame cannot sit next to one of the linedescs for the
+ * sides.  for example is 'frame top dotted color "green"' a green frame with a
+ * dotted top or a frame with a dotted green top? Writing a single list rule to
+ * capture that constraint requires you to know where the size elements appear
+ * in that list and life is horrible and complex.  If it's even reasonably
+ * tractable.  This enumeration captures many of the possibilities that are
+ * sane and minimizes the code complexity.  You can't say things like 'frame
+ * wid 3 dotted ht 5' to get a dotted 3x5 frame, but either 'frame dotted ht 3
+ * wid 5' or 'frame wid 3 ht 5 dotted' work.
+ * This comment is primarily here to prevent me from wasting another hour
+ * trying to clean this up.
+ */
 frame_statement:
 	FRAME SEP
 	    { process_frame(0, 0, 0); }
