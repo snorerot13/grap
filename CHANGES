@@ -1,4 +1,8 @@
 Change log
+1.37
+
+Fixed an error handling bug where an error at end of file/line could cause a
+core dump.  Yuk.
 
 1.36
 

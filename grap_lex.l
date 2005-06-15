@@ -963,7 +963,7 @@ char *token_context(void) {
 }
 
 string post_context(void) {
-    return linebuf.substr(tokenpos);
+    return (tokenpos < linebuf.size()) ? linebuf.substr(tokenpos) : "" ;
 }
 
 
