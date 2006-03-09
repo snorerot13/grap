@@ -162,9 +162,8 @@ linesegment::linesegment(double xx, double yy, coord* cc, line *ll,
     point *p;	// The last point on line ll.
     
     // If a null linedesc is passed in, use the one in the line
-    if ( !l ) l = &ll->desc;
-
-    desc = *l;
+    if ( l ) desc = *l;
+    else desc = ll->desc;
 
     if ( s ) plotstr = new DisplayString(*s);
     else {

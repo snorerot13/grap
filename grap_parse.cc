@@ -547,9 +547,11 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 	else
 	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des, true);
     } else {
-	the_graph->new_linesegment(p1->x, p1->y, p1->c, l);
-	if (is_line) the_graph->new_linesegment(p2->x, p2->y, p2->c, l);
-	else the_graph->new_linesegment(p2->x,p2->y,p2->c, l, 0, 0, true);
+	the_graph->new_linesegment(p1->x, p1->y, p1->c, l, 0, &des);
+	if (is_line) 
+	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des);
+	else 
+	    the_graph->new_linesegment(p2->x,p2->y,p2->c, l, 0, &des, true);
     }
     delete ld1; delete ld2;
     delete p1; delete p2;
