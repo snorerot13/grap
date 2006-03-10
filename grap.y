@@ -1110,8 +1110,9 @@ else_clause:
 if_statement:
 	IF lexpr THEN { lex_begin_macro_text(); } TEXT else_clause SEP
 	    {
-		// force all if blocks to be terminated by a SEP
+		// force all if blocks to be terminated by a SEP.  
 		*$5 += ';';
+		// We use EPSILON in loop tests 
 		if ( fabs($2) > EPSILON ) include_string($5,0,GINTERNAL);
 		else if ( $6 ) include_string($6,0,GINTERNAL);
 		delete $5;

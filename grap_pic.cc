@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include <stdexcept>
 #include "grap.h"
 #include "grap_data.h"
 #include "grap_draw.h"
@@ -320,7 +321,8 @@ void Picframe::addautoticks(sides sd) {
     if ( tickdef[sd].size == 0 ) return;
 
     autoguess(sd, idx, dir, hi, ts, ls, tickdef[sd].c);
- 
+
+    // We use EPSILON in loops
     while ( idx - hi < EPSILON*dir ) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
 		     tickdef[sd].c);
@@ -345,6 +347,7 @@ void Picframe::addautogrids(sides sd) {
 
     autoguess(sd, idx, dir, hi, ts, ls, griddef[sd].c);
 
+    // We use EPSILON in loops
     while ( idx - hi < EPSILON*dir ) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,
 		     &griddef[sd].shift, griddef[sd].c);
@@ -402,7 +405,7 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 
 
     // The line is parallel to the x axis.  It's either all valid or
-    // all invalid.
+    // all invalid.  We use EPSILON again here to be conservative.
     if ( vx > -EPSILON && vx < EPSILON )
 	if ( inbox(px) ) return true;
 	else return false;
@@ -418,7 +421,8 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 	// This is the zero intercept, and one point has been clipped,
 	// so if the first hasn't been clipped, the second must have.
 	// We recalculate the parametric representation so we can
-	// repeat the clip for x == 1.
+	// repeat the clip for x == 1.  We use EPSILON here because we have to
+	// use it by definition in the t==1 half.
 	if ( px < EPSILON ) {
 	    x1 = px + t * vx;
 	    y1 = py + t * vy;
@@ -475,12 +479,26 @@ void Piclinesegment::draw(frame *f) {
     double lastcx, lastcy;		// The last point plotted post clipping
     double cx,cy;			// The current point post clipping
 
-    x = to.c->map(to.x,x_axis);
-    y = to.c->map(to.y,y_axis);
+    try {
+	x = to.c->map(to.x,x_axis);
+	y = to.c->map(to.y,y_axis);
+    }
+    catch (range_error &e) {
+	cerr << "Unable to map point: (" << to.x << ", " << to.y 
+	     << ") : " << e.what() << endl;
+	return;
+    }
 
     if ( from ) {
-	lastcx = from->c->map(from->x, x_axis);
-	lastcy = from->c->map(from->y, y_axis);
+	try { 
+	    lastcx = from->c->map(from->x, x_axis);
+	    lastcy = from->c->map(from->y, y_axis);
+	}
+	catch (range_error &e) {
+	    cerr << "Unable to map point: (" << to.x << ", " << to.y 
+		 << ") : " << e.what() << endl;
+	    return;
+	}
     }
     else {
 	lastx = lasty = 0.0;
@@ -548,37 +566,45 @@ void Pictick::draw(frame *f) {
     char *dir;	// Direction of the tick mark
     char *just;	// placement of the label relative to the end of the tick
     Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
-	
-    switch (side) {
-	default:
-	case left_side:
-	    a = 0;
-	    b = c->map(where,y_axis);
-	    dir = "left";
-	    just = "rjust";
-	    break;
-	case right_side:
-	    a = 1;
-	    b = c->map(where,y_axis);
-	    dir = "right";
-	    just = "ljust";
-	    break;
-	case top_side:
-	    a = c->map(where,x_axis);
-	    b = 1;
-	    dir = "up";
-	    just = "above";
-	    break;
-	case bottom_side:
-	    a  = c->map(where,x_axis);
-	    b = 0;
-	    dir = "down";
-	    just = "below";
-	    break;
+
+    try {
+	switch (side) {
+	    default:
+	    case left_side:
+		a = 0;
+		b = c->map(where,y_axis);
+		dir = "left";
+		just = "rjust";
+		break;
+	    case right_side:
+		a = 1;
+		b = c->map(where,y_axis);
+		dir = "right";
+		just = "ljust";
+		break;
+	    case top_side:
+		a = c->map(where,x_axis);
+		b = 1;
+		dir = "up";
+		just = "above";
+		break;
+	    case bottom_side:
+		a  = c->map(where,x_axis);
+		b = 0;
+		dir = "down";
+		just = "below";
+		break;
+	}
     }
-    if ( a < 0 || a > 1 ) return;
+    catch (range_error& e) {
+	cerr << "failed to map tick value: " << where << ": " 
+	     << e.what() << endl;
+	return;
+    }
+    // EPSLIONS for floating point weirdness
+    if ( a < -EPSILON || a > 1+EPSILON ) return;
     else a *= f->wid;
-    if ( b < 0 || b > 1 ) return;
+    if ( b < -EPSILON || b > 1+EPSILON ) return;
     else b *= f->ht;
     cout << "line from Frame.Origin + (" << a << ", " << b;
     cout << ") then " << dir << " ";
@@ -607,33 +633,40 @@ void Picgrid::draw(frame *f) {
     double len;
     char *dir;
     Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
-	
-    switch (side) {
-	default:
-	case left_side:
-	    a = 0;
-	    b = c->map(where,y_axis);
-	    dir = "right";
-	    len = f->wid;
-	    break;
-	case right_side:
-	    a = 1;
-	    b = c->map(where,y_axis);
-	    dir = "left";
-	    len = f->wid;
-	    break;
-	case top_side:
-	    a = c->map(where,x_axis);
-	    b = 1;
-	    dir = "down";
-	    len = f->ht;
-	    break;
-	case bottom_side:
-	    a  = c->map(where,x_axis);
-	    b = 0;
-	    dir = "up";
-	    len = f->ht;
-	    break;
+
+    try { 
+	switch (side) {
+	    default:
+	    case left_side:
+		a = 0;
+		b = c->map(where,y_axis);
+		dir = "right";
+		len = f->wid;
+		break;
+	    case right_side:
+		a = 1;
+		b = c->map(where,y_axis);
+		dir = "left";
+		len = f->wid;
+		break;
+	    case top_side:
+		a = c->map(where,x_axis);
+		b = 1;
+		dir = "down";
+		len = f->ht;
+		break;
+	    case bottom_side:
+		a  = c->map(where,x_axis);
+		b = 0;
+		dir = "up";
+		len = f->ht;
+		break;
+	}
+    }
+    catch (range_error& e) {
+	cerr << "failed to map grid value: " << where << ": " 
+	     << e.what() << endl;
+	return;
     }
     if ( a < 0 || a > 1 ) return;
     else a *= f->wid;
@@ -682,10 +715,19 @@ void Picgrid::draw(frame *f) {
 void Piccircle::draw(frame *f) {
 // Plot a circle.  Strightforward.
     double x,y;	// To transform the point into device coordinates
-	
-    x = center.c->map(center.x,x_axis);
-    y = center.c->map(center.y,y_axis);
-    
+
+    try {
+	x = center.c->map(center.x,x_axis);
+	y = center.c->map(center.y,y_axis);
+    }
+    catch (range_error& e) {
+	cerr << "Unable to map circle at (" << center.x << ", " 
+	     << center.y << ") into " << "log coordinates: " 
+	     << e.what() << endl;
+	return;
+    }
+   
+    // Again, EPSILON is correct because it's needed for the 1+ and symmetry.
     if ( x > 1+EPSILON || x < 0-EPSILON ) {
 	cerr << "Circle outside coordinates:" << center.x << ", ";
 	cerr << center.y << endl;
@@ -743,10 +785,17 @@ void Picbox::draw(frame *f) {
     double x1,y1, x2,y2;	// The box edges in device coords.
     double ht, wid;		// height and width in device units (inches)
 
+    try {
     x1 = p1.c->map(p1.x,x_axis);
     y1 = p1.c->map(p1.y,y_axis);
     x2 = p2.c->map(p2.x,x_axis);
     y2 = p2.c->map(p2.y,y_axis);
+    } 
+    catch (range_error& e) {
+	cerr << "Unable to map box [(" << x1 << ", " << y1 << "), ("
+	     << x2 << ", " << y2 << ")] into logscale : " << e.what() << endl;
+	return;
+    }
 
     // make (x1,y1) upper right and (x2,y2) lower left
     if ( x1 < x2 ) swap(x1,x2);
@@ -754,7 +803,8 @@ void Picbox::draw(frame *f) {
 
     // Clip the box
 
-    // If the box is entirely out of frame, ignore it
+    // If the box is entirely out of frame, ignore it.  EPSILON for 1+ and
+    // symmetry.
     if ( (x1 > 1+EPSILON && x2 > 1+EPSILON) ||
 	 (x1 <-EPSILON && x2 < -EPSILON ) ) return;
     if ( (y1 > 1+EPSILON && y2 > 1+EPSILON) ||
@@ -826,8 +876,15 @@ void Picplot::draw(frame *f) {
 
     if ( !strs || !loc ) return;
 
-    x = f->wid * loc->c->map(loc->x,x_axis);
-    y = f->ht * loc->c->map(loc->y,y_axis);
+    try {
+	x = f->wid * loc->c->map(loc->x,x_axis);
+	y = f->ht * loc->c->map(loc->y,y_axis);
+    }
+    catch (range_error& e) {
+	cerr << "Unable to place string at (" << loc->x << ", " << loc->y 
+	     << "): " << e.what() << endl;
+	return;
+    }
 
     // Clip strings to lie in the graph (if requested)
 

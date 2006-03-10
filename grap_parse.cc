@@ -390,7 +390,8 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, DisplayString *r
 		
     if ( to - from >= 0 ) dir = 1;
     else dir = -1;
-		
+
+    //  I think EPSILON is correct here.
     idx = from;
     while ( (idx - to) *dir  < EPSILON ) {
 	t = new tick(idx, 0, top_side, 0, (shiftlist *) 0, 0);

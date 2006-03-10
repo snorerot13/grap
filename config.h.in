@@ -9,6 +9,7 @@
 #undef HAVE_STDLIB_H
 #undef HAVE_UNISTD_H
 #undef HAVE_HASH_MAP
+#undef HAVE_LIMITS
 #undef HAVE_SNPRINTF
 #undef HAVE_RANDOM
 #undef HAVE_RAND

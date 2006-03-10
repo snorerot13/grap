@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include <stdexcept>
 #include "grap.h"
 #include "grap_data.h"
 #include "grap_draw.h"
@@ -27,13 +28,15 @@ void coord::newx(double x) {
 	xautoscale = 2;
     }
     if ( (logscale & x_axis) ) {
-	if ( xmin  < EPSILON ) {
-	    xmin = EPSILON;
-	    cerr << "Logscale with negative value" << endl;
+	if ( xmin  < MIN_DOUBLE ) {
+	    cerr << "Logscale with non-positive value (within precision)"
+		 << endl;
+	    xmin = MIN_DOUBLE;
 	}
-	if ( xmax  < EPSILON ) {
-	    xmax = EPSILON;
-	    cerr << "Logscale with negative value" << endl;
+	if ( xmax  < MIN_DOUBLE ) {
+	    cerr << "Logscale with non-positive value (within precision)"
+		 << endl;
+	    xmax = MIN_DOUBLE;
 	}
     }
 }
@@ -53,13 +56,15 @@ void coord::newy(double y) {
 	yautoscale = 2;
     }
     if ( (logscale & y_axis) ) {
-	if ( ymin  < EPSILON ) {
-	    ymin = EPSILON;
-	    cerr << "Logscale with negative value" << endl;
+	if ( ymin  < MIN_DOUBLE ) {
+	    cerr << "Logscale with non-positive value (within precision)"
+		 << endl;
+	    ymin = MIN_DOUBLE;
 	}
-	if ( ymax  < EPSILON ) {
-	    ymax = EPSILON;
-	    cerr << "Logscale with negative value" << endl;
+	if ( ymax  < MIN_DOUBLE ) {
+	    cerr << "Logscale with non-positive value (within precision)"
+		 << endl;
+	    ymax = MIN_DOUBLE;
 	}
     }
 }
@@ -75,12 +80,12 @@ void coord::addmargin(double mf) {
     // Log sale must be positive
     
     if ( (logscale & x_axis) ) {
-	if ( xmin  < EPSILON ) xmin = EPSILON;
-	if ( xmax  < EPSILON ) xmax = EPSILON;
+	if ( xmin  < MIN_DOUBLE ) xmin = MIN_DOUBLE;
+	if ( xmax  < MIN_DOUBLE ) xmax = MIN_DOUBLE;
     }
     if ( (logscale & y_axis) ) {
-	if ( ymin  < EPSILON ) ymin = EPSILON;
-	if ( ymax  < EPSILON ) ymax = EPSILON;
+	if ( ymin  < MIN_DOUBLE ) ymin = MIN_DOUBLE;
+	if ( ymax  < MIN_DOUBLE ) ymax = MIN_DOUBLE;
     }
     
     if ( xautoscale ) {
@@ -119,7 +124,10 @@ void coord::addmargin(double mf) {
 	}
     }
 
-    // If they're too close together, just punt
+    // If they're too close together, just punt.  (Actually this is less a punt
+    // than it looks like.  Adding 1 works if no points have been added that
+    // would define a grid - xmin == xmax == 0 and if you do almost nothing you
+    // get a (0,1) x (0,1) frame).
     
     if ( xmax == xmin) xmax += 1.0;
     if ( ymax == ymin) ymax += 1.0;
@@ -132,17 +140,19 @@ double coord::map(double v, axis ax ) {
     switch ( ax ) {
 	case x_axis:
 	    if (logscale & x_axis ) {
-		if ( v < EPSILON )
-		    return -1;
-		else
+		if ( v > MIN_DOUBLE )
 		    return ((log(v) -log(xmin)) / (log(xmax)-log(xmin)));
+		else
+		    throw range_error("Negative or zero logscale coordinate");
 	    }
 	    else return ( (v - xmin) / (xmax - xmin ) );
 	    break;
 	case y_axis:
 	    if (logscale & y_axis ) {
-		if ( v < EPSILON ) return -1;
-		else return ((log(v) -log(ymin)) / (log(ymax)-log(ymin)));
+		if ( v > MIN_DOUBLE ) 
+		    return ((log(v) -log(ymin)) / (log(ymax)-log(ymin)));
+		else 
+		    throw range_error("Negative or zero logscale coordinate");
 	    }
 	    else return ( (v - ymin) / (ymax - ymin ) );
 	    break;

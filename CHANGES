@@ -1,4 +1,19 @@
 Change log
+1.38
+
+Fixed a bug where lines acquired the lindescription of the last drawn line.
+This was a typo level error that just never got exercised.  Thanks to  Steve
+Blinkhorn for finding it.
+
+I integrated some changes suggested by Hartmut Henkel to better handle graphing
+small numbers.  I didn't include his patch exactly, but I think that most of
+the functionality has been added.  His test cases look the same.  If you're
+graphing things in the 1e-30 range, you should see autoscaling and not have
+your graph stop at 1e-6, assuming that your compiler has <limits>.  I really
+think it's a bad idea to graph in that domain, as the math with numbers that
+small can be really hairy, and grap isn't exactly tuned for numerical analysis.
+But I think we do better now.
+
 1.37
 
 Fixed an error handling bug where an error at end of file/line could cause a
