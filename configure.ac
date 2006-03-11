@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap, 1.38pre2, faber@lunabase.org)
+AC_INIT(grap, 1.38pre3, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
@@ -83,13 +83,29 @@ test "x$prefix" = xNONE && prefix="$ac_default_prefix"
 
 # expand the data directory parameter.  Repeatedly eval the contents
 # of ddir until it has no $ in it.
-
 ddir=$datadir
 while echo $ddir | grep '\$' > /dev/null ; do 
 	ddir=`eval echo $ddir`
 done
-
 AC_DEFINE_UNQUOTED(DEFINES,"${ddir}/grap/grap.defines")
+
+# expand the examples directory parameter.  Repeatedly eval the contents
+# of ddir until it has no $ in it.
+ddir=$EXAMPLE_DIR
+while echo $ddir | grep '\$' > /dev/null ; do 
+	ddir=`eval echo $ddir`
+done
+AC_DEFINE_UNQUOTED(EXAMPLES_DIR,"${ddir}")
+
+# expand the data directory parameter.  Repeatedly eval the contents
+# of ddir until it has no $ in it.
+ddir=$DOC_DIR
+while echo $ddir | grep '\$' > /dev/null ; do 
+	ddir=`eval echo $ddir`
+done
+AC_DEFINE_UNQUOTED(DOCS_DIR,"${ddir}")
+
+
 
 dnl if the caller has overridden the decision on suppressing
 dnl optimization, use their decision, otherwise optimization has already

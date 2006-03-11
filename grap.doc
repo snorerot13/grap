@@ -1,7 +1,7 @@
 .\"-*-nroff-*-
-.\" This file is (c) 1998,1999,2000 Ted Faber (faber@lunabase.org) see
+.\" This file is (c) 1998-2006 Ted Faber (faber@lunabase.org) see
 .\" COPYRIGHT for the full copyright and limitations of liabilities.
-.Dd August 19, 1998
+.Dd March 11, 2006
 .Os
 .Dt GRAP 1
 .Sh NAME
@@ -27,7 +27,22 @@ Kernighan, revised May 1991, which is the primary source for
 information on how to use
 .Nm grap .
 As of this writing, it is available electronically at 
-.Li http://www.kohala.com/start/troff/cstr114.ps
+.Li http://www.kohala.com/start/troff/cstr114.ps .
+Additional documentation and examples, packaged with
+.Nm ,
+may have been installed locally as well.  If available, paths to them
+can be displayed using
+.Nm
+.Fl h
+or 
+.Nm
+.Fl v
+(or 
+.Nm
+.Fl -help
+/
+.Nm
+.Fl -version )
 .Pp
 This version is a black box implementation of 
 .Nm grap ,
@@ -1442,6 +1457,14 @@ to core dump or smash the stack.
 .Xr sh 1 ,
 .Xr sprintf 3 ,
 .Xr troff 1
+.Pp
+If documentation and examples have been installed, 
+.Nm 
+.Fl -version
+or 
+.Nm 
+.Fl -help
+will display the locations.
 .Sh BUGS
 .Pp
 There are several small incompatibilities with K&R
@@ -1460,7 +1483,7 @@ Iterating many times over a macro with no newlines can run
 out of memory.
 .Sh AUTHOR
 This implementation was done by
-.An Ted Faber Ao faber@lunabase.org Ac .
+.An Ted Faber Ao faber@lunabase.org Ac Ns .
 .An Bruce Lilly Ao blilly@erols.com Ac
 contributed many bug fixes, including a considerable revamp of the
 error reporting code.  If you can actually find an error in your  

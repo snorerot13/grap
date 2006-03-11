@@ -28,5 +28,7 @@
 #undef LEX_HAS_YYUNPUT
 
 #undef DEFINES 
+#undef EXAMPLES_DIR
+#undef DOCS_DIR
 
 #endif

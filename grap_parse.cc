@@ -832,12 +832,17 @@ void usage() {
     cerr << "\t-C\tcompatibility mode" << endl;
     cerr << "\t-S\tsafer mode, no internal user sprintf calls" << endl;
     cerr << "See the man page for more information." << endl;
+    cerr << "Documentation in " << DOCS_DIR << endl;
+    cerr << "Examples in " << EXAMPLES_DIR << endl;
     exit(5);
 }
 
 inline void version() {
-    cout << "grap " << PACKAGE_VERSION << " compiled under ";
-    cout << OS_VERSION << " report bugs to " << PACKAGE_BUGREPORT << endl;
+    cout << "grap " << PACKAGE_VERSION << " compiled under " 
+	 << OS_VERSION << endl;
+    cout << "Report bugs to " << PACKAGE_BUGREPORT << endl;
+    cout << "Documentation in " << DOCS_DIR << endl;
+    cout << "Examples in " << EXAMPLES_DIR << endl;
     exit(5);
 }
 
