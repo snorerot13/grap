@@ -5,7 +5,7 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 
 BINDIR = @bindir@
-DEFINESDIR = @datadir@/grap
+DEFINESDIR = @DEFINES_DIR@
 EXAMPLEDIR = @EXAMPLE_DIR@
 DOCDIR = @DOC_DIR@
 MANDIR = @mandir@/man1

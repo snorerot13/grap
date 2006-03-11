@@ -24,6 +24,11 @@ TVF_PROG_INSTALL_D
 TVF_PROG_MKDEP
 TVF_OS_VERSION
 
+AC_ARG_WITH(defines-dir, 
+    [  --with-defines-dir=dir  directory in which to install grap.defines],
+AC_SUBST(DEFINES_DIR,$withval),
+AC_SUBST(DEFINES_DIR, "$datadir/grap"))
+
 AC_ARG_WITH(example-dir, 
     [  --with-example-dir=dir  directory in which to install examples],
 AC_SUBST(EXAMPLE_DIR,$withval),
