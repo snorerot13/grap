@@ -11,6 +11,7 @@
 .Nm
 .Op Fl d Ar defines_file
 .Op Fl D
+.Op Fl l
 .Op Fl M Ar include path
 .Op Fl v
 .Op Fl u
@@ -91,7 +92,12 @@ option specifies a file of macro definitions to be read at startup,
 and defaults to DEFINES_FILE.
 The
 .Fl D
-option inhibits the reading of any initial macros file.  The defines
+option inhibits the reading of any initial macros file
+(the
+.Fl l
+flag is a synonym for 
+.Fl D ,
+though I do not remember why).  The defines
 file can also be given using the 
 .Ev GRAP_DEFINES
 environment variable. (See below).
