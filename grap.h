@@ -187,8 +187,8 @@ extern lexStack lexstack;
 #define EPSILON numeric_limits<double>::epsilon()
 #define MIN_DOUBLE numeric_limits<double>::min()
 #else
-#define EPSILON	1e-6
-#define MIN	1e-6
+#define EPSILON		1e-6
+#define MIN_DOUBLE	1e-6
 #endif
 
 
