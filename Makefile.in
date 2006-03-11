@@ -6,8 +6,8 @@ exec_prefix = @exec_prefix@
 
 BINDIR = @bindir@
 DEFINESDIR = @datadir@/grap
-EXAMPLEDIR = @datadir@/examples/grap
-DOCDIR = @datadir@/doc/grap
+EXAMPLEDIR = @EXAMPLE_DIR@
+DOCDIR = @DOC_DIR@
 MANDIR = @mandir@/man1
 
 PROGS=grap
@@ -97,7 +97,7 @@ install:	@INSTALL_DEPS@
 	${INSTALL_PROGRAM} grap ${BINDIR}
 	${INSTALL_DATA} grap.1 ${MANDIR}
 	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
-	${INSTALL_DATA} examples/*.d examples/example.ms examples/*.result examples/Makefile ${EXAMPLEDIR}
+	${INSTALL_DATA} examples/*.d examples/example.ms examples.ps examples/*.result examples/Makefile ${EXAMPLEDIR}
 
 #BSD ports may not want these installed
 install-docs:

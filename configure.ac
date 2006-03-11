@@ -24,6 +24,16 @@ TVF_PROG_INSTALL_D
 TVF_PROG_MKDEP
 TVF_OS_VERSION
 
+AC_ARG_WITH(example-dir, 
+    [  --with-example-dir=dir  directory in which to install examples],
+AC_SUBST(EXAMPLE_DIR,$withval),
+AC_SUBST(EXAMPLE_DIR, "$datadir/examples/grap"))
+
+AC_ARG_WITH(doc-dir, 
+    [  --with-doc-dir=dir     directory in which to install documents],
+AC_SUBST(DOC_DIR,$withval),
+AC_SUBST(DOC_DIR,"$datadir/doc/grap"))
+
 AC_SUBST(INSTALL_DOCS)
 
 dnl Checks for libraries.
