@@ -108,7 +108,7 @@ deinstall:
 	${RM} ${BINDIR}/grap
 	${RM} ${MANDIR}/grap.1
 	${RM} ${DEFINESDIR}/grap*.defines ${DOCDIR}/README ${DOCDIR}/CHANGES ${DOCDIR}/COPYRIGHT ${DOCDIR}/grap.man
-	${RM} ${EXAMPLEDIR}/*.d ${EXAMPLEDIR}/*.ms ${EXAMPLEDIR}/*result
+	${RM} ${EXAMPLEDIR}/*.d ${EXAMPLEDIR}/*.ms ${EXAMPLEDIR}/examples.ps ${EXAMPLEDIR}/*result
 	${RMDIR} ${DOCDIR}/examples
 	${RMDIR} ${DOCDIR}
 	${RMDIR} ${DEFINESDIR}
