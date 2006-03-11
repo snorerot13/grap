@@ -94,7 +94,7 @@ delim off
 .ft CW
 \&.G1
 \&frame invis ht 2 wid 3 left solid bot solid
-\&label left "Time (in seconds)" left .75
+\&label left "Time (in seconds)" left .25
 \&label bot "Olympic 400 Meter Run: Winning Times"
 \&draw solid
 \&copy "400mpairs.d"
@@ -106,7 +106,7 @@ delim $$
 .EN
 .G1
 frame invis ht 2 wid 3 left solid bot solid
-label left "Time (in seconds)" left .75
+label left "Time (in seconds)" left .25
 label bot "Olympic 400 Meter Run: Winning Times"
 draw solid
 copy "400mpairs.d"
@@ -135,7 +135,7 @@ delim off
 \&.G1
 \&.ft H
 \&frame invis ht 2 wid 3 left solid bot solid
-\&label left "Time (in seconds)" left .75
+\&label left "Time (in seconds)" left .25
 \&label bot "Olympic 400 Meter Run: Winning Times"
 \&coord x 1894, 1994 y 42, 56
 \&draw solid
@@ -149,7 +149,7 @@ delim $$
 .G1
 .ft H
 frame invis ht 2 wid 3 left solid bot solid
-label left "Time (in seconds)" left .75
+label left "Time (in seconds)" left .25
 label bot "Olympic 400 Meter Run: Winning Times"
 coord x 1894, 1994 y 42, 56
 draw solid
@@ -166,7 +166,7 @@ delim off
 .ft CW
 \&.G1
 \&frame invis ht 2 wid 3 left solid bot solid
-\&label left "Time (in seconds)" left .75
+\&label left "Time (in seconds)" left .25
 \&label bot "Olympic 400 Meter Run: Winning Times"
 \&coord x 1894, 1994 y 42, 56
 \&ticks left out at 44 "44", 46, 48 "48", 50, 52 "52", 54
@@ -181,7 +181,7 @@ delim $$
 .EN
 .G1
 frame invis ht 2 wid 3 left solid bot solid
-label left "Time (in seconds)" left .75
+label left "Time (in seconds)" left .25
 label bot "Olympic 400 Meter Run: Winning Times"
 coord x 1894, 1994 y 42, 56
 ticks left out at 44 "44", 46, 48 "48", 50, 52 "52", 54
@@ -331,7 +331,7 @@ delim off
 \&ticks bot at 80 "1980", 100 "2000"
 \&ticks bot from 85 to 95 by 5 "' %g"
 \&ticks left 
-\&label left "Millions of Hosts"
+\&label left "Millions of Hosts" left .25
 \&label bot "Year"
 \&draw solid
 \&copy thru { next at $1, $2/1e6;} "internet.d" 
@@ -346,7 +346,7 @@ coord x 80,100 y 1e-4, 30 log y
 ticks bot at 80 "1980", 100 "2000"
 ticks bot from 85 to 95 by 5 "' %g"
 ticks left 
-label left "Millions of Hosts"
+label left "Millions of Hosts" left .25
 label bot "Year"
 draw solid
 copy thru { next at $1, $2/1e6;} "internet.d"
@@ -691,9 +691,10 @@ delim off
 .ft CW
 \&.G1
 \&label left "Population in Millions" left .3
-\&label right "$x$ re-expressed as" unaligned "" "$space 0 left ( { date -1600 } over 100 right ) sup 7$" right .4
+\&label right "$x$ re-expressed as" unaligned "" "$space 0 left  
+\&	( { date -1600 } over 100 right ) sup 7$" right .4
 \&define newx { exp(7*(log(($1-1600)/100))) }
-\&ticks bot out at newx(1800) "1800", newx(1850) "1850", \
+\&ticks bot out at newx(1800) "1800", newx(1850) "1850", \\
 \&	newx(1900) "1900"
 \&copy "usapop.d" thru {
 \&	if $1 <= 1900 then { bullet at newx($1),$2 }
@@ -819,7 +820,7 @@ delim off
 \&.G1
 \&coord x 38, 95 y .8, 10000 log y
 \&label bot "U.S. Military Personnel"
-\&label left "Thousands" left .5
+\&label left "Thousands" left .25
 \&draw of solid
 \&draw ef dashed
 \&draw om dotted
@@ -845,7 +846,7 @@ delim $$
 .G1
 coord x 38, 95 y .8, 10000 log y
 label bot "U.S. Military Personnel" 
-label left "Thousands" left .5
+label left "Thousands" left .25
 draw of solid
 draw ef dashed
 draw om dotted
@@ -939,7 +940,7 @@ delim off
 \&.G1
 \&frame ht 2.5 wid 2.5
 \&coord x 0,1 y 0,1
-\&label bot "Direction Field is $y sup prime = x sup 2 / y$"
+\&label bot "Direction Field is $y prime = x sup 2 / y$"
 \&label left "$y = sqrt { ( 2 x sup 3 + 1 ) / 3 }$"
 \&ticks left in 0 left .1 at 0,1
 \&ticks bot in 0 down .1 at 0,1
@@ -964,7 +965,7 @@ delim $$
 .G1
 frame ht 2.5 wid 2.5
 coord x 0,1 y 0,1
-label bot "Direction Field is $y sup prime = x sup 2 / y$"
+label bot "Direction Field is $y prime = x sup 2 / y$"
 label left "$y = sqrt { ( 2 x sup 3 + 1 ) / 3 }$"
 ticks left in 0 left .1 at 0,1
 ticks bot in 0 down .1 at 0,1
@@ -1113,7 +1114,7 @@ delim off
 \&.G1
 \&frame invis bot solid
 \&label bot "Populations (in Millions) of the 50 States"
-\&label left "Number of States"
+\&label left "Number of States" left .1
 \&ticks bot out from 0 to 35 by 5
 \&coord x 0, 35 y 0, 13
 \&copy "states2.d" thru {
@@ -1130,7 +1131,7 @@ delim $$
 .G1
 frame invis bot solid
 label bot "Populations (in Millions) of the 50 States"
-label left "Number of States"
+label left "Number of States" left .1
 ticks bot out from 0 to 35 by 5
 coord x 0, 35 y 0, 13
 copy "states2.d" thru {
@@ -1151,7 +1152,7 @@ delim off
 \&.G1
 \&frame invis bot solid
 \&label bot "Populations (in Millions) of the 50 States"
-\&label left "Number of States"
+\&label left "Number of States" left .1
 \&ticks bot out from 0 to 35 by 5
 \&coord x 0, 35 y 0, 13
 \&copy "states2.d" thru {
@@ -1167,7 +1168,7 @@ delim $$
 .G1
 frame invis bot solid
 label bot "Populations (in Millions) of the 50 States"
-label left "Number of States"
+label left "Number of States" left .1
 ticks bot out from 0 to 35 by 5
 coord x 0, 35 y 0, 13
 copy "states2.d" thru {
@@ -1305,6 +1306,8 @@ delim off
 \&.G2
 .ft
 .DE
+.KE
+.KS
 .EQ
 delim $$
 .EN
@@ -1352,8 +1355,8 @@ delim off
 \&.vs 18
 \&.G1 4
 \&frame ht 2 wid 2
-\&label left "Response Variable" left .65
-\&label bot "Factor Variable" down .5
+\&label left "Response Variable" left .2
+\&label bot "Factor Variable" down .1
 \&line from 0,0 to 1,1
 \&line dotted from .5,0 to .5,1
 \&define blob X "\\v'.1m'\\(bu\\v'-.1m'" X
@@ -1370,8 +1373,8 @@ delim $$
 .vs 18
 .G1 4
 frame ht 2 wid 2
-label left "Response Variable" left .65
-label bot "Factor Variable" down .5
+label left "Response Variable" left .2
+label bot "Factor Variable" down .1
 line from 0,0 to 1,1
 line dotted from .5,0 to .5,1
 define blob X "\v'.1m'\(bu\v'-.1m'" X
@@ -1453,7 +1456,7 @@ delim off
 \&.G1
 \&frame invis bot solid
 \&label bot "Populations (in Millions) of the 50 States"
-\&label left "Number of States"
+\&label left "Number of States" left .1
 \&ticks bot out from 0 to 35 by 5
 \&coord x 0, 35 y 0, 13
 \&copy "states2.d" thru {
@@ -1468,7 +1471,7 @@ delim $$
 .G1
 frame invis bot solid
 label bot "Populations (in Millions) of the 50 States"
-label left "Number of States"
+label left "Number of States" left .1
 ticks bot out from 0 to 35 by 5
 coord x 0, 35 y 0, 13
 copy "states2.d" thru {
@@ -1662,7 +1665,7 @@ real graph are missing from this one.
 \&coord y 0,70
 \&label bot "delay (ms)" "\\fIi)\\fP" down 0.3
 \&label left "load" unaligned "index" up .9
-\&label right "Xmin =  2: \\(bu" unaligned ljust size -3 "Xmin =  4:\\(sq" \
+\&label right "Xmin =  2: \\(bu" unaligned ljust size -3 "Xmin =  4:\\(sq" \\
 \&	"Xmin =  8:\\(ci" "Xmin = 16: \\*(**" left 1.4 up 0.5
 \&draw a solid
 \&define symb % bullet %
@@ -1857,7 +1860,8 @@ of
 \&  frame invis ht 3 wid 3 left solid bot solid
 \&%
 \&graph A
-\&   mkgraphTiming(Random1500,Random-1500 ms,succ,succ,i,"SR (%)",result.SQ_MESH.Fail1.S3.R0,Square mesh)
+\&   mkgraphTiming(Random1500,Random-1500 ms,succ,succ,i,"SR (%)",\\
+\&	result.SQ_MESH.Fail1.S3.R0,Square mesh)
 \&.G2
 .ft
 .ps 10
@@ -2234,11 +2238,11 @@ I've attached a small data file and simple grap specification which shows
 one way to handle missing data (and perhaps also how to ignore a column
 header row in a data file). The data is annual US bicyclist fatalities as
 published by the National Highway Transportation Safety Administration
-.CW http://www.nhtsa.dot.gov/people/ncsa/factshet.html ; (
+.I http://www.nhtsa.dot.gov/people/ncsa/factshet.html ; (
 the \*Qfact sheets\*U for
 \*Qpedalcyclists\*U for 1998 and for 1993) and by the National Center for
 Injury Prevention and Control
-.CW http://www.cdc.gov/ncipc/osp/us9693/mvpctr.htm ; (
+.I http://www.cdc.gov/ncipc/osp/us9693/mvpctr.htm ; (
 change the numbers for
 different years). CDC data hasn't yet been published for 1997 or 1998.
 Don't ask me why two groups of bureaucrats in the US Federal Government
@@ -2251,11 +2255,12 @@ I did embellish it by adding labels and a key.
 .CW
 \&.G1
 \&label top "Bicycling Deaths by Year"
-\&label left "Deaths" left 0.25
+\&label left "Deaths" left 0.2
 \&label bottom "Year"
 \&copy "cy_fatal.d" through {
-\&	# ignore missing data (zero or negative values used as placeholders)
-\&	# also happens to ignore column header row in data
+\&	# ignore missing data (zero or negative values 
+\&	# used as placeholders). It also happens to ignore column
+\&	# header rows in data.
 \&	if $2 > 0 then {square at $1,$2 }
 \&	if $3 > 0 then {bullet at $1,$3 }
 \&}
@@ -2271,11 +2276,12 @@ I did embellish it by adding labels and a key.
 .DE
 .G1
 label top "Bicycling Deaths by Year"
-label left "Deaths" left 0.25
+label left "Deaths" left 0.2
 label bottom "Year"
 copy "cy_fatal.d" through {
-	# ignore missing data (zero or negative values used as placeholders)
-	# also happens to ignore column header row in data
+	# ignore missing data (zero or negative values
+	# used as placeholders).  It also happens to ignore column
+	# header rows in data.
 	if $2 > 0 then {square at $1,$2 }
 	if $3 > 0 then {bullet at $1,$3 }
 }
@@ -2787,8 +2793,9 @@ delim off
 .DS
 .ft CW
 \&.G1
-\&frame invis ht 2 wid 3 left solid color "blue" bot solid color "orange"
-\&label left "Time (in seconds)" left .75
+\&frame invis ht 2 wid 3 left solid color "blue" \\
+\& 	bot solid color "orange"
+\&label left "Time (in seconds)" left .15
 \&label bot "Olympic 400 Meter Run: Winning Times"
 \&coord x 1894, 1994 y 42, 56
 \&ticks left out at 44 , 46 "", 48, 50 "", 52, 54 ""
@@ -2801,7 +2808,8 @@ delim off
 \&copy "400wpairs.d"
 \&"Women" size -3 at 1958,52
 \&"Men" size -3 at 1910,47
-\&circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5 thickness 2
+\&circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" \\
+\&	fill 0.5 thickness 2
 \&.G2
 .ft
 .DE
@@ -2809,8 +2817,9 @@ delim off
 delim $$
 .EN
 .G1
-frame invis ht 2 wid 3 left solid color "blue" bot solid color "orange"
-label left "Time (in seconds)" left .75
+frame invis ht 2 wid 3 left solid color "blue" \
+	bot solid color "orange"
+label left "Time (in seconds)" left .15
 label bot "Olympic 400 Meter Run: Winning Times"
 coord x 1894, 1994 y 42, 56
 ticks left out at 44 , 46 "", 48, 50 "", 52, 54 ""
@@ -2823,6 +2832,7 @@ new color "red" thickness 2.5
 copy "400wpairs.d"
 "Women" size -3 at 1958,52
 "Men" size -3 at 1910,47
-circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" fill 0.5 thickness 2
+circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" \
+	fill 0.5 thickness 2
 .G2
 .KE
