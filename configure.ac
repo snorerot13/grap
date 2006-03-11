@@ -30,7 +30,7 @@ AC_SUBST(EXAMPLE_DIR,$withval),
 AC_SUBST(EXAMPLE_DIR, "$datadir/examples/grap"))
 
 AC_ARG_WITH(doc-dir, 
-    [  --with-doc-dir=dir     directory in which to install documents],
+    [  --with-doc-dir=dir      directory in which to install documents],
 AC_SUBST(DOC_DIR,$withval),
 AC_SUBST(DOC_DIR,"$datadir/doc/grap"))
 
