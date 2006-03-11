@@ -664,9 +664,9 @@ void process_frame(linedesc* d, frame *f, frame *s) {
     int i;	// Scratch
 
     if ( d ) {
-	// a default linedesc is possible, but unlikely (only a fill,
-	// for example).
-	if ( d->ld != def ) {
+	// If the default linedesc has a description, color or thickness,
+	// propagate it.
+	if ( d->ld != def || d->color || d->thick != 0.0 ) {
 	    for ( i = 0 ; i < 4; i++ ) {
 		the_graph->base->desc[i] = *d;
 	    }
@@ -682,7 +682,10 @@ void process_frame(linedesc* d, frame *f, frame *s) {
 		
     if ( s ) {
 	for ( i = 0 ; i < 4; i++ ) {
-	    if ( s->desc[i].ld != def )
+	    // If the linedesc has a description, color or thickness, propagate
+	    // it.
+	    if ( s->desc[i].ld != def || s->desc[i].color ||
+		    s->desc[i].thick != 0.0  )
 		the_graph->base->desc[i] = (linedesc) s->desc[i];
 	}
 	delete s;
