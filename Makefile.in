@@ -1,14 +1,19 @@
 # This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 # for the full copyright and limitations of liabilities.
 
+# Allow staged install.  Set this to install in a temporary location to make
+# sure this all works, or make a tar file.  DESTDIR needs to end with a / if
+# prefix is not absolute.
+DESTDIR=
+
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-BINDIR = @bindir@
-DEFINESDIR = @DEFINES_DIR@
-EXAMPLEDIR = @EXAMPLE_DIR@
-DOCDIR = @DOC_DIR@
-MANDIR = @mandir@/man1
+BINDIR = ${DESTDIR}@bindir@
+DEFINESDIR = ${DESTDIR}@DEFINES_DIR@
+EXAMPLEDIR = ${DESTDIR}@EXAMPLE_DIR@
+DOCDIR = ${DESTDIR}@DOC_DIR@
+MANDIR = ${DESTDIR}@mandir@/man1
 
 PROGS=grap
 

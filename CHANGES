@@ -1,6 +1,35 @@
 Change log
 1.38
 
+Michail Vidiassov suggests that a DESTDIR variable be added to the
+Makedile to allow staged installs or temporary installs or other stuff.
+Setting DESTDIR when making install or deinstall will create a tree
+under DESTDIR that contains the full grap install.  E.g., 
+
+make DESTDIR=/usr/tmp install
+
+Does something like:
+
+/usr/bin/install -c -d /usr/tmp/usr/local/share/doc/grap || true
+/usr/bin/install -c -m 644 README CHANGES COPYRIGHT grap.man
+/usr/tmp/usr/local/share/doc/grap
+strip grap || true
+/usr/bin/install -c -d /usr/tmp/usr/local/bin || true
+/usr/bin/install -c -d /usr/tmp/usr/local/man/man1 || true
+/usr/bin/install -c -d /usr/tmp/usr/local/share/grap || true
+/usr/bin/install -c -d /usr/tmp/usr/local/share/examples/grap || true
+/usr/bin/install -c grap /usr/tmp/usr/local/bin
+/usr/bin/install -c -m 644 grap.1 /usr/tmp/usr/local/man/man1
+/usr/bin/install -c -m 644 grap*.defines /usr/tmp/usr/local/share/grap
+/usr/bin/install -c -m 644 examples/*.d examples/example.ms examples.ps \
+	examples/*.result examples/Makefile \
+	/usr/tmp/usr/local/share/examples/grap
+
+There is a possibility of munging the manpage by doing this, but that's
+actually pretty difficult, and the modifications below to print install
+locations will still print the original (that is DESTDIR-free) install
+locations.
+
 Warner Lemberg found a bunch of bad typesetting in the examples, and I
 hope much of that is fixed.  He also pointed out that configure should
 allow installers to place documentation and examples where their system
