@@ -9,11 +9,11 @@ DESTDIR=
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-BINDIR = ${DESTDIR}@bindir@
-DEFINESDIR = ${DESTDIR}@DEFINES_DIR@
-EXAMPLEDIR = ${DESTDIR}@EXAMPLE_DIR@
-DOCDIR = ${DESTDIR}@DOC_DIR@
-MANDIR = ${DESTDIR}@mandir@/man1
+BINDIR = @bindir@
+DEFINESDIR = @DEFINES_DIR@
+EXAMPLEDIR = @EXAMPLE_DIR@
+DOCDIR = @DOC_DIR@
+MANDIR = @mandir@/man1
 
 PROGS=grap
 
@@ -95,29 +95,34 @@ grap.1:	grap.doc
 # fails on existing directories.
 install:	@INSTALL_DEPS@
 	strip grap || true
-	${INSTALL} -d ${BINDIR} || true
-	${INSTALL} -d ${MANDIR} || true
-	${INSTALL} -d ${DEFINESDIR} || true
-	${INSTALL} -d ${EXAMPLEDIR} || true
-	${INSTALL_PROGRAM} grap ${BINDIR}
-	${INSTALL_DATA} grap.1 ${MANDIR}
-	${INSTALL_DATA} grap*.defines ${DEFINESDIR}
-	${INSTALL_DATA} examples/*.d examples/example.ms examples.ps examples/*.result examples/Makefile ${EXAMPLEDIR}
+	${INSTALL} -d ${DESTDIR}${BINDIR} || true
+	${INSTALL} -d ${DESTDIR}${MANDIR} || true
+	${INSTALL} -d ${DESTDIR}${DEFINESDIR} || true
+	${INSTALL} -d ${DESTDIR}${EXAMPLEDIR} || true
+	${INSTALL_PROGRAM} grap ${DESTDIR}${BINDIR}
+	${INSTALL_DATA} grap.1 ${DESTDIR}${MANDIR}
+	${INSTALL_DATA} grap*.defines ${DESTDIR}${DEFINESDIR}
+	${INSTALL_DATA} examples/*.d examples/example.ms examples.ps \
+		examples/*.result examples/Makefile ${DESTDIR}${EXAMPLEDIR}
 
 #BSD ports may not want these installed
 install-docs:
-	${INSTALL} -d ${DOCDIR} || true
-	${INSTALL_DATA} README CHANGES COPYRIGHT grap.man ${DOCDIR}
+	${INSTALL} -d ${DESTDIR}${DOCDIR} || true
+	${INSTALL_DATA} README CHANGES COPYRIGHT grap.man ${DESTDIR}${DOCDIR}
 
 deinstall:
-	${RM} ${BINDIR}/grap
-	${RM} ${MANDIR}/grap.1
-	${RM} ${DEFINESDIR}/grap*.defines ${DOCDIR}/README ${DOCDIR}/CHANGES ${DOCDIR}/COPYRIGHT ${DOCDIR}/grap.man
-	${RM} ${EXAMPLEDIR}/*.d ${EXAMPLEDIR}/*.ms ${EXAMPLEDIR}/examples.ps ${EXAMPLEDIR}/*result
-	${RMDIR} ${DOCDIR}/examples
-	${RMDIR} ${DOCDIR}
-	${RMDIR} ${DEFINESDIR}
-	${RMDIR} ${EXAMPLEDIR}
+	${RM} ${DESTDIR}${BINDIR}/grap
+	${RM} ${DESTDIR}${MANDIR}/grap.1
+	${RM} ${DESTDIR}${DEFINESDIR}/grap*.defines ${DESTDIR}${DOCDIR}/README \
+		${DESTDIR}${DOCDIR}/CHANGES ${DESTDIR}${DOCDIR}/COPYRIGHT \
+		${DESTDIR}${DOCDIR}/grap.man
+	${RM} ${DESTDIR}${EXAMPLEDIR}/*.d ${DESTDIR}${EXAMPLEDIR}/*.ms \
+		${DESTDIR}${EXAMPLEDIR}/examples.ps \
+		${DESTDIR}${EXAMPLEDIR}/*result
+	${RMDIR} ${DESTDIR}${DOCDIR}/examples
+	${RMDIR} ${DESTDIR}${DOCDIR}
+	${RMDIR} ${DESTDIR}${DEFINESDIR}
+	${RMDIR} ${DESTDIR}${EXAMPLEDIR}
 
 check:	grap grap.defines examples/example.ms
 	cd examples && \
