@@ -2,7 +2,7 @@ Change log
 1.38
 
 Michail Vidiassov suggests that a DESTDIR variable be added to the
-Makedile to allow staged installs or temporary installs or other stuff.
+Makefile to allow staged installs or temporary installs or other stuff.
 Setting DESTDIR when making install or deinstall will create a tree
 under DESTDIR that contains the full grap install.  E.g., 
 
@@ -21,7 +21,7 @@ strip grap || true
 /usr/bin/install -c grap /usr/tmp/usr/local/bin
 /usr/bin/install -c -m 644 grap.1 /usr/tmp/usr/local/man/man1
 /usr/bin/install -c -m 644 grap*.defines /usr/tmp/usr/local/share/grap
-/usr/bin/install -c -m 644 examples/*.d examples/example.ms examples.ps \
+/usr/bin/install -c -m 644 examples/*.d examples/example.ms \
 	examples/*.result examples/Makefile \
 	/usr/tmp/usr/local/share/examples/grap
 
