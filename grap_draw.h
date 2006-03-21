@@ -246,9 +246,7 @@ public:
     int yautoscale;	// True if the user has not given an explicit y range
     string name;	// Name of the coordinate system, if any
 
-    void coord::newpt(double x, double y) {
-	newx(x); newy(y);
-    }
+    void newpt(double x, double y) { newx(x); newy(y); }
     void newx(double);
     void newy(double);
 
