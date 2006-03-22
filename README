@@ -1,4 +1,4 @@
-This is grap, an implementation of Kernigan and Bentley's grap
+This is grap, an implementation of Kernighan and Bentley's grap
 language for typesetting graphs.  I got sick of groff not having a
 version of grap, so I built one.
 

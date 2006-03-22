@@ -89,7 +89,7 @@ with TeX.
 The 
 .Fl d
 option specifies a file of macro definitions to be read at startup,
-and defaults to DEFINES_FILE.
+and defaults to /usr/local/share/grap/grap.defines .
 The
 .Fl D
 option inhibits the reading of any initial macros file
@@ -1008,8 +1008,10 @@ is encountered at the beginning of the line.
 is one of the workhorses of 
 .Nm grap .
 Check out the paper and 
-.Pa EXAMPLES
-for more details.
+.Pa /usr/local/share/examples/grap
+for more details.  Confirm the location of the examples directory using the 
+.Fl v
+flag.
 .Ed
 .Ic print 
 .Sm off 
@@ -1366,14 +1368,17 @@ define foo { next at $1, $2 }
 for i from 1 to 5 { foo(i,i) }
 .Ed
 Macros persist across graphs.  The file 
-.Pa DEFINES_FILE
+.Pa /usr/local/share/grap/grap.defines
 contains simple macros for plotting common characters.  The 
 .Ic undefine
 command deletes a macro.
 .Pp
-See the file
-.Pa EXAMPLES
+See the directory
+.Pa /usr/local/share/examples/grap
 for more examples of macros.
+Confirm the location of the examples directory using the 
+.Fl v
+flag.
 .Ed
 .Ss Number Lists
 .Pp
@@ -1454,7 +1459,7 @@ is disabled to prevent forcing
 .Nm
 to core dump or smash the stack.
 .Sh FILES
-.Pa DEFINES_FILE
+.Pa /usr/local/share/grap/grap.defines
 .Sh SEE ALSO
 .Xr atan2 3 ,
 .Xr groff 1 ,

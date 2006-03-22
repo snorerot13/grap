@@ -88,8 +88,10 @@ grap.man:	grap.1
 grap.ps:	grap.1
 	groff -mdoc grap.1 > grap.ps
 
+# This used to be more complex.  The stub's here so that the grap.doc
+# records in my CVS stay where they are.
 grap.1:	grap.doc
-	sed "s#DEFINES_FILE#${DEFINESDIR}/grap.defines#g;" < grap.doc > grap.1 ;
+	cp grap.doc grap.1
 
 # The || true lines allow make to continue on systems where install -d
 # fails on existing directories.

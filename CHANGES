@@ -1,4 +1,14 @@
 Change log
+
+1.39
+
+Tobias Toedter, the debian grap maintainer noticed a typo that upsets
+gcc 4.1, though earlier versions don't even generate a warning (Grrrr).
+This is fixed.  I didn't issue a new FreeBSD port, because it doesn't
+change anything functionally.  I also cleaned up the man page a bit, and
+Tobias fixed a couple typos in the man page and the README file.  Always
+troubling to misspell the inventor's name.
+
 1.38
 
 Michail Vidiassov suggests that a DESTDIR variable be added to the
