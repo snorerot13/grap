@@ -272,6 +272,7 @@ log[ \t]+(x|y|log)	{
 			   // The yyless/YY_BREAK allows us to redo the
                            // match under the new start condition.
 
+			   debug("starting ident white ident");
                            if ( is_macro(yytext) ) {
 			       BEGIN(REJECTED_COORD);
 			       yyless(0);
@@ -338,7 +339,7 @@ log[ \t]+(x|y|log)	{
 			   return COORD_NAME;
                         }
 <GRAP,REJECTED_COORD>{
-{identifier}/[ \t][ \t]*[0123456789\.(] {
+{identifier}/[ \t][ \t]*-?[0123456789\.(] {
 			   coordinateDictionary::iterator ci;
 			   coord *c;
 			   
