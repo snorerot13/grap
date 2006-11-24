@@ -339,7 +339,50 @@ log[ \t]+(x|y|log)	{
 			   return COORD_NAME;
                         }
 <GRAP,REJECTED_COORD>{
-{identifier}/[ \t][ \t]*-?[0123456789\.(] {
+{identifier}/[ \t][ \t]*-[ \t]*[0123456789\.(] {
+			   // This is close to the case below, which is more
+			   // clearly a coordinate space modifying a number.
+			   // This case includes things like
+			   //    ident -3
+			   // It's often literally impossible to decide if that
+			   // means -3 in the ident coordinate space or the
+			   // variable ident minus 3.  This code rules that if
+			   // ident is a keyword, macro, or initialized
+			   // variable, ident will be treated as one of those,
+			   // and this rule will be rejected.  Otherwise it is
+			   // a coordinate space and, if neceaasry, a new space
+			   // will be allocated for it.
+			   //
+			   // I don't expect that this is the last piece of
+			   // pain to come from here.
+			   coordinateDictionary::iterator ci;
+			   coord *c;
+			   
+			   debug("testing (minus sign): ",yytext);
+			   debug("count ", active.count(yytext));
+                           if ( is_macro(yytext) ) 
+			       REJECT;
+
+			   if ( active.count(yytext) ) 
+			       REJECT;
+
+			   if ( vars.count(yytext) ) 
+			   	REJECT;
+
+			   ci = the_graph->coords.find(yytext);
+			   if ( ci != the_graph->coords.end()) {
+			       c = (*ci).second;
+			       yylval.coordptr = c;
+			   }
+			   else {
+			       yylval.coordptr = new coord(yytext);
+			       the_graph->coords[yytext] = yylval.coordptr;
+			   }
+			   tokenpos += yyleng;
+			   debug("COORD_NAME: ",yytext);
+			   return COORD_NAME;
+                        }
+{identifier}/[ \t][ \t]*[0123456789\.(] {
 			   coordinateDictionary::iterator ci;
 			   coord *c;
 			   
