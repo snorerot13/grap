@@ -13,6 +13,8 @@
 .Op Fl D
 .Op Fl l
 .Op Fl M Ar include path
+.Op Fl R
+.Op Fl r
 .Op Fl v
 .Op Fl u
 .Op Fl C
