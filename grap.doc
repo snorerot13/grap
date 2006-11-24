@@ -146,6 +146,33 @@ for in the path given by
 The search path always includes the current directory, and by default
 that directory is searched last.
 .Pp
+All numbers used internally by 
+.Nm
+are double precision floating point values.  Sometimes using floating point
+numbers has unintended consequences.  To help avoid these problems,
+.Nm
+can use two thresholds for comparison of floating point numbers, set by
+.Fl R
+or 
+.Fl r .
+The 
+.Fl R
+flag sets coarse comparison mode, which is suitable for most applications.  If
+you are plotting small values \(en less than 1e-6 or so \(en consider using
+.Fl r
+which uses very fine comparisons between numbers.  You may also want to rescale your plotted values to be larger in magnitude. The coarse comarisons are
+used by default.
+.Pp
+To be precise, the value by which two numbers must differ for 
+.Nm
+to consider them not equal is called the comparison limit and the smallest
+non-zero number is called the minimum value.  The values a given version of 
+.Nm
+uses for these are included in the output of
+.Fl v
+or 
+.Fl h .
+.Pp
 All
 .Nm
 commands are included between 
@@ -306,6 +333,13 @@ or
 .Xr pic 
 commands.  Otherwise the frame is output before the first plotted
 object (even invisible ones).
+.Pp
+.Ic ht
+and
+.Ic wid
+are in inches by default, but can be any
+.Xr groff
+unit.  If omitted, the dimensions are 2 inches high by 3 inches wide.
 .Ed 
 .Pp
 .Ic coord

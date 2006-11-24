@@ -1,5 +1,46 @@
 Change log
 
+1.40
+
+Man, here's a weird one, care of Bruce Lilly: in previous versions doing
+something like this:
+
+	coord temp x -2,2 y 3,4
+	ticks left out from temp -1 to 1
+
+would interpret the ticks as starting from the value of the
+uninitialized variable temp with one subtracted from it to 1 in the
+default coordinate space rather than (correctly) interpreting that as
+ticks from -1 to 1 in the temp coordinate space.  This is a two
+character fix to a regular expression, but a weird bug.  I believe it's
+fixed.
+
+Bruce also discovered that the changes I put into version 1.38 to
+address issues raised by Hartmut Henkel affected large number
+comparisions in unpleasently non-intuitive ways.  Specifically doing
+this:
+
+	coord pressure x -2.400000, 27.000000 y 1035.124000, 1039.000000
+	ticks right in left 0.6 from pressure 1035.200 to 1039.000000 by 0.200
+
+Results in the top tick - the one at 1039 - being clipped because the 19
+additions in the tick loop introduce enough floating point error that
+the limit (1039) and the index (1039+epsilon) differ by a large enough
+value that the loop terminates one iteration early.  Essentially the <=
+at the top of the tick loop fails because the error induced by the 19
+additions accumulates to be detectable.
+
+I've reverted the default comparison thresholds back to their pre-1.38
+levels; numbers must differ by more than 1e-6 to be considered different
+by grap.  For people who explicitly want to work with very small
+quantities directly - a decision I still disagree with - the -r flag has
+been added to make grap use the system's idea of what the smallest
+comparable numbers are (the 1.38 and 1.39 behavior).  The output of -v
+or -h lists these two values and the manual page documents the flags.
+
+I've updated the grap.spec to one donated by John Heidemann.  Linux guys
+should have it easier.
+
 1.39
 
 Martin Michlmayr noticed a typo that upsets gcc 4.1, though earlier

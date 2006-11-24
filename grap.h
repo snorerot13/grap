@@ -182,14 +182,24 @@ class grap_buffer_state {
 
 extern lexStack lexstack;
 
+// Set the coarse and fine limits for double comparisons.  COARSE comparisons
+// are always within one millionth.  If fine comarisons are requested, either
+// the values in limits are used or one trillionth (1e-12).
 #ifdef HAVE_LIMITS
 #include <limits>
-#define EPSILON numeric_limits<double>::epsilon()
-#define MIN_DOUBLE numeric_limits<double>::min()
+#define FINE_EPSILON numeric_limits<double>::epsilon()
+#define FINE_MIN_DOUBLE numeric_limits<double>::min()
+#define COARSE_EPSILON		1e-6
+#define COARSE_MIN_DOUBLE	1e-6
 #else
-#define EPSILON		1e-6
-#define MIN_DOUBLE	1e-6
+#define FINE_EPSILON		1e-12
+#define FINE_MIN_DOUBLE		1e-12
+#define COARSE_EPSILON		1e-6
+#define COARSE_MIN_DOUBLE	1e-6
 #endif
+
+extern double epsilon;
+extern double min_double;
 
 
 #ifdef HAVE_RANDOM

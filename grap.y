@@ -1112,8 +1112,8 @@ if_statement:
 	    {
 		// force all if blocks to be terminated by a SEP.  
 		*$5 += ';';
-		// We use EPSILON in loop tests 
-		if ( fabs($2) > EPSILON ) include_string($5,0,GINTERNAL);
+		// We use epsilon in loop tests 
+		if ( fabs($2) > epsilon ) include_string($5,0,GINTERNAL);
 		else if ( $6 ) include_string($6,0,GINTERNAL);
 		delete $5;
 		if ( $6) delete $6;

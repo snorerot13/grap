@@ -912,9 +912,7 @@ int yywrap() {
 		break;
 	}
 
-	// It's possible this should be MIN, but EPSILON is pretty
-	// conservative.
-	if ( (*f->loop_var - f->limit) * f->dir < EPSILON ) {
+	if ( (*f->loop_var - f->limit) * f->dir < epsilon ) {
 	    // still iterating redo this stack frame
 	    yy_delete_buffer(g->yy);
 

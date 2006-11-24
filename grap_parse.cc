@@ -56,7 +56,12 @@ extern int yyparse();
 extern int nlines;
 
 extern macroDictionary macros;
-const char *opts = "d:lDvuM:CVhSc";
+const char *opts = "d:lDvuM:CVhScRr";
+
+// Coarse defaults for double tolerances because these work best for common
+// cases - comparisons of fairly large values that don't differ by much.
+double epsilon = COARSE_EPSILON;
+double min_double = COARSE_MIN_DOUBLE;
 
 // Classes for various for_each calls
 
@@ -391,9 +396,8 @@ ticklist *tick_for(coord *c, double from, double to, bydesc by, DisplayString *r
     if ( to - from >= 0 ) dir = 1;
     else dir = -1;
 
-    //  I think EPSILON is correct here.
     idx = from;
-    while ( (idx - to) *dir  < EPSILON ) {
+    while ( (idx - to) *dir  < epsilon ) {
 	t = new tick(idx, 0, top_side, 0, (shiftlist *) 0, 0);
 	t->c = c;
 
@@ -822,15 +826,23 @@ void usage() {
     cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " << 
 	"[-M path] [files]" << endl;
     cerr << "\t-h\tprint this list and exit (also --help)" << endl;
+    cerr << "\t-C\tcompatibility mode" << endl;
+    cerr << "\t-c\tdefault to not clipping lines" << endl;
     cerr << "\t-d\tuse given defines file" << endl;
     cerr << "\t-D\tuse no defines file" << endl;
     cerr << "\t-l\tuse no defines file" << endl;
+    cerr << "\t-R\tuse coarse numeric comparisons (default)" << endl;
+    cerr << "\t-r\tuse fine numeric comparisons" << endl;
     cerr << "\t-v\tprint version and exit (also --version)" << endl;
     cerr << "\t-V\tprint parse debugging information" << endl;
     cerr << "\t-u\tforce graph labels to be unaligned by default" << endl;
     cerr << "\t-M\tspecify search path for files" << endl;
-    cerr << "\t-C\tcompatibility mode" << endl;
     cerr << "\t-S\tsafer mode, no internal user sprintf calls" << endl;
+    cerr << endl;
+    cerr << "Fine comparsion limit: " << FINE_EPSILON << endl;
+    cerr << "Fine minimum value: " << FINE_MIN_DOUBLE << endl;
+    cerr << "Coarse comparsion limit: " << COARSE_EPSILON << endl;
+    cerr << "Coarse minimum value: " << COARSE_MIN_DOUBLE << endl;
     cerr << "Defines are in " << DEFINES << endl;
     cerr << "See the man page for more information." << endl;
     cerr << "Documentation in " << DOCS_DIR << endl;
@@ -841,6 +853,10 @@ void usage() {
 inline void version() {
     cout << "grap " << PACKAGE_VERSION << " compiled under " 
 	 << OS_VERSION << endl;
+    cerr << "Fine comparsion limit: " << FINE_EPSILON << endl;
+    cerr << "Fine minimum value: " << FINE_MIN_DOUBLE << endl;
+    cerr << "Coarse comparsion limit: " << COARSE_EPSILON << endl;
+    cerr << "Coarse minimum value: " << COARSE_MIN_DOUBLE << endl;
     cout << "Report bugs to " << PACKAGE_BUGREPORT << endl;
     cout << "Documentation in " << DOCS_DIR << endl;
     cout << "Examples in " << EXAMPLES_DIR << endl;
@@ -900,6 +916,14 @@ int main(int argc, char** argv) {
 		break;
 	    case 'S':
 		do_sprintf = false;
+		break;
+	    case 'R':
+		epsilon = COARSE_EPSILON;
+		min_double = COARSE_MIN_DOUBLE;
+		break;
+	    case 'r':
+		epsilon = FINE_EPSILON;
+		min_double = FINE_MIN_DOUBLE;
 		break;
 	    case 'h':
 	    case '?':

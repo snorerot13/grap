@@ -28,15 +28,15 @@ void coord::newx(double x) {
 	xautoscale = 2;
     }
     if ( (logscale & x_axis) ) {
-	if ( xmin  < MIN_DOUBLE ) {
+	if ( xmin  < min_double ) {
 	    cerr << "Logscale with non-positive value (within precision)"
 		 << endl;
-	    xmin = MIN_DOUBLE;
+	    xmin = min_double;
 	}
-	if ( xmax  < MIN_DOUBLE ) {
+	if ( xmax  < min_double ) {
 	    cerr << "Logscale with non-positive value (within precision)"
 		 << endl;
-	    xmax = MIN_DOUBLE;
+	    xmax = min_double;
 	}
     }
 }
@@ -56,15 +56,15 @@ void coord::newy(double y) {
 	yautoscale = 2;
     }
     if ( (logscale & y_axis) ) {
-	if ( ymin  < MIN_DOUBLE ) {
+	if ( ymin  < min_double ) {
 	    cerr << "Logscale with non-positive value (within precision)"
 		 << endl;
-	    ymin = MIN_DOUBLE;
+	    ymin = min_double;
 	}
-	if ( ymax  < MIN_DOUBLE ) {
+	if ( ymax  < min_double ) {
 	    cerr << "Logscale with non-positive value (within precision)"
 		 << endl;
-	    ymax = MIN_DOUBLE;
+	    ymax = min_double;
 	}
     }
 }
@@ -80,12 +80,12 @@ void coord::addmargin(double mf) {
     // Log sale must be positive
     
     if ( (logscale & x_axis) ) {
-	if ( xmin  < MIN_DOUBLE ) xmin = MIN_DOUBLE;
-	if ( xmax  < MIN_DOUBLE ) xmax = MIN_DOUBLE;
+	if ( xmin  < min_double ) xmin = min_double;
+	if ( xmax  < min_double ) xmax = min_double;
     }
     if ( (logscale & y_axis) ) {
-	if ( ymin  < MIN_DOUBLE ) ymin = MIN_DOUBLE;
-	if ( ymax  < MIN_DOUBLE ) ymax = MIN_DOUBLE;
+	if ( ymin  < min_double ) ymin = min_double;
+	if ( ymax  < min_double ) ymax = min_double;
     }
     
     if ( xautoscale ) {
@@ -140,7 +140,7 @@ double coord::map(double v, axis ax ) {
     switch ( ax ) {
 	case x_axis:
 	    if (logscale & x_axis ) {
-		if ( v > MIN_DOUBLE )
+		if ( v > min_double )
 		    return ((log(v) -log(xmin)) / (log(xmax)-log(xmin)));
 		else
 		    throw range_error("Negative or zero logscale coordinate");
@@ -149,7 +149,7 @@ double coord::map(double v, axis ax ) {
 	    break;
 	case y_axis:
 	    if (logscale & y_axis ) {
-		if ( v > MIN_DOUBLE ) 
+		if ( v > min_double ) 
 		    return ((log(v) -log(ymin)) / (log(ymax)-log(ymin)));
 		else 
 		    throw range_error("Negative or zero logscale coordinate");

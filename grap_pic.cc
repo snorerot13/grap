@@ -322,8 +322,9 @@ void Picframe::addautoticks(sides sd) {
 
     autoguess(sd, idx, dir, hi, ts, ls, tickdef[sd].c);
 
-    // We use EPSILON in loops
-    while ( idx - hi < EPSILON*dir ) {
+    // This changed to match the code in grap_parse (all the computations on
+    // one side of the comparison)
+    while ( (idx - hi)* dir < epsilon ) {
 	t = new tick(idx,tickdef[sd].size,sd,0, &tickdef[sd].shift,
 		     tickdef[sd].c);
 	if ( tickdef[sd].prt)
@@ -347,8 +348,7 @@ void Picframe::addautogrids(sides sd) {
 
     autoguess(sd, idx, dir, hi, ts, ls, griddef[sd].c);
 
-    // We use EPSILON in loops
-    while ( idx - hi < EPSILON*dir ) {
+    while ( (idx - hi)*dir < epsilon ) {
 	g = new grid(idx,&griddef[sd].desc,sd,0,
 		     &griddef[sd].shift, griddef[sd].c);
 	if ( griddef[sd].prt)
@@ -405,8 +405,8 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 
 
     // The line is parallel to the x axis.  It's either all valid or
-    // all invalid.  We use EPSILON again here to be conservative.
-    if ( vx > -EPSILON && vx < EPSILON )
+    // all invalid.  We use epsilon again here to be conservative.
+    if ( vx > -epsilon && vx < epsilon )
 	if ( inbox(px) ) return true;
 	else return false;
 
@@ -421,9 +421,9 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 	// This is the zero intercept, and one point has been clipped,
 	// so if the first hasn't been clipped, the second must have.
 	// We recalculate the parametric representation so we can
-	// repeat the clip for x == 1.  We use EPSILON here because we have to
+	// repeat the clip for x == 1.  We use epsilon here because we have to
 	// use it by definition in the t==1 half.
-	if ( px < EPSILON ) {
+	if ( px < epsilon ) {
 	    x1 = px + t * vx;
 	    y1 = py + t * vy;
 	    px = x1;
@@ -445,7 +445,7 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
     if ( inbox(t) ) {
 	// This is the 1 intercept, and one point has been clipped,
 	// so if the first hasn't been clipped, the second must have.
-	if ( px > 1 - EPSILON ) {
+	if ( px > 1 - epsilon ) {
 	    x1 = px + t * vx;
 	    y1 = py + t * vy;
 	}
@@ -601,10 +601,10 @@ void Pictick::draw(frame *f) {
 	     << e.what() << endl;
 	return;
     }
-    // EPSLIONS for floating point weirdness
-    if ( a < -EPSILON || a > 1+EPSILON ) return;
+    // epsilons for floating point weirdness
+    if ( a < -epsilon || a > 1+epsilon ) return;
     else a *= f->wid;
-    if ( b < -EPSILON || b > 1+EPSILON ) return;
+    if ( b < -epsilon || b > 1+epsilon ) return;
     else b *= f->ht;
     cout << "line from Frame.Origin + (" << a << ", " << b;
     cout << ") then " << dir << " ";
@@ -727,13 +727,13 @@ void Piccircle::draw(frame *f) {
 	return;
     }
    
-    // Again, EPSILON is correct because it's needed for the 1+ and symmetry.
-    if ( x > 1+EPSILON || x < 0-EPSILON ) {
+    // Again, epsilon is correct because it's needed for the 1+ and symmetry.
+    if ( x > 1+epsilon || x < 0-epsilon ) {
 	cerr << "Circle outside coordinates:" << center.x << ", ";
 	cerr << center.y << endl;
 	return;
     }
-    if ( y > 1+EPSILON || y < 0-EPSILON ) {
+    if ( y > 1+epsilon || y < 0-epsilon ) {
 	cerr << "Circle outside coordinates:" << center.x << ", ";
 	cerr << center.y << endl;
 	return;
@@ -803,18 +803,18 @@ void Picbox::draw(frame *f) {
 
     // Clip the box
 
-    // If the box is entirely out of frame, ignore it.  EPSILON for 1+ and
+    // If the box is entirely out of frame, ignore it.  epsilon for 1+ and
     // symmetry.
-    if ( (x1 > 1+EPSILON && x2 > 1+EPSILON) ||
-	 (x1 <-EPSILON && x2 < -EPSILON ) ) return;
-    if ( (y1 > 1+EPSILON && y2 > 1+EPSILON) ||
-	 (y1 <-EPSILON && y2 < -EPSILON ) ) return;
+    if ( (x1 > 1+epsilon && x2 > 1+epsilon) ||
+	 (x1 <-epsilon && x2 < -epsilon ) ) return;
+    if ( (y1 > 1+epsilon && y2 > 1+epsilon) ||
+	 (y1 <-epsilon && y2 < -epsilon ) ) return;
 
     // Box is at least partially in frame - clip it
-    if ( x1 > 1+EPSILON) x1 = 1;
-    if ( y1 > 1+EPSILON) y1 = 1;
-    if ( x2 < -EPSILON) x2 = 0;
-    if ( y2 < -EPSILON) y2 = 0;
+    if ( x1 > 1+epsilon) x1 = 1;
+    if ( y1 > 1+epsilon) y1 = 1;
+    if ( x2 < -epsilon) x2 = 0;
+    if ( y2 < -epsilon) y2 = 0;
 
     x1 *= f->wid;
     y1 *= f->ht;
@@ -888,8 +888,8 @@ void Picplot::draw(frame *f) {
 
     // Clip strings to lie in the graph (if requested)
 
-    if ( x < -EPSILON || x > f->wid + EPSILON ) in_frame = false;
-    if ( y < -EPSILON || y > f->ht + EPSILON ) in_frame = false;
+    if ( x < -epsilon || x > f->wid + epsilon ) in_frame = false;
+    if ( y < -epsilon || y > f->ht + epsilon ) in_frame = false;
 
     // Make a copy of all the DisplayStrings that are really displayed - either
     // all of them, if the plot is in the graph, or the unclipped ones if the

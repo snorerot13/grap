@@ -1,10 +1,15 @@
+# -*-rpm-spec-*-
+%define	prefix   %{_prefix}
+%define version 1.40
+
 Summary: grap, typesets graphs for groff
 Name: grap
-Version: 1.36
+Version: %{version}
 Release: 1
-Copyright: BSD
+License: BSD
 Group: Applications/Publishing
-Source: grap-1.35.tar.gz
+Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-%{version}.tar.gz
+BuildRoot: /var/tmp/grap-%{version}
 
 %description
 This is grap, an implementation of Kernigan and Bentley\'s grap
@@ -15,11 +20,11 @@ language for typesetting graphs.
 %setup
 
 %build
-./configure --prefix=/usr/ --mandir=/usr/share/man
-make 
+./configure --prefix=%{prefix} --mandir=%{prefix}/share/man
+make prefix=$RPM_BUILD_ROOT%{prefix} MANDIR=$RPM_BUILD_ROOT%{prefix}/share/man/man1
 
 %install
-make install
+make prefix=$RPM_BUILD_ROOT%{prefix} MANDIR=$RPM_BUILD_ROOT%{prefix}/share/man/man1 install
 
 
 %files
@@ -29,7 +34,11 @@ make install
 %doc COPYRIGHT
 %doc CHANGES
 
-/usr/bin/grap
-/usr/share/man/man1/grap.1
-/usr/share/grap/
-/usr/share/doc/grap/
+%{prefix}/bin/grap
+%{prefix}/share/man/man1/grap.1.gz
+%{prefix}/share/grap/
+%{prefix}/share/examples/grap/
+%{prefix}/share/doc/grap/
+
+
+

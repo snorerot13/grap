@@ -73,7 +73,7 @@ class Piclinesegment : public linesegment, public drawable {
 protected:
     // Returns true if the coordinate is between 0 and 1 (withing tolerance).
     inline bool inbox(double a) {
-	return ( a < 1+EPSILON && a > 0-EPSILON );
+	return ( a < 1+epsilon && a > 0-epsilon );
     }
     bool clipx( double &, double &, double &, double &);
     bool clip( double &, double &, double &, double &);
