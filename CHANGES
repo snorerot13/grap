@@ -1,5 +1,10 @@
 Change log
 
+1.41
+
+Small changes to compile without warnings under g++ 4.2.0 and to find and
+use ext/hash_map under g++ versions that include it.
+
 1.40
 
 Man, here's a weird one, care of Bruce Lilly: in previous versions doing

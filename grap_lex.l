@@ -91,11 +91,11 @@ void newline();
 char *strdup(const char *);
 #endif 
 
-char *vf1names[NVF1] = { "srand" };
-char *f0names[NF0] = { "rand", "getpid" };
-char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
+const char *vf1names[NVF1] = { "srand" };
+const char *f0names[NF0] = { "rand", "getpid" };
+const char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
 		       "eexp","ln" };
-char *f2names[NF2] = { "atan2", "min", "max" };
+const char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
 

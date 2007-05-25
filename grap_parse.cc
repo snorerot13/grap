@@ -794,7 +794,7 @@ void init_dict() {
 }
 
 
-int yyerror(char *s) {
+int yyerror(const char *s) {
     grap_buffer_state *g = 0;
     int tp= 0;
 

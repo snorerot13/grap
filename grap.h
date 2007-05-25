@@ -72,7 +72,37 @@ class shiftdesc;
 class keyword;
 
 
-#ifndef HAVE_HASH_MAP
+#if HAVE_HASH_MAP||HAVE_EXT_HASH_MAP
+
+#ifdef HAVE_HASH_MAP
+#include <hash_map>
+#define hash_space std
+#else
+#include <ext/hash_map>
+#ifdef __GNUC__
+#define hash_space __gnu_cxx
+#else
+#define hash_space std
+#endif
+#endif
+
+// A functor for hashing strings - it is an adapter to get to the
+// standard library char * hash function.
+class Strhash : public unary_function<const string&, size_t> {
+private:
+    hash_space::hash<const char *> h;
+public:
+    size_t operator()(const string& s) const {
+	return h(s.c_str());
+    }
+};
+
+typedef hash_space::hash_map<string, double *, Strhash> doubleDictionary;
+typedef hash_space::hash_map<string, coord *, Strhash> coordinateDictionary;
+typedef hash_space::hash_map<string, line *, Strhash> lineDictionary;
+typedef hash_space::hash_map<string, macro *, Strhash> macroDictionary;
+typedef hash_space::hash_map<string, keyword, Strhash> keywordDictionary;
+#else
 #include <map>
 typedef less<string> Strcmp;
 
@@ -81,25 +111,8 @@ typedef map<string, coord *, Strcmp> coordinateDictionary;
 typedef map<string, line *, Strcmp> lineDictionary;
 typedef map<string, macro *, Strcmp> macroDictionary;
 typedef map<string, keyword, Strcmp> keywordDictionary;
-#else
-#include <hash_map>
-// A functor for hashing strings - it is an adapter to get to the
-// standard library char * hash function.
-class Strhash : public unary_function<const string&, size_t> {
-private:
-    hash<const char *> h;
-public:
-    size_t operator()(const string& s) const {
-	return h(s.c_str());
-    }
-};
-
-typedef hash_map<string, double *, Strhash> doubleDictionary;
-typedef hash_map<string, coord *, Strhash> coordinateDictionary;
-typedef hash_map<string, line *, Strhash> lineDictionary;
-typedef hash_map<string, macro *, Strhash> macroDictionary;
-typedef hash_map<string, keyword, Strhash> keywordDictionary;
 #endif
+
 typedef list<plot *> plotSequence;
 typedef vector<double> doublevec;
 typedef list<double> doublelist;

@@ -173,7 +173,7 @@ public:
 
     DisplayString() : string(), j(none), size(0), relsz(0), clip(true), 
 	color(0) { }
-    DisplayString(char *s, int ju=0, double sz=0, int rsz=0, bool c=true,
+    DisplayString(const char *s, int ju=0, double sz=0, int rsz=0, bool c=true,
 	    string *col=0) :
 	string(s), j(ju), size(sz), relsz(rsz), clip(c), color(col) { }
     DisplayString(string s, int ju=0, double sz=0, int rsz=0, bool c=true,

@@ -562,9 +562,9 @@ void Pictick::draw(frame *f) {
 // space and draw and label the line.  The translation from data
 // structure to pic is straightforward.
     
-    double a,b;	// x and y offsets from the origin
-    char *dir;	// Direction of the tick mark
-    char *just;	// placement of the label relative to the end of the tick
+    double a,b;	    // x and y offsets from the origin
+    string dir;	    // Direction of the tick mark
+    string just;    // placement of the label relative to the end of the tick
     Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
 
     try {
@@ -631,7 +631,7 @@ void Picgrid::draw(frame *f) {
 // Draw a grid line.  As usual very similar to a tick.
     double a,b;
     double len;
-    char *dir;
+    string dir;
     Picshiftdraw sd(cout); // Functor to put out multiple tick shifts
 
     try { 
@@ -786,14 +786,15 @@ void Picbox::draw(frame *f) {
     double ht, wid;		// height and width in device units (inches)
 
     try {
-    x1 = p1.c->map(p1.x,x_axis);
-    y1 = p1.c->map(p1.y,y_axis);
-    x2 = p2.c->map(p2.x,x_axis);
-    y2 = p2.c->map(p2.y,y_axis);
+	x1 = p1.c->map(p1.x,x_axis);
+	y1 = p1.c->map(p1.y,y_axis);
+	x2 = p2.c->map(p2.x,x_axis);
+	y2 = p2.c->map(p2.y,y_axis);
     } 
     catch (range_error& e) {
-	cerr << "Unable to map box [(" << x1 << ", " << y1 << "), ("
-	     << x2 << ", " << y2 << ")] into logscale : " << e.what() << endl;
+	cerr << "Unable to map box [(" << p1.x << ", " << p1.y << "), ("
+	     << p2.x << ", " << p2.y << ")] into logscale : " 
+	     << e.what() << endl;
 	return;
     }
 

@@ -48,7 +48,7 @@ AC_HEADER_STDC
 if test $ac_cv_header_stdc = "no"; then
 	AC_CHECK_HEADERS(stdlib.h)
 fi
-AC_CHECK_HEADERS(unistd.h errno.h hash_map limits)
+AC_CHECK_HEADERS(unistd.h errno.h hash_map ext/hash_map limits)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T

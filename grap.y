@@ -48,7 +48,7 @@ string *ps_param;
 int nlines;
 
 // bison wants these defined....
-int yyerror(char*);
+int yyerror(const char*);
 int yylex();
 void init_dict(); 
 
