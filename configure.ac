@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap, 1.40, faber@lunabase.org)
+AC_INIT(grap, 1.41, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
@@ -48,8 +48,34 @@ AC_HEADER_STDC
 if test $ac_cv_header_stdc = "no"; then
 	AC_CHECK_HEADERS(stdlib.h)
 fi
-AC_CHECK_HEADERS(unistd.h errno.h hash_map ext/hash_map limits)
+AC_CHECK_HEADERS(unistd.h errno.h limits)
 
+AC_CHECK_HEADERS(hash_map ext/hash_map, [
+	AC_COMPILE_IFELSE(
+		AC_LANG_PROGRAM([
+#ifdef HAVE_HASH_MAP
+#include <hash_map>
+#endif
+#ifdef HAVE_EXT_HASH_MAP
+#include <ext/hash_map>
+#endif
+],[
+   std::hash<char *> h;
+]),
+[ AC_DEFINE(HASH_SPACE, std) break],
+	AC_COMPILE_IFELSE(
+		AC_LANG_PROGRAM([
+#ifdef HAVE_HASH_MAP
+#include <hash_map>
+#endif
+#ifdef HAVE_EXT_HASH_MAP
+#include <ext/hash_map>
+#endif
+],[
+   __gnu_cxx::hash<char *> h;
+]),
+[ AC_DEFINE(HASH_SPACE, __gnu_cxx) break;],[]))]
+)
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 

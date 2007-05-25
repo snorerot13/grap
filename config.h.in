@@ -10,6 +10,7 @@
 #undef HAVE_UNISTD_H
 #undef HAVE_HASH_MAP
 #undef HAVE_EXT_HASH_MAP
+#undef HASH_SPACE
 #undef HAVE_LIMITS
 #undef HAVE_SNPRINTF
 #undef HAVE_RANDOM
