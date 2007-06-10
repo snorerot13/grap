@@ -5,6 +5,9 @@ Change log
 Small changes to compile without warnings under g++ 4.2.0 and to find and
 use ext/hash_map under g++ versions that include it.
 
+Incorporated Tobias Toedter's patch to the grap.spec.  I'd found another
+place to misspell "Kernighan" and Tobias fixed it.
+
 1.40
 
 Man, here's a weird one, care of Bruce Lilly: in previous versions doing
