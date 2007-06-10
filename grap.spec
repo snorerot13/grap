@@ -12,7 +12,7 @@ Source: http://www.lunabase.org/~faber/Vault/software/grap/grap-%{version}.tar.g
 BuildRoot: /var/tmp/grap-%{version}
 
 %description
-This is grap, an implementation of Kernigan and Bentley\'s grap
+This is grap, an implementation of Kernighan and Bentley\'s grap
 language for typesetting graphs. 
 
 
