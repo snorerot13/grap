@@ -12,8 +12,8 @@ Got rid of an ambiguous else construct in grap_pic.cc
 
 Support g++4.3.0 by either compiling under compaitbility headers (with a
 warning) or using the c++0x standard header <unordered_map> if you set
-CXXFLAGS=-std=c++0x CPPFLAGS=-std=c++0x in the environment.  Using
-unordered_set avoids the warnings, but is experimental.
+CXXFLAGS=-std=c++0x CPPFLAGS=-std=c++0x in the environment (during configure
+and compile).  Using unordered_set avoids the warnings, but is experimental.
 
 1.40
 
