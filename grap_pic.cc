@@ -406,9 +406,10 @@ bool Piclinesegment::clipx(double& x1, double& y1, double& x2, double& y2) {
 
     // The line is parallel to the x axis.  It's either all valid or
     // all invalid.  We use epsilon again here to be conservative.
-    if ( vx > -epsilon && vx < epsilon )
+    if ( vx > -epsilon && vx < epsilon ) {
 	if ( inbox(px) ) return true;
 	else return false;
+    }
 
     // Do the x = 0 intercept
 
