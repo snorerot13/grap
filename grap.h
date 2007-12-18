@@ -72,12 +72,18 @@ class shiftdesc;
 class keyword;
 
 
-#if HAVE_HASH_MAP||HAVE_EXT_HASH_MAP
+#if HAVE_HASH_MAP||HAVE_EXT_HASH_MAP||HAVE_UNORDERED_MAP
 
+#ifdef HAVE_UNORDERED_MAP
+#include <unordered_map>
+#define HASH_MAP unordered_map
+#else
+#define HASH_MAP hash_map
 #ifdef HAVE_HASH_MAP
 #include <hash_map>
 #else
 #include <ext/hash_map>
+#endif
 #endif
 
 // A functor for hashing strings - it is an adapter to get to the
@@ -91,11 +97,11 @@ public:
     }
 };
 
-typedef HASH_SPACE::hash_map<string, double *, Strhash> doubleDictionary;
-typedef HASH_SPACE::hash_map<string, coord *, Strhash> coordinateDictionary;
-typedef HASH_SPACE::hash_map<string, line *, Strhash> lineDictionary;
-typedef HASH_SPACE::hash_map<string, macro *, Strhash> macroDictionary;
-typedef HASH_SPACE::hash_map<string, keyword, Strhash> keywordDictionary;
+typedef HASH_SPACE::HASH_MAP<string, double *, Strhash> doubleDictionary;
+typedef HASH_SPACE::HASH_MAP<string, coord *, Strhash> coordinateDictionary;
+typedef HASH_SPACE::HASH_MAP<string, line *, Strhash> lineDictionary;
+typedef HASH_SPACE::HASH_MAP<string, macro *, Strhash> macroDictionary;
+typedef HASH_SPACE::HASH_MAP<string, keyword, Strhash> keywordDictionary;
 #else
 #include <map>
 typedef less<string> Strcmp;

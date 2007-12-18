@@ -8,6 +8,13 @@ use ext/hash_map under g++ versions that include it.
 Incorporated Tobias Toedter's patch to the grap.spec.  I'd found another
 place to misspell "Kernighan" and Tobias fixed it.
 
+Got rid of an ambiguous else construct in grap_pic.cc
+
+Support g++4.3.0 by either compiling under compaitbility headers (with a
+warning) or using the c++0x standard header <unordered_map> if you set
+CXXFLAGS=-std=c++0x CPPFLAGS=-std=c++0x in the environment.  Using
+unordered_set avoids the warnings, but is experimental.
+
 1.40
 
 Man, here's a weird one, care of Bruce Lilly: in previous versions doing

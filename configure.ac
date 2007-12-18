@@ -50,9 +50,12 @@ if test $ac_cv_header_stdc = "no"; then
 fi
 AC_CHECK_HEADERS(unistd.h errno.h limits)
 
-AC_CHECK_HEADERS(hash_map ext/hash_map, [
+AC_CHECK_HEADERS(unordered_map hash_map ext/hash_map, [
 	AC_COMPILE_IFELSE(
 		AC_LANG_PROGRAM([
+#ifdef HAVE_UNORDERED_MAP
+#include <unordered_map>
+#endif
 #ifdef HAVE_HASH_MAP
 #include <hash_map>
 #endif
@@ -65,6 +68,9 @@ AC_CHECK_HEADERS(hash_map ext/hash_map, [
 [ AC_DEFINE(HASH_SPACE, std) break],
 	AC_COMPILE_IFELSE(
 		AC_LANG_PROGRAM([
+#ifdef HAVE_UNORDERED_MAP
+#include <unordered_map>
+#endif
 #ifdef HAVE_HASH_MAP
 #include <hash_map>
 #endif
