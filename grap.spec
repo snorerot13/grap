@@ -1,6 +1,6 @@
 # -*-rpm-spec-*-
 %define	prefix   %{_prefix}
-%define version 1.40
+%define version 1.41
 
 Summary: grap, typesets graphs for groff
 Name: grap

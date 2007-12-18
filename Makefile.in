@@ -8,6 +8,8 @@ DESTDIR=
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+datarootdir=@datarootdir@
+datadir=@datadir@
 
 BINDIR = @bindir@
 DEFINESDIR = @DEFINES_DIR@

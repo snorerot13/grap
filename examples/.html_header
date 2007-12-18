@@ -1,10 +1,11 @@
 <html>
 <head><title>Grap Examples</title>
-<link rel=stylesheet href="/~faber/style/paper.css" type="text/css">
+<link rel=stylesheet href="/~faber/style/groff.css" type="text/css">
 </head>
 <body>
-<table>
-<tr>
-<td><img src="http://www.lunabase.org/images/small_logo.gif" alt=logo align=left></td><td>
-<h1>Grap Examples</h1>
-</td></tr></table>
+<div class="header">
+<div class="title">
+Grap Examples
+</div>
+</div>
+<div class="content">

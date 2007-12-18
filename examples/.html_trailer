@@ -1,5 +1,5 @@
-<hr>
-<address>
+</div>
+<div class="address">
 Generated from groff.  Written by
 <a href="http://www.lunabase.org/~faber">Ted Faber</a>
 (<a href="mailto:faber@lunabase.org">faber@lunabase.org</a>).<br>
@@ -9,6 +9,6 @@ PGP Public Keys:
 <a href="http://www.lunabase.org/~faber/pubkey.asc">RSA</a>,
 <a href="http://www.lunabase.org/~faber/pubkey5.asc">DSS</a>,
 <a href="http://www.lunabase.org/~faber/pubkeys.asc">Both</a>
-</address>
+</div>
 </body>
 </html>
