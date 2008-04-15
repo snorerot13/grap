@@ -151,7 +151,7 @@ class for_descriptor {
     string *anything;
     for_descriptor() : 
 	loop_var(0), dir(0), limit(0.0), by(0.0), by_op(0), anything(0) { }
-    for_descriptor(double *lv, int d, double l, int b, int bo, string *a) :
+    for_descriptor(double *lv, int d, double l, double b, int bo, string *a) :
 	loop_var(lv), dir(d), limit(l), by(b), by_op(bo), anything(a) { }
     ~for_descriptor() {
 	if ( anything) {

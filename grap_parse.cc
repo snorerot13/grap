@@ -626,35 +626,63 @@ void coord_statement(coord *co, axisdesc& xa, axisdesc& ya, axis log) {
 // in the middle of the for_statement yacc rule.
 void for_statement(string *ident, double from, double to,
 		   bydesc by, string *body) {
-    struct for_descriptor *f;
-    doubleDictionary::iterator di;
-    double *d;
-		
-    f = new for_descriptor;
-
-    if ( ( di = vars.find(*ident)) != vars.end() ) {
-	d = (*di).second;
-	*d = from;
+    // force body to end with a sep
+    *body += ';';
+    if ( fabs(to - from) < epsilon ) {
+	// Limits are essentially the same, include the string once.  The
+	// routine will discard body.
+	include_string(body,0,GINTERNAL);
     }
     else {
-	d = new double(from);
-	vars[*ident] = d;
-    }
-    // XXX: delete ident?
-    if (ident) delete ident;
-    
-    f->loop_var = d;
-    if ( to - from > 0 ) f->dir = 1;
-    else f->dir = -1;
+	// Determine if the loop is advancing from -> to.  If not, it's a null
+	// loop.
+	double lim1 = to -from;			// Initial difference
+	double lim2 = from;			// Difference after an iteration
+	int dir = ( lim1 > -epsilon ) ? 1 : -1;	// Make the differences positive
 
-    f->limit = to;
-    f->by = by.expr;
-    f->by_op = by.op;
-    // force "anything" to end with a sep
-    *body += ';';
-    f->anything = body;
-    // include_string is responsible for deleting body
-    include_string(body,f,GINTERNAL);
+	switch (by.op ) {
+	    case PLUS:
+	    default:
+		lim2 += by.expr;
+		break;
+	    case MINUS:
+		lim2 -= by.expr;
+		break;
+	    case TIMES:
+		lim2 *= by.expr;
+		break;
+	    case DIV:
+		lim2 /= by.expr;
+		break;
+	}
+	lim2 = (to - lim2) * dir;
+	lim1 *= dir;
+
+	// If the loop is advancing toward the limit include the string.
+	// Create a for descriptor and insert the string.  Otherwise throw away
+	// body
+	if ( lim1 > lim2 ) {
+	    for_descriptor *f = 0;
+	    doubleDictionary::iterator di = vars.find(*ident);
+	    double *d = 0;
+
+	    if ( di != vars.end() ) {
+		d = (*di).second;
+		*d = from;
+	    }
+	    else {
+		d = new double(from);
+		vars[*ident] = d;
+	    }
+	    
+	    f = new for_descriptor(d, dir, to, by.expr, by.op, body);
+	    // include_string is responsible for deleting body (actually the
+	    // for_descriptor destructor will do it.
+	    include_string(body, f, GINTERNAL);
+	}
+	else 
+	    delete body;
+    }
 }
 
 void process_frame(linedesc* d, frame *f, frame *s) {

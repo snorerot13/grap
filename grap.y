@@ -1116,14 +1116,17 @@ if_statement:
 		if ( fabs($2) > epsilon ) include_string($5,0,GINTERNAL);
 		else if ( $6 ) include_string($6,0,GINTERNAL);
 		delete $5;
-		if ( $6) delete $6;
+		delete $6;
 	    }
 ;
 
 for_statement:
 	FOR IDENT from expr TO expr
             by_clause DO { lex_begin_macro_text(); } TEXT SEP
-	    { for_statement($2, $4, $6, $7, $10); }
+	    { 
+		for_statement($2, $4, $6, $7, $10);
+		delete $2;
+	    }
 ;
 
 graph_statement:
@@ -1217,13 +1220,13 @@ bar_statement:
 		the_graph->new_box($2, $4, $5);
 		delete $2; delete $4; delete $5;
 	    }
-|	BAR opt_coordname bar_dir expr bar_params opt_linedesc SEP
+|	BAR bar_dir opt_coordname expr bar_params opt_linedesc SEP
            { 
 	   	if ( !$5 || !$5->have_ht ) {
 			yyerror("bar must have a position and ht ");
 		}
 		else {
-			bar_statement($2, $3, $4, $5->ht, $5->wid, 
+			bar_statement($3, $2, $4, $5->ht, $5->wid, 
 				$5->base, $6);
 		}
 		delete $5;

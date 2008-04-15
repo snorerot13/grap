@@ -1,5 +1,33 @@
 Change log
 
+1.42
+
+John Heidemann points out that bars in other coordinate systems just didn't
+work.  This was a bug in my yacc grammer - for heaven's sake.  It's corrected
+to match the manual page.
+
+For loops were strange in that 
+
+.G1
+for xx  from  15 to 13  do  { print "YYY" }
+print "ZZZZ"
+.G2
+
+would loop infinitely.  xx never passes 13.  Added a test to make that a
+null loop as well as making 
+
+.G1
+for xx  from  13 to 13  do  { print "YYY" }
+print "ZZZZ"
+.G2
+
+print one "YYY".  You can still confuse loops, using strange by clauses
+- for example "by 0" or "by * -1" but common cases should be covered.
+
+Spotted by a fellow named Yuval.
+
+Found a lurking initializer bug while fixing the for loop thing.
+
 1.41
 
 Small changes to compile without warnings under g++ 4.2.0 and to find and
