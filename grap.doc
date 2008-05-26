@@ -430,6 +430,13 @@ String_modifiers are described in the description of the
 .Ic plot 
 command.
 .Pp
+The standard defines file includes several macros useful as plot strings, 
+including 
+.Ic bullet ,
+.Ic square , 
+and
+.Ic delta .
+.Pp
 .Ic new
 is a synonym for 
 .Ic draw .
@@ -510,6 +517,13 @@ and
 modifiers which are briefly noted in the description of the 
 .Ic label
 command.
+.Pp
+The standard defines file includes several macros useful as plot strings, 
+including 
+.Ic bullet ,
+.Ic square , 
+and
+.Ic delta .
 .Pp
 Strings placed by either format of the 
 .Ic plot
