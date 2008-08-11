@@ -8,6 +8,9 @@ bug report at
 http://lists.gnu.org/archive/html/groff/2008-03/msg00003.html
 about this.  As os version 1.42 grap no longer outputs this pic construct.
 
+Dan Lasley pointed out that the key was incomplete for the bar graph example.
+His fix to restore the key is included.
+
 John Heidemann points out that bars in other coordinate systems just didn't
 work.  This was a bug in my yacc grammer - for heaven's sake.  It's corrected
 to match the manual page.
