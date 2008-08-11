@@ -607,17 +607,15 @@ void Pictick::draw(frame *f) {
     else a *= f->wid;
     if ( b < -epsilon || b > 1+epsilon ) return;
     else b *= f->ht;
-    cout << "line from Frame.Origin + (" << a << ", " << b;
-    cout << ") then " << dir << " ";
-    cout << size << endl;
+    cout << "move to Frame.Origin + (" << a << ", " << b << ")" << endl;
+    cout << "line " << dir << " " << size << endl;
     if ( prt ) {
 	double dist;
 	if ( size > 0 ) dist = 1.2 * size;
 	else dist = 0;
 	
-	cout << "move from Frame.Origin + (" << a << ", " << b;
-	cout << ") then " << dir << " ";
-	cout << dist << endl;
+	cout << "move to Frame.Origin + (" << a << ", " << b << ")" << endl;
+	cout << "move " << dir << " " << dist << endl;
 
 	for_each(shift.begin(), shift.end(), sd);
 
@@ -673,6 +671,7 @@ void Picgrid::draw(frame *f) {
     else a *= f->wid;
     if ( b < 0 || b > 1 ) return;
     else b *= f->ht;
+    cout << "move to Frame.Origin + (" << a << ", " << b << ")" << endl;
     cout << "line ";
     switch (desc.ld) {
 	case invis:
@@ -696,13 +695,10 @@ void Picgrid::draw(frame *f) {
 	if ( desc.color ) cout << " color " << *desc.color << " ";
 	if ( desc.thick ) cout << " thickness " << desc.thick << " ";
     }
-    cout << "from Frame.Origin + (" << a << ", " << b;
-    cout << ") then " << dir << " ";
-    cout << len << endl;
+    cout << dir << " " << len << endl;
     if ( prt ) {
-	cout << "move from Frame.Origin + (" << a << ", " << b;
-	cout << ") then " << dir << " ";
-	cout << -0.125 << endl;
+	cout << "move to Frame.Origin + (" << a << ", " << b << ")" << endl;
+	cout << "move " << dir << " -0.125" << endl;
 
 	for_each(shift.begin(), shift.end(), sd);
 
