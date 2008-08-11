@@ -1612,11 +1612,11 @@ copy until "DONE" thru {
 	bar 1.5,$1, 1.75, $1+0.2 fill $2
 	$3 size -2 ljust at 1.8,$1+0.1
 }
-10 0.25 "Copying"
-9.5 0.5 "Initialization"
+9 0.25 "Copying"
+8.5 0.5 "Initialization"
 9  0.9 "Checksum"
 DONE
-bar 1.45,10.35, 2.25, 8.85 dashed
+bar 1.45,9.35, 2.25, 7.85 dashed
 .G2
 .KE
 .KS
