@@ -9,6 +9,8 @@ MACROS=-ms
 .include "${HOME}/lib/mk/makefile.groff"
 .include "${HOME}/lib/mk/makefile.groff.html"
 
+.MAKEFLAGS += -f Makefile.local
+
 example.ps:	example.ms
 	grap example.ms | groff -pe $(MACROS) > example.ps
 
@@ -25,9 +27,9 @@ example.pdf:	example.ps
 	ps2pdf example.ps example.pdf
 
 install:	example.pdf example.ps.gz example.html
-	mv example.pdf example.ps.gz ${HOME}/public_html/Vault/software/grap/
-	mv *.gif ${HOME}/public_html/Vault/software/grap/example
-	mv example.html ${HOME}/public_html/Vault/software/grap/example/index.html
+	install -m 644  example.pdf example.ps.gz ${HOME}/public_html/Vault/software/grap/
+	install -m 644  *.gif ${HOME}/public_html/Vault/software/grap/example
+	install -m 644  example.html ${HOME}/public_html/Vault/software/grap/example/index.html
 #html conversions
 
 example-17.gif:	example-17.grap
