@@ -6,7 +6,7 @@ There's been a long standing bug with how different versions of pic
 interpret the "line from (x,y) then down 5" construct.  There was once a
 bug report at
 http://lists.gnu.org/archive/html/groff/2008-03/msg00003.html
-about this.  As os version 1.42 grap no longer outputs this pic construct.
+about this.  As of version 1.42 grap no longer outputs this pic construct.
 
 Dan Lasley pointed out that the key was incomplete for the bar graph example.
 His fix to restore the key is included.
