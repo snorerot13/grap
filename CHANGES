@@ -1,5 +1,27 @@
 Change log
 
+1.43
+
+Bruce Lilly pointed out that g++ 4.3.1 was emitting all sorts of dire
+warnings about the hash_map data structure and associated support being
+pulled from g++ in the future.  SuSe seems to ship with this and there's
+no point scaring people (or letting a time bomb tick).  Grap now detects
+and uses unordered_map if it's present on your system, which stops the
+wailing and gnashing of teeth from g++ 4.3.1 .  That g++ version also
+requires a compiler option to support that include file, which we also
+autodetect and use.
+
+A fellow named Fergus had a Cygwin compilation problem as well.  His
+system apparently had rand but not random (a very rare configuration
+these days).  This led me to find a corner of the autoconf code that I
+apparently hadn't checked sufficiently.  If rand was found and a
+declaration made in the system files, the grap config stuff failed to
+note the declaration and made its own incompatible one.  This should be
+gone now.
+
+Changed the examples to include a brief tutorial on string matching in
+grap.  Suggested by John Heidemann.
+
 1.42
 
 There's been a long standing bug with how different versions of pic
