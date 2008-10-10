@@ -76,16 +76,18 @@ class keyword;
 
 #ifdef HAVE_UNORDERED_MAP
 #include <unordered_map>
-#define HASH_MAP unordered_map
+
+typedef HASH_SPACE::unordered_map<string, double *> doubleDictionary;
+typedef HASH_SPACE::unordered_map<string, coord *> coordinateDictionary;
+typedef HASH_SPACE::unordered_map<string, line *> lineDictionary;
+typedef HASH_SPACE::unordered_map<string, macro *> macroDictionary;
+typedef HASH_SPACE::unordered_map<string, keyword> keywordDictionary;
 #else
-#define HASH_MAP hash_map
 #ifdef HAVE_HASH_MAP
 #include <hash_map>
 #else
 #include <ext/hash_map>
 #endif
-#endif
-
 // A functor for hashing strings - it is an adapter to get to the
 // standard library char * hash function.
 class Strhash : public unary_function<const string&, size_t> {
@@ -97,11 +99,13 @@ public:
     }
 };
 
-typedef HASH_SPACE::HASH_MAP<string, double *, Strhash> doubleDictionary;
-typedef HASH_SPACE::HASH_MAP<string, coord *, Strhash> coordinateDictionary;
-typedef HASH_SPACE::HASH_MAP<string, line *, Strhash> lineDictionary;
-typedef HASH_SPACE::HASH_MAP<string, macro *, Strhash> macroDictionary;
-typedef HASH_SPACE::HASH_MAP<string, keyword, Strhash> keywordDictionary;
+typedef HASH_SPACE::hash_map<string, double *, Strhash> doubleDictionary;
+typedef HASH_SPACE::hash_map<string, coord *, Strhash> coordinateDictionary;
+typedef HASH_SPACE::hash_map<string, line *, Strhash> lineDictionary;
+typedef HASH_SPACE::hash_map<string, macro *, Strhash> macroDictionary;
+typedef HASH_SPACE::hash_map<string, keyword, Strhash> keywordDictionary;
+#endif
+
 #else
 #include <map>
 typedef less<string> Strcmp;

@@ -93,8 +93,6 @@ extern void process_frame(linedesc *, frame *, frame *);
 extern void define_macro(string *, string*);
 extern void bar_statement(coord *, sides, double, double, double,
 		   double, linedesc *); 
-void init_dict(); 
-
 // adapters to return complex (complex-ish) functions
 void grap_srandom(double x) { srandom(static_cast<unsigned int>(x)); }
 double grap_random() {

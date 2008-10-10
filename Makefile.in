@@ -38,7 +38,7 @@ MKDEPFLAGS=@MKDEPFLAGS@;
 SOURCES=grap.cc grap_lex.cc *.cc
 DISTDIR=@PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
-CXXFLAGS +=@GXXFLAGS@ @DEFS@
+CXXFLAGS +=@GXXFLAGS@ @DEFS@ @CX0FLAGS@
 
 # To suppress optimization of certain files under g++ where
 # optimization is costly at compilation time and of minimial use at

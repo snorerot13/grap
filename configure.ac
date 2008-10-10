@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap, 1.42, faber@lunabase.org)
+AC_INIT(grap, 1.43-pre2, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
@@ -23,6 +23,22 @@ AC_PROG_INSTALL
 TVF_PROG_INSTALL_D
 TVF_PROG_MKDEP
 TVF_OS_VERSION
+
+AC_MSG_CHECKING(if ${CXX} supports -std=c++0x)
+old_cxxflags="$CXXFLAGS"
+old_cppflags="$CPPFLAGS"
+CXXFLAGS="$CXXFLAGS -std=c++0x"
+CPPFLAGS="$CPPFLAGS -std=c++0x"
+AC_TRY_COMPILE([], [], [
+	CX0FLAGS="-std=c++0x"
+	AC_MSG_RESULT(yes)
+	], [
+	CX0FLAGS=""
+	CXXFLAGS="$old_cxxflags"
+	CPPFLAGS="$old_cppflags"
+	AC_MSG_RESULT(no)
+])
+AC_SUBST(CX0FLAGS)
 
 AC_ARG_WITH(defines-dir, 
     [  --with-defines-dir=dir  directory in which to install grap.defines],
