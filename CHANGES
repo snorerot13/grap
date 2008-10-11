@@ -9,7 +9,9 @@ no point scaring people (or letting a time bomb tick).  Grap now detects
 and uses unordered_map if it's present on your system, which stops the
 wailing and gnashing of teeth from g++ 4.3.1 .  That g++ version also
 requires a compiler option to support that include file, which we also
-autodetect and use.
+autodetect and use.  (This is essentially autodetecting the flags described in
+the changes to grap 1.41 below, along with some code changes to make that
+actually function correctly.)
 
 A fellow named Fergus had a Cygwin compilation problem as well.  His
 system apparently had rand but not random (a very rare configuration
