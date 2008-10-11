@@ -2836,3 +2836,101 @@ circle at 1940, 52 rad 0.25 color "blue" fillcolor "red" \
 	fill 0.5 thickness 2
 .G2
 .KE
+.bp
+.PP
+Some people have tripped over 
+.CW grap 's
+fairly limited string manipulation capabilities.  Simply 
+.CW grap
+can only compare two quoted strings for equality.  Strings cannot be
+assigned to variables.  Surprisingly, when combined with macros, that's
+enough to do simple data selection, but not much more.  Here's an
+example.
+.KS
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&copy until "END" thru {
+\&    if ( "$1" == "yes" ) then {
+\&        next at $2, $3
+\&    }
+\&}
+\&yes 1 1
+\&yes 2 2
+\&no 3 3
+\&yes 4 4
+\&yes 5 5
+\&END
+\&.G2
+.ft
+.DE
+.G1
+copy until "END" thru {
+if ( "$1" == "yes" ) then {
+	next at $2, $3
+}
+}
+yes 1 1
+yes 2 2
+no 3 3
+yes 4 4
+yes 5 5
+END
+.G2
+.KE
+.LP
+Note that while data files can contain quotes, putting quotes in the
+data file will 
+.B not 
+collect words into strings containing whitespace; 
+.CW grap
+splits lines of data files into words separated by whitespace.
+.CW Grap 's 
+macro substitution and line splitting are very literal and know nothing
+about the language structure.  Overall, if you're planning anything more
+complex than conditionals based on the contents of a single word
+parameter to a macro call, do it outside 
+.CW grap .
+.CW Perl
+and other scripting languages make complex text manipulations very easy.
+Here's the same example with quotes in the file; notice the change in the
+expression in the 
+.CW if .
+.KS
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&copy until "END" thru {
+\&    if ( $1 == "yes" ) then {
+\&        next at $2, $3
+\&    }
+\&}
+\&"yes" 1 1
+\&"yes" 2 2
+\&"no" 3 3
+\&"yes" 4 4
+\&"yes" 5 5
+\&END
+\&.G2
+.ft
+.DE
+.G1
+copy until "END" thru {
+if ( $1 == "yes" ) then {
+	next at $2, $3 
+}
+}
+"yes" 1 1
+"yes" 2 2
+"no" 3 3
+"yes" 4 4
+"yes" 5 5
+END
+.G2
+.KE
