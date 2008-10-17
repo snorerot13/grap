@@ -48,3 +48,4 @@ grap.tex.defines
 grap_tokenizer.cc
 Makefile.common
 aclocal.m4
+snprintf.h

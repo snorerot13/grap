@@ -1,6 +1,6 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(grap, 1.43, faber@lunabase.org)
+AC_INIT(grap, 1.43-pre4, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AC_LANG_CPLUSPLUS
 
@@ -114,10 +114,10 @@ AC_CACHE_CHECK(if sprintf returns an int, grap_cv_sprintf_int,
 AC_TRY_RUN([
 changequote(<<, >>)dnl
 #include <stdio.h>
-main(int argc, char* argv) {
+int main(int argc, char **argv) {
 	char a<<[10]>>;
-	if ( (char *) sprintf(a,"ten") == a ) exit(1);
-	else exit(0);
+	if ( (char *) sprintf(a,"ten") == a ) return 1;
+	else return 0;
 }
 changequote([, ])dnl
 ],grap_cv_sprintf_int="yes",grap_cv_sprintf_int="no",echo ""))

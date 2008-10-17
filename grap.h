@@ -21,29 +21,7 @@ extern "C" {
 #endif
 
 #ifndef HAVE_SNPRINTF
-// This is the only signature that snprintf is called with in grap.
-// It's concievable that someone could smash the stack here, but
-// there's not much privlege to gain, and I'd be impressed enough if
-// you could print a float that caused a stack overflow and error that
-// you can break the code.
-inline int snprintf(char *s, int lim, const char *fmt, double d) {
-    int tot;
-
-#ifdef SPRINTF_NOT_INT
-    // For some reason some old versions of SunOS have an sprintf that
-    // doesn't return an int.  In this case, we can't bounds check at all.
-    
-    sprintf(s,fmt,d);
-    tot = lim;
-#else    
-    if ( (tot = sprintf(s,fmt,d)) > lim ) {
-	cerr << "Bad format to internal sprintf crashed the stack" << endl;
-	abort();
-    }
-#endif
-
-    return tot;
-}
+#include "snprintf.h"
 #else
 // AIX seems to have snprintf, but not prototype it..
 #ifndef SNPRINTF_DECLARED

@@ -21,6 +21,11 @@ declaration made in the system files, the grap config stuff failed to
 note the declaration and made its own incompatible one.  This should be
 gone now.
 
+Fergus's system also seemed to be lacking snprintf - which again is very
+odd.  I hadn't reflected the change to grap sprintf in version 1.23 into
+the code that emulates snprintf on systems without it.  That code has
+been added.
+
 Changed the examples to include a brief tutorial on string matching in
 grap.  Suggested by John Heidemann.
 
