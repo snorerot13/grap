@@ -69,7 +69,7 @@ standard template library, so that may also be a factor.  The STL
 included with g++ works.  grap has successfully compiled under UWIN
 (http://www.research.att.com/sw/tools/uwin/) under Windows NT with g++
 2.95.1. (Yeah, it surprised me, too.)  Grap has been reported to build
-and install correctly on NetBSD as well.
+and install correctly on OpenBSD as well.
 
 The distribution uses GNU configure.  ./configure should create a
 viable set of makefiles.  After running configure, you should be able
