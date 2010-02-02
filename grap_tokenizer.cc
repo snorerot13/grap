@@ -158,6 +158,7 @@ void init_only_once() {
 
     temp.clear();
     temp.push_back("at");
+    temp.insert(temp.end(), strmod_keys.begin(), strmod_keys.end());
     keywords["plot"] = keyword(temp, empty, true, PLOT);
 }
 

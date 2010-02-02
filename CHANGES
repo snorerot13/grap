@@ -1,5 +1,15 @@
 Change log
 
+1.44
+
+John Heidemann pointed out that plot doesn't accept modifiers to strings
+(though he didn't phrade it that way).  The short form is that 
+
+plot bullet at x,y
+
+wasn't working.  I've adjusted plot to make the string modifiers into 
+active keywors, which fixes the problem.
+
 1.43
 
 Bruce Lilly pointed out that g++ 4.3.1 was emitting all sorts of dire
