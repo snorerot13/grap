@@ -122,7 +122,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED THICKNESS
+%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED THICKNESS MOD
 %start graphs
 %union {
     int val;
@@ -179,7 +179,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %right NOT
 %left EQ NEQ LT GT LTE GTE
 %left PLUS MINUS
-%left TIMES DIV
+%left TIMES DIV MOD
 %left CARAT
 %%
 
@@ -463,6 +463,8 @@ expr:
 	    { $$ = $1 * $3; }
 |	expr DIV expr
 	    { $$ = $1 / $3; }
+|	expr MOD expr
+	    { $$ = static_cast<int>($1) % static_cast<int>($3); }
 |	expr CARAT expr
 	    { $$ = pow($1,$3);}
 |	MINUS expr %prec CARAT
@@ -767,6 +769,8 @@ by_clause:
 	    { $$.op = TIMES; $$.expr = $3; }
 |	BY DIV expr
 	    { $$.op = DIV; $$.expr = $3; }
+|	BY MOD expr
+	    { $$.op = MOD; $$.expr = $3; }
 ;
 
 tickat:

@@ -222,6 +222,7 @@ keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coor
 \)			tokenpos += yyleng; debug("RPAREN"); return RPAREN;
 ,			tokenpos += yyleng; debug("COMMA"); return COMMA;
 \+			tokenpos += yyleng; debug("PLUS"); return PLUS;
+\%			tokenpos += yyleng; debug("MOD"); return MOD;
 \-			tokenpos += yyleng; debug("MINUS"); return MINUS;
 \*			tokenpos += yyleng; debug("TIMES"); return TIMES;
 \/			tokenpos += yyleng; debug("DIV"); return DIV;
@@ -952,6 +953,10 @@ int yywrap() {
 		break;
 	    case DIV:
 		*f->loop_var /= f->by;
+		break;
+	    case MOD:
+		*f->loop_var = static_cast<int>(*f->loop_var) % 
+			static_cast<int>(f->by);
 		break;
 	}
 
