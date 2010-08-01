@@ -16,7 +16,7 @@ BUILT_SOURCES=y.tab.h
 dist_man1_MANS = grap.doc
 
 definesdir = @DEFINES_DIR@
-dist_defines_DATA = grap.defines
+dist_defines_DATA = grap*.defines
 
 exampledir = @EXAMPLE_DIR@
 dist_example_DATA = examples/*.d examples/*.result examples/Makefile \
