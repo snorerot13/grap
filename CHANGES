@@ -3,15 +3,19 @@ Change log
 1.44
 
 John Heidemann pointed out that plot doesn't accept modifiers to strings
-(though he didn't phrade it that way).  The short form is that 
+(though he didn't phrase it that way).  The short form is that 
 
 plot bullet at x,y
 
 wasn't working.  I've adjusted plot to make the string modifiers into 
-active keywors, which fixes the problem.
+active keywords, which fixes the problem.
 
 Someone named Y T pointed out that there was no mod operator (%).  There
 is now.
+
+This marks the transition from my home brewed Makefiles to automake-generated
+makefiles.  A couple largely unused options went away, but with any luck
+we still build everywhere.  
 
 1.43
 

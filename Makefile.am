@@ -6,7 +6,7 @@ bin_PROGRAMS = grap
 grap_SOURCES = grap_draw.cc grap_pic.cc grap_parse.cc grap_tokenizer.cc 
 nodist_grap_SOURCES= grap.yy grap_lex.ll y.tab.h
 EXTRA_DIST = grap.h grap_data.h grap_draw.h grap_pic.h grap_string.h snprintf.h\
-	     grap.yy grap_lex.ll
+	     grap.yy grap_lex.ll grap.spec
 BUILT_SOURCES=y.tab.h
 
 # Support for compiling our own strdup and strerror if needed.  We don't use
