@@ -1,8 +1,27 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
+m4_include([m4/grap.m4])
 AC_INIT(grap, 1.44, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE
 AC_LANG_CPLUSPLUS
+
+dnl for autoheader
+AH_TEMPLATE([DEFINES], [The pathname of the grap.defines file])
+AH_TEMPLATE([DOCS_DIR], [The directory for documentation])
+AH_TEMPLATE([EXAMPLES_DIR], [The directory for examples])
+AH_TEMPLATE([GRAP_SAFER], [True if the grap sprintf command is disabled])
+AH_TEMPLATE([HASH_SPACE], [C++ namespace where hash_map lives])
+AH_TEMPLATE([OPTARG_DEFINED], [True if optarg is defined by headers])
+AH_TEMPLATE([OS_VERSION], [OS version])
+AH_TEMPLATE([RANDOM_DECLARED], [True if random() is declared])
+AH_TEMPLATE([RANDOM_IN_MATH], [True if random() is declared in math.h])
+AH_TEMPLATE([RAND_DECLARED], [True if rand() is declared])
+AH_TEMPLATE([RAND_IN_MATH], [True if rand() is declared in math.h])
+AH_TEMPLATE([SNPRINTF_DECLARED], [Is snprintf declared?])
+AH_TEMPLATE([SPRINTF_NOT_INT], [True if sprintf does not return an integer])
+AH_TEMPLATE([STRDUP_DECLARED], [True if strdup is declared])
+AH_TEMPLATE([STRERROR_DECLARED], [True if strerror is declared])
 
 dnl Note to self: it's possible to get separate tables out of byacc.  It
 dnl is confusing because g++ optimizes away the const static tables that
@@ -194,4 +213,6 @@ if test $ac_cv_grap_safer_mode = "yes" ; then
 fi
 
 TVF_CREATE_DOT_DEPEND
-AC_OUTPUT(examples/Makefile Makefile)
+MYLIBOBJS=$LIBOBJS
+AC_SUBST(MYLIBOBJS)
+AC_OUTPUT(Makefile)
