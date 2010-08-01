@@ -7,7 +7,7 @@ grap_SOURCES = grap.yy grap_lex.ll grap_draw.cc grap_pic.cc grap_parse.cc \
 MYLIBOBJS=@GRAPLIBOBJS@
 grap_LDADD = $(GRAPLIBOBJS)
 grap_DEPENDENCIES = $(GRAPLIBOBJS)
-EXTRA_grap_SOURCES= strdup.cc str2dup.cc strerror.cc
+EXTRA_grap_SOURCES= strdup.cc strerror.cc
 
 CLEANFILES = grap.cc grap_lex.cc grap.man y.tab.h
 
