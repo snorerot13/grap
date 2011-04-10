@@ -300,7 +300,7 @@ string:
 		     // incrementally more.
 		     switch ($5->size()) {
 			case 0:
-			    snprintf(buf, len, $3->c_str());
+			    snprintf(buf, len, "%s", $3->c_str());
 			    break;
 			case 1:
 			    snprintf(buf, len, $3->c_str(), (*$5)[0]);

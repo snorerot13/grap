@@ -2,6 +2,9 @@ Change log
 
 1.44
 
+Modern g++ seems to dislike *printf without a constant format string if there
+are no other aguuments and was causing compiles to fail.  Fixed warning and patch from Tobias Quathamer.
+
 Manpage spelling fix from Tobias Quathamer.
 
 John Heidemann pointed out that plot doesn't accept modifiers to strings
