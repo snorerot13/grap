@@ -2,6 +2,8 @@ Change log
 
 1.44
 
+Manpage spelling fix from Tobias Quathamer.
+
 John Heidemann pointed out that plot doesn't accept modifiers to strings
 (though he didn't phrase it that way).  The short form is that 
 

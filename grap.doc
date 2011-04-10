@@ -527,7 +527,7 @@ and
 .Pp
 Strings placed by either format of the 
 .Ic plot
-command are restricted to being within the frame.  This can be overriden by
+command are restricted to being within the frame.  This can be overridden by
 using the 
 .Ic unclipped
 attribute, which allows a string to be plotted in or out of the frame.  The 
