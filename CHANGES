@@ -3,7 +3,8 @@ Change log
 1.44
 
 Modern g++ seems to dislike *printf without a constant format string if there
-are no other aguuments and was causing compiles to fail.  Fixed warning and patch from Tobias Quathamer.
+are no other aguuments and was causing compiles to fail.  Fixed warning
+and patch from Tobias Quathamer.
 
 Manpage spelling fix from Tobias Quathamer.
 
@@ -21,6 +22,13 @@ is now.
 This marks the transition from my home brewed Makefiles to automake-generated
 makefiles.  A couple largely unused options went away, but with any luck
 we still build everywhere.  
+
+Robert Daasch submitted a patch to include floor and ceil fuctions.
+That's been incorporated.  (His patch also included adding a mod
+operator, but I'd already done that.)
+
+Added minimal support for dates, by adding versions of strftime and
+strptime that return and accept seconds since the unix epoch.
 
 1.43
 

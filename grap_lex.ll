@@ -119,7 +119,7 @@ bool no_coord=false;
 
 identifier	[A-Za-z][A-Za-z0-9_]*
 
-keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y|undefine|clipped|unclipped|thickness
+keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coord|copy|dashed|define|do|dotted|down|draw|else|fill|fillcolor|for|frame|from|graph|grid|ht|if|in|invis|label|left|line|ljust|new|next|off|on|out|pic|plot|print|rad|radius|right|rjust|sh|size|solid|sprintf|then|through|thru|tick|ticks|to|top|unaligned|until|up|wid|x|y|undefine|clipped|unclipped|thickness|strftime
 %%
 <INITIAL>{
 ^.*$ 	{
@@ -472,6 +472,11 @@ at			{
 			      debug("AT not active");
 			      REJECT;
 			  }
+			}
+strptime		{
+			debug("STRPTIME");
+			BEGIN(GRAP);
+			return STRPTIME;
 			}
 srand			{
 			debug("VFUNC1");

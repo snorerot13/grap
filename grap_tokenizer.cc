@@ -26,7 +26,7 @@ string gk[] = {
     "plot", "at", "frame", "graph", "coord", "for", "if", "print", "sprintf",
     "ticks", "tick", "label", "grid", "pic", "sh", "bar", "ljust", "rjust",
     "above", "below", "aligned", "unaligned", "size", "undefine", "clipped",
-    "unclipped", "color"
+    "unclipped", "color", "strftime"
 };
 
 // These are the keywords recognized by any keyword that takes a line
@@ -45,7 +45,8 @@ string sk[] = {
 // Keywords recognized by ticks and graph
 string tk[] = {
     "left", "right", "up", "down", "bottom", "bot", "top", "in", "out",
-    "from", "to", "by", "at", "off", "on", "auto", "sprintf", "color"
+    "from", "to", "by", "at", "off", "on", "auto", "sprintf", "color",
+    "strftime"
 };
 
 
@@ -98,6 +99,8 @@ void init_multiples() {
     keywords["fillcolor"] = keyword(empty, empty, false, FILLCOLOR);
     keywords["color"] = keyword(empty, empty, false, COLOR);
     keywords["thickness"] = keyword(empty, empty, false, THICKNESS);
+    keywords["sprintf"] = keyword(empty, empty, false, SPRINTF);
+    keywords["strftime"] = keyword(empty, empty, false, STRFTIME);
 
 }
 
@@ -176,11 +179,13 @@ void init_line_starters() {
     temp = linedesc_keys;
     temp.push_back("at");
     temp.push_back("sprintf");
+    temp.push_back("strftime");
     keywords["next"] = keyword(temp, empty, true, NEXT);
 
     temp = linedesc_keys;
     temp.insert(temp.end(), strmod_keys.begin(), strmod_keys.end());
     temp.push_back("sprintf");
+    temp.push_back("strftime");
     keywords["draw"] = keywords["new"] = keyword(temp, empty, true, DRAW);
     
     temp = linedesc_keys;
@@ -243,6 +248,7 @@ void init_line_starters() {
     temp.push_back("bot");
     temp.push_back("top");
     temp.push_back("sprintf");
+    temp.push_back("strftime");
     keywords["label"] = keyword(temp, empty, true, LABEL);
 
     temp = linedesc_keys;
@@ -300,11 +306,6 @@ void init_keywords() {
     init_only_once();
     init_line_starters();
     init_wipers();
-
-    // Sprintf is unusual in that it doesn't alter the parse state at
-    // all.
-    keywords["sprintf"] = keyword(empty, empty, false, SPRINTF);
-
     // init the table
     init_id();
 }

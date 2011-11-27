@@ -2934,3 +2934,100 @@ if ( $1 == "yes" ) then {
 END
 .G2
 .KE
+.bp
+.LP
+This demonstrates the 
+.CW grap
+features for manipulating dates by plotting a histogram of automobile
+gas mileage.  The fields of the data are a date in yyymmdd format, an
+odometer reading and the number of gallons on fill up.  The 
+.CW strptime
+function is used to convert the ad hoc date format into a plottable
+number, and 
+.CW strptime
+is used to label ticks.
+.KS
+.EQ
+delim off
+.EN
+.DS
+.ft CW
+\&.G1
+\&max_mpg = last_date = last_miles = mn = mx = 0
+\&copy until "END" thru { 
+\&  # parse the date into seconds
+\&  dt = strptime("%Y%m%d", "$1")
+\&  if mn == 0 || dt < mn then { mn = dt }
+\&  if mx == 0 || dt > mx then { mx = dt }
+\&  if last_miles != 0 then { 
+\&  	mpg = ($2 - last_miles)/$3
+\&	if mpg > max_mpg then { max_mpg = mpg }
+\&  	bar up (last_date + dt) / 2 ht mpg wid dt -last_date
+\&  }
+\&  last_miles = $2; last_date = dt 
+\&}
+\&20100623 34794 9.845
+\&[...]
+\&20111119 42802 9.539
+\&END
+\&for t from mn to mx by (mx - mn )/3 do {
+\&	tick bot at t strftime("%Y-%m-%d", t)
+\&}
+\&label left "Miles per gallon"
+\&label bot "Dates"
+\&.G2
+.ft
+.DE
+.G1
+max_mpg = last_date = last_miles = mn = mx = 0
+copy until "END" thru { 
+  # parse the date into seconds
+  dt = strptime("%Y%m%d", "$1")
+  if mn == 0 || dt < mn then { mn = dt }
+  if mx == 0 || dt > mx then { mx = dt }
+  if last_miles != 0 then { 
+  	mpg = ($2 - last_miles)/$3
+	if mpg > max_mpg then { max_mpg = mpg }
+  	bar up (last_date + dt) / 2 ht mpg wid dt -last_date
+  }
+  last_miles = $2; last_date = dt 
+}
+20100623 34794 9.845 
+20100710 35066 9.804
+20100728 35339 9.785
+20100811 35623 10.026
+20100826 35919 10.086
+20100912 36192 9.536
+20101001 36472 9.759
+20101024 36737 9.848
+20101113 37004 9.827
+20101129 37257 9.806
+20101218 37521 10.211
+20110108 37774 9.868
+20110122 38036 10.295
+20110208 38293 9.693
+20110220 38564 9.567
+20110306 38817 9.577
+20110325 39087 10.090
+20110406 39350 9.893
+20110422 39620 9.975
+20110507 39913 10.089
+20110522 40149 8.428
+20110614 40411 10.007
+20110702 40696 9.842
+20110719 40982 10.219
+20110806 41224 8.710
+20110828 41510 9.775
+20110917 41745 8.142
+20111005 42018 9.841
+20111019 42287 9.886
+20111108 42545 9.732
+20111119 42802 9.539
+END
+for t from mn to mx by (mx - mn )/3 do {
+	tick bot at t strftime("%Y-%m-%d", t)
+}
+label left "Miles per gallon"
+label bot "Dates"
+.G2
+.KE

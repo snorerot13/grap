@@ -1318,14 +1318,15 @@ does not execute.
 .Pp
 .Nm
 supports the following functions that take one argument:
-.Ic log , exp , int , sin , cos , sqrt , rand .
+.Ic log , exp , int , sin , cos , sqrt , rand , floor , ceil .
 The logarithms are base 10 and the trigonometric functions are in
 radians.  
 .Ic eexp
 returns Euler's number to the given power and
 .Ic ln
-returns the natural logarithm.  The natural log and exponentiation
-functions are extensions and are probably not available in other
+returns the natural logarithm.  The natural log, exponentiation
+functions and floor and ceil are extensions and are probably not available in
+other
 .Nm
 implementations.
 .Pp
@@ -1375,6 +1376,24 @@ command will return the format string.  This mode of operation is only
 intended to be used only if
 .Nm
 is being used as part of a super-user enabled print system.
+.Pp
+.Nm
+version 1.44 and beyond support two functions for date and time
+manipulation, 
+.Ic strptime
+and
+.Ic strptime .
+.Ic strptime
+parses a time using the 
+.Xr strptime 3 
+function.  It takes two parameters, both strings, the format and a
+string to parse using that format and returns a number that can be
+sorted directly - the number of seconds since the UNIX epoch.  
+.Ic strftime 
+does the reverse.  It takes a string and a number and formats the number
+into a date.  In both functions, the format is the first parameter.
+The formats are defined in the documentation for 
+.Xr strftime 3 .
 .Ss Macros
 .Nm
 has a simple but powerful macro facility.  Macros are defined using

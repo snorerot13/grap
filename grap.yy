@@ -123,7 +123,8 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %token ARROW XDIM YDIM LOG_X LOG_Y LOG_LOG COORD TEXT DEFINE IF THEN ELSE
 %token EQ NEQ LT GT LTE GTE NOT OR AND FOR DO MACRO COPYTEXT THRU
 %token GRAPH REST PRINT PIC TROFF UNTIL COLOR SPRINTF SH BAR FILL FILLCOLOR
-%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED THICKNESS MOD
+%token BASE ON LHS VFUNC1 CLIPPED UNCLIPPED THICKNESS MOD STRPTIME
+%token STRFTIME
 %start graphs
 %union {
     int val;
@@ -152,7 +153,7 @@ function2 jtf2[NF2] = { atan2, grap_min, grap_max};
     bar_param *bar_p;
 }
 %type <num> NUMBER num_line_elem expr opt_expr direction radius_spec
-%type <num> assignment_statement lexpr pure_lexpr right_hand_side
+%type <num> assignment_statement lexpr pure_lexpr right_hand_side time_expr
 %type <stringmod> strmod
 %type <String> IDENT STRING opt_ident TEXT else_clause REST TROFF
 %type <String> START string LHS
@@ -356,6 +357,28 @@ string:
 		 }
 		 else $$ = $3;
 	     }
+|	STRFTIME LPAREN string COMMA expr RPAREN
+	     {
+	         time_t t = $5;
+	         struct tm *tm = localtime(&t);
+		 const int len = 1024;
+		 char *buf = new char[len];
+		 bool ok = false;
+		 
+		 if (tm) {
+		     if (strftime(buf, len, $3->c_str(), tm) != 0 ) {
+		     	$$ = new string(buf);
+			delete buf;
+			ok = true;
+		     }
+		}
+		if ( !ok) {
+		    delete buf;
+		    cerr << "Cannot format " << $5 << " using format " 
+		         << *$3 << endl;
+		    $$ = new string("error");
+	        }
+	     }
 ;
 
 expr_list:
@@ -478,6 +501,8 @@ expr:
 	    { $$ = ( $1 >=0 && $1 < NF2 ) ? jtf2[$1]($3, $5) : 0; }
 |	LPAREN expr RPAREN
  	    { $$ = $2; }
+|	time_expr 
+	    { $$ = $1; }
 |	IDENT
  	    {
 		doubleDictionary::iterator di;
@@ -549,6 +574,23 @@ point:
 	opt_coordname coord_pair
             { $$ = new point($2->x, $2->y, $1); delete $2; }
 ;
+
+time_expr:
+	STRPTIME LPAREN string COMMA string RPAREN 
+	    {
+	      struct tm tm = { 0 };
+	      if (strptime($5->c_str(), $3->c_str(), &tm) != 0) {
+	      	  time_t t = mktime(&tm);
+	          $$ = t;
+	      }
+	      else  {
+	      	  cerr << "Could not parse time/date " << *$5 
+		       << " using format " << *$3 << endl;
+	          $$ = 0.0;
+	      }
+            }
+;
+
 
 strmod:
 	    {
