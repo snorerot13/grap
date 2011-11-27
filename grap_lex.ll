@@ -983,7 +983,6 @@ int yywrap() {
 	return 1;
     }
     else {
-	grap_input closed = g->type;
 	delete g;
 	g = lexstack.front();
         tokenpos = g->tokenpos;
