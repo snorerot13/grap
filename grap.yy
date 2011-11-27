@@ -111,7 +111,8 @@ typedef double (*function2)(double, double);
 // jump tables for dispatching internal functions
 vfunction1 jtvf1[NVF1] = { grap_srandom };
 function0 jtf0[NF0] = { grap_random, grap_getpid };
-function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log };
+function1 jtf1[NF1] = { log10, pow10, toint, sin, cos, sqrt, exp, log, floor,
+	ceil };
 function2 jtf2[NF2] = { atan2, grap_min, grap_max};
 %}
 %token NUMBER START END IDENT COPY SEP STRING COORD_NAME UNDEFINE

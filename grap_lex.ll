@@ -94,7 +94,7 @@ char *strdup(const char *);
 const char *vf1names[NVF1] = { "srand" };
 const char *f0names[NF0] = { "rand", "getpid" };
 const char *f1names[NF1] = { "log", "exp", "int", "sin", "cos", "sqrt",
-		       "eexp","ln" };
+		       "eexp","ln", "floor", "ceil" };
 const char *f2names[NF2] = { "atan2", "min", "max" };
 
 #define	ECHO	/* */
@@ -491,7 +491,7 @@ rand|getpid			{
 			BEGIN(GRAP);
  			return FUNC0;
 			}
-log|exp|int|sin|cos|sqrt|eexp|ln	{
+log|exp|int|sin|cos|sqrt|eexp|ln|floor|ceil	{
 			debug("FUNC1");
 			for ( int i = 0 ; i < NF1; i++ ) 
 				if ( !strcmp(yytext,f1names[i]) )

@@ -112,7 +112,7 @@ typedef list<shiftdesc *> shiftlist;
 // jumptables in grap.y
 const int NVF1=1;
 const int NF0=2;
-const int NF1=8;
+const int NF1=10;
 const int NF2=3;
 
 enum size { ht = 0, wid};
