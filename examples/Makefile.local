@@ -11,6 +11,8 @@ MACROS=-ms
 
 .MAKEFLAGS += -f Makefile.local
 
+PIC2GIFFLAGS=-r150
+
 example.ps:	example.ms
 	grap example.ms | groff -pe $(MACROS) > example.ps
 
@@ -20,7 +22,7 @@ local.example.ps:	example.ms
 clean:
 	rm -f *.gif *.ps *.eqn *.grap example.html *.ps.gz
 
-example.ps.gz:	example.ps
+example.ps.gz:	example.pdf
 	gzip example.ps
 
 example.pdf:	example.ps
