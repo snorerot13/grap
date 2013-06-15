@@ -1285,7 +1285,7 @@ The iteration has the semantics defined in the
 command.  The definition of
 .Ar block
 is discussed in 
-.Sx Marcos .
+.Sx Macros .
 See also the note about implicit separators in the description of the
 .Ic if
 command.

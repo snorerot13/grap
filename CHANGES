@@ -1,5 +1,9 @@
 Change log
 
+1.45
+
+Eric Raymond caught a typo in the grap man page.
+
 1.44
 
 Modern g++ seems to dislike *printf without a constant format string if there
