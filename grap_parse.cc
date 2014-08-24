@@ -45,7 +45,7 @@ bool do_sprintf = true;			//  Allow sprintf
 #endif
 
 // defined in grap_lex.l
-extern int include_string(string *,struct for_descriptor *f=0,
+extern int include_string(string *, for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern string pre_context(void);
 extern char *token_context(void);
@@ -824,7 +824,6 @@ void init_dict() {
 
 int yyerror(const char *s) {
     grap_buffer_state *g = 0;
-    int tp= 0;
 
     cerr << "grap: " << s << endl;
     while ( !lexstack.empty() ) {
@@ -842,7 +841,6 @@ int yyerror(const char *s) {
 	    default:
 		break;
 	}
-	tp = g->tokenpos;
 	delete g;
     }
     cerr << " context is:" << endl << "        " << pre_context();

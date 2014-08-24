@@ -80,7 +80,7 @@ inline void debug(T p1, U p2) {
     if ( print_lex_debug) cerr << p1 << p2 << endl;
 }
 
-int include_string(string *, struct for_descriptor *f=0, grap_input i=GMACRO);
+int include_string(string *, for_descriptor *f=0, grap_input i=GMACRO);
 void lex_begin_macro_text();
 void lex_end_expr(); 
 void macro_args(macro*);
@@ -198,7 +198,7 @@ keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coor
                            if ( active.count("do") && active.count("from"))
 				REJECT;
                            tokenpos += yyleng;
-                           for ( int i = 0; i < yyleng; i++ )
+                           for ( unsigned i = 0; i < yyleng; i++ )
                                if ( yytext[i] == ' ' || yytext[i] == '\t' ||
 				    yytext[i] == '=' ) {
 				   yytext[i] = '\0';
@@ -780,7 +780,7 @@ void linenum() { }
 // used to search for the file.
 bool include_file(string *s, bool rs /* =false */ , bool usepath /* =true*/) {
     FILE *f=0;
-    struct grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
+    grap_buffer_state *g = new grap_buffer_state(0, 0, 0, 1, rs, GFILE);
     grap_buffer_state *gg = lexstack.empty() ? 0 : lexstack.front();
 
     if ( s ) {
@@ -823,7 +823,7 @@ bool include_file(string *s, bool rs /* =false */ , bool usepath /* =true*/) {
 // Include the given string into the input stream.  Additional
 // parameters are a for descriptor associated with the buffer (if its
 // part of a for loop) and an input type (that's usualy GMACRO)
-int include_string(string *s, struct for_descriptor *f /* =0 */,
+int include_string(string *s, for_descriptor *f /* =0 */,
     grap_input it /*=GMACRO */) {
 	char *cbuf;
         int len;
@@ -930,7 +930,7 @@ void lex_coord_ok() { no_coord = false; }
 // an associated for descriptor, do the for processing and replace the
 // buffer on the stack if the loop is continuing.
 int yywrap() {
-    struct grap_buffer_state *g;
+    grap_buffer_state *g;
 
     debug("(yywrap)");
     if ( lexstack.empty() ) yyterminate();
@@ -941,7 +941,7 @@ int yywrap() {
     
     if ( g->f ) {
 
-	struct for_descriptor *f = g->f;
+	for_descriptor *f = g->f;
 	// we're processing a for statement
 
 

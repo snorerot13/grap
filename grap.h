@@ -103,7 +103,7 @@ typedef list<grid *> gridlist;
 typedef list<string *> linelist;
 typedef list<string *> stringSequence;
 typedef list<circle *> circleSequence;
-typedef list<struct grap_buffer_state*> lexStack;
+typedef list<class grap_buffer_state*> lexStack;
 typedef list<DisplayString *> stringlist;
 typedef list<shiftdesc *> shiftlist;
 

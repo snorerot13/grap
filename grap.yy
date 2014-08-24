@@ -61,7 +61,7 @@ extern void lex_begin_rest_of_line();
 extern void lex_no_coord();
 extern void lex_coord_ok();
 extern void lex_begin_copy( string*s=0);
-extern int include_string(string *,struct for_descriptor *f=0,
+extern int include_string(string *, for_descriptor *f=0,
 			  grap_input i=GMACRO);
 extern void lex_hunt_macro();
 extern int yyparse(void);	// To shut yacc (vs. bison) up.
@@ -1130,6 +1130,7 @@ sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
 		int len = $3->length()+1 ;
 		char *sys = new char [len];
 		int i=0;
+		int srv = 0;
 
 		// String to char*
 		       
@@ -1138,7 +1139,8 @@ sh_statement: SH { lex_begin_macro_text(); } TEXT SEP
 
 		delete $3;
 		
-		system(sys);
+		if ( (srv = system(sys)) )
+		    cerr << "Warn: system returned " << srv << endl;
 	    }
 ;
 
