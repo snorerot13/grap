@@ -4,6 +4,8 @@ Change log
 
 Eric Raymond caught a typo in the grap man page.
 
+Various small code changes to remove clang and recent g++ warnings.
+
 1.44
 
 Modern g++ seems to dislike *printf without a constant format string if there
