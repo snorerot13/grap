@@ -1,7 +1,8 @@
 dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
-m4_include([m4/grap.m4])
-AC_INIT(grap, 1.44, faber@lunabase.org)
+dnl NB grap.m4 moved to source dir for automake
+m4_include([grap.m4])
+AC_INIT(grap, 1.45, faber@lunabase.org)
 AC_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
 AC_LANG_CPLUSPLUS
