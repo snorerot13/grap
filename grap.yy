@@ -12,17 +12,23 @@
 #include <math.h>
 #ifdef STDC_HEADERS
 #include <limits.h>
-#else
-// Best guess, really - limits should exist
-#ifndef LONG_MAX
-#define LONG_MAX        0x7fffffffL
-#endif
 #endif
 #if defined(STDC_HEADERS) | defined(HAVE_STDLIB_H)
 #include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+// We use RAND_MAX to scale random()/rand() values into doubles below.
+// This is a little defensive driving to find a usable value for it.
+#ifndef RAND_MAX
+#ifdef LONG_MAX
+#define RAND_MAX        LONG_MAX
+#else
+// Shot in the dark, really - stdlib.h or limits.h should exist
+#define RAND_MAX        0x7fffffffL
+#endif
 #endif
 
 #include "grap.h"
@@ -96,7 +102,7 @@ extern void bar_statement(coord *, sides, double, double, double,
 // adapters to return complex (complex-ish) functions
 void grap_srandom(double x) { srandom(static_cast<unsigned int>(x)); }
 double grap_random() {
-    return static_cast<double>(random())/(static_cast<double>(LONG_MAX)+1e-6);
+    return static_cast<double>(random())/(static_cast<double>(RAND_MAX)+1e-6);
 }
 double grap_getpid() { return static_cast<double>(getpid());} 
 double pow10(double x) { return pow(10,x); }
