@@ -198,7 +198,8 @@ keyword		above|aligned|arrow|auto|bar|base|below|bot|bottom|by|circle|color|coor
                            if ( active.count("do") && active.count("from"))
 				REJECT;
                            tokenpos += yyleng;
-                           for ( unsigned i = 0; i < yyleng; i++ )
+                           for ( unsigned i = 0; i <
+                                           static_cast<unsigned>(yyleng); i++ )
                                if ( yytext[i] == ' ' || yytext[i] == '\t' ||
 				    yytext[i] == '=' ) {
 				   yytext[i] = '\0';
