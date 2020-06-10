@@ -905,20 +905,20 @@ grid_statement:
 label_statement:
 	LABEL side strlist opt_shift SEP
 	    {
+                shiftlist *sl = new shiftlist;
 		shiftdesc *sd;
 
 		for (stringlist::iterator s = $3->begin(); s != $3->end(); s++)
 		    if ( ! ((*s)->j & unaligned) ) (*s)->j |= aligned;
 		
-		the_graph->base->label[$2] = $3;
-
 		// Copy the label shifts into the frame
 		while (!$4->empty() ) {
 		    sd = $4->front();
 		    $4->pop_front();
-		    the_graph->base->lshift[$2]->push_back(sd);
+                    sl->push_back(sd);
 		}
 		delete $4;
+		the_graph->base->label[$2]->push_back(new label($3, sl));
 	    }
 ;
 radius_spec:

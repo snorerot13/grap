@@ -407,6 +407,36 @@ public:
     }
 };
 
+class label {
+    public:
+        stringlist *strs;
+        shiftlist *shifts;
+        label(): strs(new stringlist), shifts(new shiftlist) { }
+        label(stringlist *st, shiftlist *sl) : strs(st), shifts(sl) { }
+        ~label() {
+	    if ( strs ) {
+		stringlist::iterator s;
+
+		for (s = strs->begin(); s != strs->end(); s++)
+		    delete (*s);
+		strs->erase(strs->begin(), strs->end());
+		delete strs;
+		strs=0;
+	    }
+	    if ( shifts ) {
+		shiftlist::iterator s;
+
+		for (s = shifts->begin(); s != shifts->end(); s++)
+		    delete (*s);
+		shifts->erase(shifts->begin(), shifts->end());
+		delete shifts;
+		shifts=0;
+	    }
+        }
+};
+
+typedef list<label *> labellist;
+
 class frame {
     // The frame is the physical description of the graph axes.  It's
     // height and width are used by all drawable classes.
@@ -415,35 +445,34 @@ public:
     double ht;			// height of the graph
     double wid;			// width
     linedesc desc[4];		// The line styles for the axes
-    stringlist *label[4];	// labels for the axes.  These are
+    labellist *label[4];	// labels for the axes.  These are
                                 // lists of DisplayStrings that must
                                 // be translated by the associated
                                 // drawable class
-    shiftlist *lshift[4];	// positioning info for labels
     tick tickdef[4];		// default tick definitions
     grid griddef[4];		// default gridline definitions
     ticklist tks;		// the ticks to draw (generated from
                                 // defaults if unspecified by the user)
     gridlist gds;		// gridlines to draw
+    shiftlist tmp;
 
     frame() : ht(2), wid(3), tks(), gds() {
 	DisplayString g = "%g";
 	
 	for ( int i = 0 ; i < 4 ; i ++ ) {
 	    desc[i] = linedesc(def,0,0);
-	    label[i] = new stringlist;
-	    lshift[i] = new shiftlist;
-	    griddef[i] = grid(0.0, desc+i, top_side, &g, lshift[i], 0);
+	    label[i] = new labellist;
+	    griddef[i] = grid(0.0, desc+i, top_side, &g, &tmp, 0);
 	    tickdef[i] = tick(0.0,((i== bottom_side || i == left_side ) ?
 				   0.125 : 0),
-			      (sides) i, &g, lshift[i], 0);
+			      (sides) i, &g, &tmp, 0);
 	}
     }
 
     virtual ~frame() {
 	for ( int i = 0; i < 4; i++ ) {
 	    if ( label[i] ) {
-		stringlist::iterator s;
+		labellist::iterator s;
 
 		for (s = label[i]->begin(); s != label[i]->end(); s++)
 		    delete (*s);
@@ -451,17 +480,7 @@ public:
 		delete label[i];
 		label[i] =0;
 	    }
-	    if ( lshift[i] ) {
-		shiftlist::iterator s;
-		
-		for (s = lshift[i]->begin(); s != lshift[i]->end(); s++)
-		    delete (*s);
-		lshift[i]->erase(lshift[i]->begin(), lshift[i]->end());
-		delete lshift[i];
-		lshift[i] =0;
-	    }
-	}
-	    
+        }
 	if ( !tks.empty() ) {
 	    ticklist::iterator t;
 

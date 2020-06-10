@@ -183,7 +183,7 @@ void Picframe::frame_line(double x2, double y2, sides s) {
 		cout << desc[s].param << " ";
 	    break;
     }
-    if ( !compat_mode ) { 
+    if ( !compat_mode ) {
 	if ( desc[s].color ) cout << " color " << *desc[s].color << " " ;
 	if ( desc[s].thick ) cout << " thickness " << desc[s].thick << " " ;
     }
@@ -197,72 +197,84 @@ void Picframe::label_line(sides s) {
     // Functor to convert a DisplayString to a PicdisplayString and print it
     draw_string_f draw_string(this);
     double dx, dy; // Used to place the alignment line relative to the axis
+    labellist::iterator cli;
     shiftlist::const_iterator csi;
 
-    switch (s) {
-	case left_side:
-	    dx = -0.4; dy = 0;
-	    break;
-	case right_side:
-	    dx = 0.4; dy = 0;
-	    break;
-	case top_side:
-	    dx = 0; dy = 0.4;
-	    break;
-	case bottom_side:
-	    dx = 0; dy = -0.4;
-	    break;
-	default: // to keep the compiler quiet
-	    dx = dy = 0;
-	    break;
+    for (cli = label[s]->begin(); cli != label[s]->end(); cli++) {
+        switch (s) {
+            case left_side:
+                dx = -0.4; dy = 0;
+                break;
+            case right_side:
+                dx = 0.4; dy = 0;
+                break;
+            case top_side:
+                dx = 0; dy = 0.4;
+                break;
+            case bottom_side:
+                dx = 0; dy = -0.4;
+                break;
+            default: // to keep the compiler quiet
+                dx = dy = 0;
+                break;
+        }
+
+        for (csi = (*cli)->shifts->begin();
+                csi != (*cli)->shifts->end(); csi++) {
+            switch ((*csi)->dir) {
+                case left_side:
+                    dx -= (*csi)->param;
+                    break;
+                case right_side:
+                    dx += (*csi)->param;
+                    break;
+                case top_side:
+                    dy += (*csi)->param;
+                    break;
+                case bottom_side:
+                    dy -= (*csi)->param;
+                    break;
+            }
+        }
+
+        // DWB grap did not put the whitespace around for unlabelled sizes of the
+        // graph, so omit that space if in compatibility mode.
+        if ( compat_mode && (*cli)->strs->empty() ) return;
+        cout << "line invis ";
+
+        // draw all the labels
+        for_each((*cli)->strs->begin(), (*cli)->strs->end(), draw_string);
+
+        switch (s) {
+            case left_side:
+                cout << "from Frame.Left.start + (";
+                cout << dx << ", " << dy << ") ";
+                cout << "to Frame.Left.end + (";
+                cout << dx << ", " << dy << ") ";
+                break;
+            case right_side:
+                cout << "from Frame.Right.start + (";
+                cout << dx << ", " << dy << ") ";
+                cout << "to Frame.Right.end + (";
+                cout << dx <<  ", " << dy << ") " ;
+                break;
+            case bottom_side:
+                cout << "from Frame.Bottom.end + (";
+                cout << dx <<  ", " << dy << ") ";
+                cout << "to Frame.Bottom.start + (";
+                cout << dx <<  ", " << dy << ") ";
+                break;
+            case top_side:
+                cout << "from Frame.Top.start + (";
+                cout << dx <<  ", " << dy << ") " ;
+                cout << "to Frame.Top.end + (";
+                cout << dx << ", " << dy << ") " ;
+                break;
+            default:
+                break;
+        }
+        cout << endl;
     }
-
-    for (csi = lshift[s]->begin(); csi != lshift[s]->end(); csi++) {
-	switch ((*csi)->dir) {
-	    case left_side:
-		dx -= (*csi)->param;
-		break;
-	    case right_side:
-		dx += (*csi)->param;
-		break;
-	    case top_side:
-		dy += (*csi)->param;
-		break;
-	    case bottom_side:
-		dy -= (*csi)->param;
-		break;
-	}
-    }
-
-    // DWB grap did not put the whitespace around for unlabelled sizes of the
-    // graph, so omit that space if in compatibility mode.
-    if ( compat_mode && label[s]->empty() ) return;
-    cout << "line invis ";
-
-    // draw all the labels
-    for_each(label[s]->begin(), label[s]->end(), draw_string);
-
-    switch (s) {
-	case left_side:
-	    cout << "from Frame.Left.start + (" << dx << ", " << dy << ") " ;
-	    cout << "to Frame.Left.end + (" << dx << ", " << dy << ") " ;
-	    break;
-	case right_side:
-	    cout << "from Frame.Right.start + (" << dx << ", " << dy << ") " ;
-	    cout << "to Frame.Right.end + (" << dx <<  ", " << dy << ") " ;
-	    break;
-	case bottom_side:
-	    cout << "from Frame.Bottom.end + (" << dx <<  ", " << dy << ") " ;
-	    cout << "to Frame.Bottom.start + (" << dx <<  ", " << dy << ") " ;
-	    break;
-	case top_side:
-	    cout << "from Frame.Top.start + (" << dx <<  ", " << dy << ") " ;
-	    cout << "to Frame.Top.end + (" << dx << ", " << dy << ") " ;
-	    break;
-	default:
-	    break;
-    }
-    cout << endl;
 }
 
 void Picframe::autoguess(sides sd, double &idx, double& dir, double& lim,
