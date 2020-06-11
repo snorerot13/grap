@@ -1,5 +1,12 @@
 Change log
 
+1.46
+
+Handle multiple label lines correctly (thanks to Bruce Lilly for pointing that
+out).
+
+Be more careful about scaling rand() returns.
+
 1.45
 
 Eric Raymond caught a typo in the grap man page.
