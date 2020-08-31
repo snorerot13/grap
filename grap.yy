@@ -197,10 +197,13 @@ graphs:
 
 graph :
 	    START {
+	    	double DEFAULT_MARGIN = 0.07;
+		
                 if ( !the_graph)
 		    the_graph = initial_graph();
 		the_graph->init();
 		init_dict();
+		assignment_statement(new string("margin"), DEFAULT_MARGIN);
 		first_line = true;
 		the_graph->begin_block($1);
 	    } prog END

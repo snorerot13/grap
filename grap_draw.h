@@ -4,6 +4,8 @@
 // This file is (c) 1998-2001 Ted Faber (faber@lunabase.org) see COPYRIGHT
 // for the full copyright and limitations of liabilities.
 
+extern doubleDictionary vars;
+
 // Names for the sides of graphs (_side because of globals left(), right())
 typedef enum { top_side=0, bottom_side ,left_side, right_side} sides;
 
@@ -678,7 +680,7 @@ protected:
     public:
 	    int operator() (coordinateDictionary::value_type cp) {
 		coord *c = cp.second;
-		c->addmargin(0.07);
+		c->addmargin(*vars["margin"]);
 		return 0;
 	    }
     } addmargin;
