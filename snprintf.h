@@ -7,8 +7,8 @@
 #ifndef HAVE_SNPRINTF
 // Snprintf is only called with the following 11 signatures.  Enumerating them
 // is ugly, but probably more portable than varargs.  And very few systems have
-// no snprintf.  It's concievable that someone could smash the stack here, but
-// there's not much privlege to gain, and I'd be impressed enough if you could
+// no snprintf.  It's conceivable that someone could smash the stack here, but
+// there's not much privilege to gain, and I'd be impressed enough if you could
 // print a float that caused a stack overflow and error that you can break the
 // code.
 inline int snprintf(char *s, int lim, const char *fmt) {

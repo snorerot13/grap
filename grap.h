@@ -178,7 +178,7 @@ class grap_buffer_state {
 extern lexStack lexstack;
 
 // Set the coarse and fine limits for double comparisons.  COARSE comparisons
-// are always within one millionth.  If fine comarisons are requested, either
+// are always within one millionth.  If fine comparisons are requested, either
 // the values in limits are used or one trillionth (1e-12).
 #ifdef HAVE_LIMITS
 #include <limits>

@@ -289,7 +289,7 @@ void init_id() {
     int i;	// Scratch
     for (i = 0; i < 256; i++ ) id_letter[i] = false;
 
-    // assumes letters are contiugous.  Is there still any character set
+    // assumes letters are contiguous.  Is there still any character set
     // for this which doesn't hold?
     
     for ( i = 'a'; i <= 'z' ; i++ ) id_letter[i] = true;
