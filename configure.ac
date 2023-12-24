@@ -2,10 +2,10 @@ dnl -*-m4-*-
 dnl Process this file with autoconf to produce a configure script.
 dnl NB grap.m4 moved to source dir for automake
 m4_include([grap.m4])
-AC_INIT(grap, 1.46, faber@lunabase.org)
-AC_CONFIG_HEADER(config.h)
+AC_INIT([grap],[1.46],[faber@lunabase.org])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
-AC_LANG_CPLUSPLUS
+AC_LANG([C++])
 
 dnl for autoheader
 AH_TEMPLATE([DEFINES], [The pathname of the grap.defines file])
@@ -47,10 +47,10 @@ old_cxxflags="$CXXFLAGS"
 old_cppflags="$CPPFLAGS"
 CXXFLAGS="$CXXFLAGS -std=c++0x"
 CPPFLAGS="$CPPFLAGS -std=c++0x"
-AC_TRY_COMPILE([], [], [
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[
 	CX0FLAGS="-std=c++0x"
 	AC_MSG_RESULT(yes)
-	], [
+	],[
 	CX0FLAGS=""
 	CXXFLAGS="$old_cxxflags"
 	CPPFLAGS="$old_cppflags"
@@ -78,7 +78,15 @@ AC_SUBST(INSTALL_DOCS)
 dnl Checks for libraries.
 
 dnl Checks for header files.
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 if test $ac_cv_header_stdc = "no"; then
 	AC_CHECK_HEADERS(stdlib.h)
 fi
@@ -129,7 +137,7 @@ TVF_DECL_OPTARG
 
 if test "$ac_cv_func_snprintf" = "no"; then
 AC_CACHE_CHECK(if sprintf returns an int, grap_cv_sprintf_int,
-AC_TRY_RUN([
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 changequote(<<, >>)dnl
 #include <stdio.h>
 int main(int argc, char **argv) {
@@ -138,7 +146,7 @@ int main(int argc, char **argv) {
 	else return 0;
 }
 changequote([, ])dnl
-],grap_cv_sprintf_int="yes",grap_cv_sprintf_int="no",echo ""))
+]])],[grap_cv_sprintf_int="yes"],[grap_cv_sprintf_int="no"],[echo ""]))
 
 if test "$grap_cv_sprintf_int" = "no" ; then 
 AC_DEFINE(SPRINTF_NOT_INT)
@@ -213,4 +221,5 @@ fi
 
 GRAPLIBOBJS=$LIBOBJS
 AC_SUBST(GRAPLIBOBJS)
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
