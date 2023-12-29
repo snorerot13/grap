@@ -105,7 +105,7 @@ set<string> active;
 // Commonly used keyword sets
 extern vector<string> grap_keys;
 extern keywordDictionary keywords; 
-// There are a couple times when the possiblity of a COORD_NAME can be
+// There are a couple times when the possibility of a COORD_NAME can be
 // ruled out.  If this is set, this is one of those times.
 bool no_coord=false;
  
@@ -352,7 +352,7 @@ log[ \t]+(x|y|log)	{
 			   // ident is a keyword, macro, or initialized
 			   // variable, ident will be treated as one of those,
 			   // and this rule will be rejected.  Otherwise it is
-			   // a coordinate space and, if neceaasry, a new space
+			   // a coordinate space and, if necessary, a new space
 			   // will be allocated for it.
 			   //
 			   // I don't expect that this is the last piece of
@@ -823,7 +823,7 @@ bool include_file(string *s, bool rs /* =false */ , bool usepath /* =true*/) {
 
 // Include the given string into the input stream.  Additional
 // parameters are a for descriptor associated with the buffer (if its
-// part of a for loop) and an input type (that's usualy GMACRO)
+// part of a for loop) and an input type (that's usually GMACRO)
 int include_string(string *s, for_descriptor *f /* =0 */,
     grap_input it /*=GMACRO */) {
 	char *cbuf;
@@ -849,9 +849,9 @@ int include_string(string *s, for_descriptor *f /* =0 */,
 	return 1;
 }
 
-// Disable macro expansion of identifers (used in definingin new macros)
+// Disable macro expansion of identifiers (used in defining new macros)
 void lex_no_macro_expansion() { lex_expand_macro = false; }
-// Disable macro expansion of identifers (used in definingin new macros)
+// Disable macro expansion of identifiers (used in defining new macros)
 void lex_macro_expansion_ok() { lex_expand_macro = true; }
 
 // Begin parsing macro text.  Set the lexer into the appropriate start
@@ -998,7 +998,7 @@ int yywrap() {
     return copystate ? 1 : 0;
 }
 
-// Newline processing.  Inrement the current line number
+// Newline processing.  Increment the current line number
 void newline() {
     if ( !lexstack.empty() ) {
 	grap_buffer_state *g = lexstack.front();

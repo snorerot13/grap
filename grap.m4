@@ -113,7 +113,7 @@ AC_SUBST(MKDEPFLAGS)
 ])
 
 dnl See if the given function is both present and declared.  The first
-dnl argument is the function to check, the second is a space spearated
+dnl argument is the function to check, the second is a space separated
 dnl list of headers to check and the last is an optional CHECK or REPLACE
 dnl that determines whether AC_CHECK_FUNCS or AC_REPLACE_FUNCS is called
 dnl internally.  Both the usual HAVE_function and function_DECLARED are 
@@ -180,7 +180,7 @@ dnl determine if $MAKE uses .ifdef or ifdef .  If one of these choices
 dnl works, the output variables MAKE_IFDEF, MAKE_IFNDEF, MAKE_ELSE,
 dnl and MAKE_ENDIF are set to appropriate values.  If the routine
 dnl can't tell which ones to use, the output variables are defined as
-dnl comment characters.  Can be  onverriden with --enable-make-ifdef=.
+dnl comment characters.  Can be  overridden with --enable-make-ifdef=.
 
 AC_DEFUN([TVF_MAKE_IFDEF], [
 AC_ARG_ENABLE(make-ifdef,

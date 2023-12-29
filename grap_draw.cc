@@ -136,7 +136,7 @@ void coord::addmargin(double mf) {
 
 double coord::map(double v, axis ax ) {
 // map the coordinate from data space to [0,1]. 1 is the top of the axis,
-// 0 the bottom.  Do it right for logscale or cartesian coordinates
+// 0 the bottom.  Do it right for logscale or Cartesian coordinates
     switch ( ax ) {
 	case x_axis:
 	    if (logscale & x_axis ) {

@@ -21,7 +21,7 @@ Various small code changes to remove clang and recent g++ warnings.
 1.44
 
 Modern g++ seems to dislike *printf without a constant format string if there
-are no other aguuments and was causing compiles to fail.  Fixed warning
+are no other arguments and was causing compiles to fail.  Fixed warning
 and patch from Tobias Quathamer.
 
 Manpage spelling fix from Tobias Quathamer.
@@ -41,7 +41,7 @@ This marks the transition from my home brewed Makefiles to automake-generated
 makefiles.  A couple largely unused options went away, but with any luck
 we still build everywhere.  
 
-Robert Daasch submitted a patch to include floor and ceil fuctions.
+Robert Daasch submitted a patch to include floor and ceil functions.
 That's been incorporated.  (His patch also included adding a mod
 operator, but I'd already done that.)
 
@@ -89,7 +89,7 @@ Dan Lasley pointed out that the key was incomplete for the bar graph example.
 His fix to restore the key is included.
 
 John Heidemann points out that bars in coordinate systems other than the
-default just didn't work.  This was a bug in my yacc grammer - for
+default just didn't work.  This was a bug in my yacc grammar - for
 heaven's sake.  It's corrected to match the manual page.
 
 For loops were strange in that 
@@ -149,7 +149,7 @@ fixed.
 
 Bruce also discovered that the changes I put into version 1.38 to
 address issues raised by Hartmut Henkel affected large number
-comparisions in unpleasently non-intuitive ways.  Specifically doing
+comparisons in unpleasantly non-intuitive ways.  Specifically doing
 this:
 
 	coord pressure x -2.400000, 27.000000 y 1035.124000, 1039.000000
@@ -272,7 +272,7 @@ string are optional.  plot at x,y will plot a 0 at x,y. plot "x" at x,y
 is exactly equivalent to "x" at x,y in output, but slightly slower. 
 plot 3 at x,y works as before as does plot 2 "%g of clubs" at x,y
 
-I also modified the grammar to accept the base and wid paramaters to bar
+I also modified the grammar to accept the base and wid parameters to bar
 in any order.
 
 1.35
@@ -335,7 +335,7 @@ Fixed a plot bug I found while disabling that.
 
 1.22: John Heidemann caught a bug with respect to large sizes and size
 changes in titles.  Those large size changes are now supported.  Generally
-the groff [] syntax is now used for the embedded \s commans that size
+the groff [] syntax is now used for the embedded \s commands that size
 generates.  This can be turned off by using -C.
 
 John also wanted to be able to specify string modifiers like size, etc.
@@ -405,7 +405,7 @@ before the first plotted object or after the frame statement, if any.
 This change motivated much of the class changes and actually cleaned
 them up somewhat.
 
-grap is now *much* more tolerant of variables with the keword names.
+grap is now *much* more tolerant of variables with the keyword names.
 Things like
 
 from=1; to = 10 
@@ -530,7 +530,7 @@ success.  In the course of creating grap_parse.cc I think I caught
 some memory leaks, too.
 
 1.02: Bruce's error handling code produced a few inconsistencies
-(eating the last newline of a file, and adding one befor ethe file.  I
+(eating the last newline of a file, and adding one before the file.  I
 think it no longer does that.  In addition I took care of a error
 placement bug when the error was in a line containing a macro
 expansion, and changed the error handling from using char * to using
@@ -548,7 +548,7 @@ commands. (There, that'll tell me if anyone reads this!)
 and tweaked the makefile.
 
 1.0: Incorporated Bruce Lilly's error reporting code.  Cleaned up the
-documents (including a menton for Bruce in the man page) for v1.0
+documents (including a mention for Bruce in the man page) for v1.0
 release.  Cleared up a file reading bug.
 
 0.98b: Bruce Lilly reported some bugs and DWP incompatibilities,
@@ -567,7 +567,7 @@ While tinkering with those autoconf changes I found that grap didn't
 compile under g++ 2.7.2.1 any more.  Good thing that 0.97b wasn't
 really released.  All is well again.
 
-More fun from Bruce: he's given me patches to make cascding
+More fun from Bruce: he's given me patches to make cascading
 assignments work and to remove a bug with comments not acting as
 separators.
 

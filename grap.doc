@@ -162,7 +162,7 @@ The
 flag sets coarse comparison mode, which is suitable for most applications.  If
 you are plotting small values \(en less than 1e-6 or so \(en consider using
 .Fl r
-which uses very fine comparisons between numbers.  You may also want to rescale your plotted values to be larger in magnitude. The coarse comarisons are
+which uses very fine comparisons between numbers.  You may also want to rescale your plotted values to be larger in magnitude. The coarse comparisons are
 used by default.
 .Pp
 To be precise, the value by which two numbers must differ for 
@@ -539,7 +539,7 @@ flags set
 on all strings, and to prevent a string from being plotted outside the frame
 when those flags are active, the 
 .Ic clipped 
-attribute can be used to retore clipping behavior.  Though 
+attribute can be used to restore clipping behavior.  Though 
 .Ic clipped
 or 
 .Ic unclipped
@@ -1116,7 +1116,7 @@ statement, if any.  If the user specifies
 .Xr pic
 or 
 .Xr troff
-commands and neither any plotable object nor a 
+commands and neither any plottable object nor a 
 .Ic frame 
 command, the commands will not be output.
 .Ed

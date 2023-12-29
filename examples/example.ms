@@ -192,7 +192,7 @@ copy "400mpairs.d"
 .KE
 .KS
 .PP
-This graph adds the womens' times (from the same source) and includes
+This graph adds the women's times (from the same source) and includes
 different plotting styles and labels.  My version of this graph also
 uses the 
 .CW until
@@ -465,7 +465,7 @@ of the states.  My data is more recent than that of Bentley/Kernighan,
 so the graph is different from theirs.  Data is from the U.S. Census
 Bureau at 
 .CW http://www.census.gov/ , 
-specificly
+specifically
 .CW http://www.census.gov/population/www/censusdata/apportionment.html .
 .EQ
 delim off

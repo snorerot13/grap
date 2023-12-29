@@ -278,7 +278,7 @@ stringlist *combine_strings(stringlist *sl, string *st, strmod &sm)  {
     }
 
     // If there is a color in the string modifier, it will be used to create
-    // the new display string, otherise if there is a color specified for an
+    // the new display string, otherwise if there is a color specified for an
     // earlier string use a copy of that string for the color to avoid freeing
     // that string twice.
     if ( sm.color ) last.color = sm.color;
@@ -326,7 +326,7 @@ void next_statement(string *ident, point *p, linedesc* ld) {
 	    macro *m;
 	    DisplayString *s;
 	
-	    // We need to create a new line with default perameters.
+	    // We need to create a new line with default parameters.
 	    // Initialize the line to be invisible with a bullet
 	    // plotting string.
 	    if ( ( md = macros.find("bullet")) != macros.end()) {
@@ -524,7 +524,7 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
     delete ld;
 }
 
-// Draw a line from p1 to p2.  If is_line is false, draw an arror
+// Draw a line from p1 to p2.  If is_line is false, draw an error
 // instead.  Either ld1 or ld2 or both may be present.  If only one is
 // non-default, it rules, otherwise ld2 counts.
 void line_statement(int is_line, linedesc *ld1, point *p1,
@@ -688,7 +688,7 @@ void for_statement(string *ident, double from, double to,
 void process_frame(linedesc* d, frame *f, frame *s) {
     // it's inconvenient to write three forms of the frame statement
     // as one yacc rule, so I wrote the three rules explicitly and
-    // extracted the action here.  The three arugments are the default
+    // extracted the action here.  The three arguments are the default
     // frame linedesc (d), the size of the frame (f), and individual
     // descriptions of the linedescs (s) of the sides.  Note that d,
     // f, and s are freed by this routine.
@@ -865,9 +865,9 @@ void usage() {
     cerr << "\t-M\tspecify search path for files" << endl;
     cerr << "\t-S\tsafer mode, no internal user sprintf calls" << endl;
     cerr << endl;
-    cerr << "Fine comparsion limit: " << FINE_EPSILON << endl;
+    cerr << "Fine comparison limit: " << FINE_EPSILON << endl;
     cerr << "Fine minimum value: " << FINE_MIN_DOUBLE << endl;
-    cerr << "Coarse comparsion limit: " << COARSE_EPSILON << endl;
+    cerr << "Coarse comparison limit: " << COARSE_EPSILON << endl;
     cerr << "Coarse minimum value: " << COARSE_MIN_DOUBLE << endl;
     cerr << "Defines are in " << DEFINES << endl;
     cerr << "See the man page for more information." << endl;
@@ -879,9 +879,9 @@ void usage() {
 inline void version() {
     cout << "grap " << PACKAGE_VERSION << " compiled under " 
 	 << OS_VERSION << endl;
-    cerr << "Fine comparsion limit: " << FINE_EPSILON << endl;
+    cerr << "Fine comparison limit: " << FINE_EPSILON << endl;
     cerr << "Fine minimum value: " << FINE_MIN_DOUBLE << endl;
-    cerr << "Coarse comparsion limit: " << COARSE_EPSILON << endl;
+    cerr << "Coarse comparison limit: " << COARSE_EPSILON << endl;
     cerr << "Coarse minimum value: " << COARSE_MIN_DOUBLE << endl;
     cout << "Report bugs to " << PACKAGE_BUGREPORT << endl;
     cout << "Documentation in " << DOCS_DIR << endl;

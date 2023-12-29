@@ -732,8 +732,8 @@ sides:
 	    }
 ;
 
-/* Though this looks kludgy as Hell, it's about as clean as I can make it.  Th
- * eproblem is that liesdescs are composed of lists of linedesc elements, and 2
+/* Though this looks kludgy as Hell, it's about as clean as I can make it.  The
+ * problem is that linedescs are composed of lists of linedesc elements, and 2
  * linedescs next to each other are impossible to tell apart.  So, the global
  * linedesc for the frame cannot sit next to one of the linedescs for the
  * sides.  for example is 'frame top dotted color "green"' a green frame with a

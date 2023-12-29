@@ -486,7 +486,7 @@ bool Piclinesegment::clip(double& x1, double& y1, double& x2, double& y2) {
 void Piclinesegment::draw(frame *f) {
 // Draw this line segment.  Clip the line segment according to the
 // point's coordinates, then put them into the graph.  There are some
-// details to laying out the styles and poltting strings correctly.
+// details to laying out the styles and plotting strings correctly.
     double x,y;				// The current point's coordinates
     double lastcx, lastcy;		// The last point plotted post clipping
     double cx,cy;			// The current point post clipping
