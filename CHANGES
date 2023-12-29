@@ -1,5 +1,10 @@
 Change log
 
+1.47
+
+Simplify autoconf for portability and (I hope) modernity.  The grap.spec is
+also updated and may even be easier to use.
+
 1.46
 
 Handle multiple label lines correctly (thanks to Bruce Lilly for pointing that

@@ -82,8 +82,7 @@ you, but I found:
 
 $ aclocal && autoheader && automake --add-missing && autoconf
 
-is a good starting point.  I get some warnings from the bowels of
-autoconf, but the output seems to work.
+is a good starting point.
 
 If you try to compile grap on a new system and have problems, let me
 know and I'll try to help.  If you succeed, let me know.
