@@ -1,5 +1,10 @@
 Change log
 
+1.48
+
+Change output pic to be more amenable to dpic implementation of pic.
+See https://github.com/snorerot13/grap/pull/4 .
+
 1.47
 
 Simplify autoconf for portability and (I hope) modernity.  The grap.spec is
