@@ -959,7 +959,7 @@ int main(int argc, char** argv) {
 	string::size_type p = pathstring.find(':');
 	string *s;
 
-	if ( pathstring[p] == ':' ) {
+	if ( p != string::npos && pathstring[p] == ':' ) {
 	    if ( p != 0 ) {
 		s = new string(pathstring.substr(0,p));
 		pathstring.erase(0,p+1);
