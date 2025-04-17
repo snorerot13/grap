@@ -845,7 +845,7 @@ int yyerror(const char *s) {
 }
 
 void usage() {
-    cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " <
+    cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " <<
 	"[-M path] [files]" << endl;
     cerr << "\t-h\tprint this list and exit (also --help)" << endl;
     cerr << "\t-C\tcompatibility mode" << endl;
