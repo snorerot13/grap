@@ -1,5 +1,10 @@
 Change log
 
+1.49
+
+Fix a bug where I was handling a string::find return value in a bad way.
+You should probably upgrade to this.
+
 1.48
 
 Change output pic to be more amenable to dpic implementation of pic.
