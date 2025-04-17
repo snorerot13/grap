@@ -29,7 +29,7 @@ extern "C" {
 #include "y.tab.h"
 
 extern doubleDictionary vars;
-extern stringSequence path; 
+extern stringSequence path;
 extern graph *the_graph;
 extern bool unaligned_default;	// Should strings be unaligned by default
 extern bool clip_default;	// Should strings be clipped by default
@@ -110,7 +110,7 @@ public:
 	the_graph->base->tks.push_back(t);
 	if ( t->side == top_side || t->side == bottom_side )
 	    t->c->newx(t->where);
-	else 
+	else
 	    t->c->newy(t->where);
 	return 0;
     }
@@ -302,7 +302,7 @@ void plot_statement(double val, DisplayString *fmt, point *pt) {
 	s = new DisplayString(val,fmt);
     }
     else s = new DisplayString(val);
-  
+
     // Delete format whether or not we used it (delete on 0 is OK)
     delete fmt;
 
@@ -346,7 +346,7 @@ void next_statement(string *ident, point *p, linedesc* ld) {
 		
     if ( ld )
 	the_graph->new_linesegment(p->x, p->y, p->c, l, 0, ld);
-    else 
+    else
 	the_graph->new_linesegment(p->x, p->y, p->c, l);
 		
     delete p;
@@ -489,7 +489,6 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 	while (!tl->empty() ) {
 	    t = tl->front();
 	    tl->pop_front();
-			
 	    g = new grid(t);
 	    g->side = side;
 	    shiftcpy scy(&g->shift);
@@ -499,7 +498,6 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 		if ( ld->ld == def ) ld->ld = dotted;
   		g->desc = *ld;
 	    }
-		    
 	    for_each(sl->begin(), sl->end(), scy);
 
 	    if ( ticks_off ) {
@@ -509,7 +507,7 @@ void grid_statement(sides side, int ticks_off, linedesc *ld,
 	    the_graph->base->gds.push_back(g);
 	    if ( g->side == top_side || g->side == bottom_side )
 		g->c->newx(g->where);
-	    else 
+	    else
 		g->c->newy(g->where);
 	    delete t;
 	}
@@ -541,7 +539,7 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 	l = new line(&des);
 	the_graph->lines["grap.internal"] = l;
     }
-    else { l = (*li).second; } 
+    else { l = (*li).second; }
 
     l->lastplotted(0);
 
@@ -553,9 +551,9 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des, true);
     } else {
 	the_graph->new_linesegment(p1->x, p1->y, p1->c, l, 0, &des);
-	if (is_line) 
+	if (is_line)
 	    the_graph->new_linesegment(p2->x, p2->y, p2->c, l, 0, &des);
-	else 
+	else
 	    the_graph->new_linesegment(p2->x,p2->y,p2->c, l, 0, &des, true);
     }
     delete ld1; delete ld2;
@@ -566,7 +564,7 @@ void line_statement(int is_line, linedesc *ld1, point *p1,
 // bounds.
 axisdesc axis_description(axis which, double d1, double d2) {
     axisdesc a;
-    
+
     a.which = which;
     if (d1 < d2 ) {
 	a.min = d1; a.max = d2;
@@ -584,7 +582,7 @@ void coord_statement(string *ident, axisdesc& xa, axisdesc& ya, axis log) {
     if (ident) {
 	c = new coord(*ident);
 	the_graph->coords[*ident] = c;
-    } else 
+    } else
 	c = defcoord;
 
     if ( xa.which != none ) {
@@ -604,10 +602,10 @@ void coord_statement(string *ident, axisdesc& xa, axisdesc& ya, axis log) {
 // the axes and tell which if any are logarithmic.
 void coord_statement(coord *co, axisdesc& xa, axisdesc& ya, axis log) {
     coord *c;
-    
+
     if (co) c = co;
     else c = defcoord;
-    
+
     if ( xa.which != none ) {
 	c->xmin = xa.min;
 	c->xmax = xa.max;
@@ -674,13 +672,13 @@ void for_statement(string *ident, double from, double to,
 		d = new double(from);
 		vars[*ident] = d;
 	    }
-	    
+
 	    f = new for_descriptor(d, dir, to, by.expr, by.op, body);
 	    // include_string is responsible for deleting body (actually the
 	    // for_descriptor destructor will do it.
 	    include_string(body, f, GINTERNAL);
 	}
-	else 
+	else
 	    delete body;
     }
 }
@@ -692,7 +690,6 @@ void process_frame(linedesc* d, frame *f, frame *s) {
     // frame linedesc (d), the size of the frame (f), and individual
     // descriptions of the linedescs (s) of the sides.  Note that d,
     // f, and s are freed by this routine.
-    
     int i;	// Scratch
 
     if ( d ) {
@@ -761,7 +758,6 @@ axis combine_logs(axis old, axis n) {
 void define_macro(string *name, string *text) {
     macro *m;				// The new macro
     macroDictionary::iterator mi;	// To search defined macros
-    
     if ( ( mi = macros.find(*name)) != macros.end() ) {
 	m = (*mi).second;
 	delete m->text;
@@ -804,14 +800,14 @@ void bar_statement(coord *c, sides dir, double offset, double ht, double wid,
 // if it is defined or a bullet character if not.
 void init_dict() {
     // The plot string for the default line
-    string s = (macros.find("bullet") != macros.end()) ? 
-	"bullet;" : "\"\\(bu\";\n"; 
+    string s = (macros.find("bullet") != macros.end()) ?
+	"bullet;" : "\"\\(bu\";\n";
 
     s.insert(0,"new grap_internal_default invis ");
     include_string(&s, 0, GINTERNAL);
     defline = new line();
     the_graph->lines["grap_internal_default"] = defline;
-    
+
     defcoord = new coord;
     the_graph->coords["grap.internal.default"] = defcoord;
     for ( int i = 0 ; i < 4; i++) {
@@ -849,7 +845,7 @@ int yyerror(const char *s) {
 }
 
 void usage() {
-    cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " << 
+    cerr << "Usage: grap [-d defines] [-h|-l|-D|-V|-v|-u|-C|-S] " <
 	"[-M path] [files]" << endl;
     cerr << "\t-h\tprint this list and exit (also --help)" << endl;
     cerr << "\t-C\tcompatibility mode" << endl;
@@ -877,7 +873,7 @@ void usage() {
 }
 
 inline void version() {
-    cout << "grap " << PACKAGE_VERSION << " compiled under " 
+    cout << "grap " << PACKAGE_VERSION << " compiled under "
 	 << OS_VERSION << endl;
     cerr << "Fine comparison limit: " << FINE_EPSILON << endl;
     cerr << "Fine minimum value: " << FINE_MIN_DOUBLE << endl;
@@ -997,5 +993,4 @@ int main(int argc, char** argv) {
     for (stringSequence::iterator ii = path.begin(); ii != path.end(); ii++)
 	delete (*ii);
     path.erase(path.begin(),path.end());
-    
 }
